@@ -1,0 +1,12 @@
+{
+  "uuid": "7b9f8c72-1f2a-4d3b-9a6e-5d2f0e6c1234",
+  "shortName": "OwnTone",
+  "longName": "OwnTone Search",
+  "companyName": "Personal",
+  "versionCode": 1,
+  "versionLabel": "0.1",
+  "sdkVersion": "3",
+  "watchapp": { "watchface": false },
+  "targetPlatforms": [ "basalt" ],
+  "resources": { "media": [] }
+}

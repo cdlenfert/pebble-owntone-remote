@@ -1,0 +1,12 @@
+# Build artifacts
+build/
+*.pbw
+
+# OS files
+.DS_Store
+
+# Node / JS
+node_modules/
+
+# Pebble lock
+.lock-waf_linux2_build
