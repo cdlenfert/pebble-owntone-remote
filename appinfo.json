@@ -78,9 +78,14 @@
     "media": [
       {
         "type": "png",
-        "name": "ICON_PLAY",
-        "file": "images/icon_play.png",
+        "name": "MENU_ICON",
+        "file": "images/menu_icon.png",
         "menuIcon": true
+      },
+      {
+        "type": "png",
+        "name": "ICON_PLAY",
+        "file": "images/icon_play.png"
       },
       {
         "type": "png",
