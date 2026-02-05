@@ -1,0 +1,63 @@
+#pragma once
+
+// Command types (CMD key)
+typedef enum {
+  CMD_GET_PLAYER_STATE = 1,
+  CMD_PLAY_PAUSE = 2,
+  CMD_NEXT = 3,
+  CMD_PREVIOUS = 4,
+  CMD_SET_VOLUME = 5,
+  CMD_SEARCH = 6,
+  CMD_RANDOM = 7,
+  CMD_ADD_TO_QUEUE = 8,
+  CMD_GET_OUTPUTS = 9,
+  CMD_SET_OUTPUT_EXCLUSIVE = 10,
+  CMD_TOGGLE_OUTPUT = 11,
+  CMD_SET_OUTPUT_VOLUME = 12
+} CommandType;
+
+// Content types for search/random
+typedef enum {
+  CONTENT_TYPE_PLAYLIST = 0,
+  CONTENT_TYPE_ARTIST = 1,
+  CONTENT_TYPE_ALBUM = 2
+} ContentType;
+
+// Message keys (must match appinfo.json)
+typedef enum {
+  KEY_CMD = 0,
+  KEY_TYPE = 1,
+  KEY_QUERY = 2,
+  KEY_URI = 3,
+  KEY_VOLUME = 4,
+  KEY_OUTPUT_ID = 5,
+  
+  KEY_RESULT_COUNT = 10,
+  KEY_RESULT_TITLE_BASE = 20,
+  KEY_RESULT_URI_BASE = 30,
+  
+  KEY_PLAYER_STATE = 40,
+  KEY_PLAYER_TRACK = 41,
+  KEY_PLAYER_ARTIST = 42,
+  KEY_PLAYER_ALBUM = 43,
+  KEY_PLAYER_VOLUME = 44,
+  
+  KEY_OUTPUT_COUNT = 50,
+  KEY_OUTPUT_NAME_BASE = 60,
+  KEY_OUTPUT_ID_BASE = 70,
+  KEY_OUTPUT_VOLUME_BASE = 80,
+  KEY_OUTPUT_ENABLED_BASE = 90,
+  
+  KEY_STATUS = 100
+} MessageKey;
+
+// Player states
+typedef enum {
+  PLAYER_STATE_STOPPED = 0,
+  PLAYER_STATE_PLAYING = 1,
+  PLAYER_STATE_PAUSED = 2
+} PlayerState;
+
+#define MAX_RESULTS 8
+#define MAX_OUTPUTS 8
+#define MAX_STRING_LENGTH 64
