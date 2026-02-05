@@ -391,16 +391,13 @@ Pebble.addEventListener('ready', function(e) {
 
 Pebble.addEventListener('appmessage', function(e) {
   var payload = e.payload;
-  console.log('OwnTone Remote: Received message: ' + JSON.stringify(payload));
   
   if (!payload) {
-    console.log('No payload in message');
     return;
   }
   
   // PebbleKit JS converts numeric keys to their string names from appinfo.json
   var cmd = payload.CMD || payload[MessageKeys.CMD];
-  console.log('OwnTone Remote: Command: ' + cmd);
   
   switch (cmd) {
     case Commands.GET_PLAYER_STATE:

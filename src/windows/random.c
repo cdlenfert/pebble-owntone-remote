@@ -9,6 +9,9 @@ static MenuLayer *s_menu_layer;
 
 static const char *s_content_types[] = {"Playlist", "Artist", "Album"};
 
+// Forward declaration
+static void random_results_handler(int count, char *titles[], char *uris[]);
+
 static uint16_t menu_get_num_rows(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   return 3;
 }
@@ -17,9 +20,27 @@ static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cel
   menu_cell_basic_draw(ctx, cell_layer, s_content_types[cell_index->row], NULL, NULL);
 }
 
+static void random_results_handler(int count, char *titles[], char *uris[]) {
+  // Unregister our callback
+  message_set_results_callback(NULL);
+  
+  // Get the type from the currently selected menu item
+  MenuIndex index = menu_layer_get_selected_index(s_menu_layer);
+  ContentType type = (ContentType)index.row;
+  
+  // Push results window with the data
+  results_window_push(count, titles, uris, type);
+}
+
 static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   ContentType type = (ContentType)cell_index->row;
+  
+  // Register callback to receive results
+  message_set_results_callback(random_results_handler);
+  
+  // Send random request
   message_send_random(type);
+  vibes_short_pulse();
 }
 
 static void window_load(Window *window) {
@@ -37,6 +58,8 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
+  // Clear any pending results callback
+  message_set_results_callback(NULL);
   menu_layer_destroy(s_menu_layer);
   window_destroy(window);
   s_window = NULL;

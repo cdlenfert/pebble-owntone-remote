@@ -29,6 +29,7 @@ static void cleanup_results(void) {
 }
 
 static void results_handler(int count, char *titles[], char *uris[]) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "results_handler: received %d results", count);
   cleanup_results();
   s_result_count = count;
   
@@ -100,6 +101,21 @@ static void window_disappear(Window *window) {
 
 void results_window_push(int count, char *titles[], char *uris[], ContentType type) {
   s_current_type = type;
+  
+  // Copy the results data
+  cleanup_results();
+  s_result_count = count;
+  
+  for (int i = 0; i < count && i < MAX_RESULTS; i++) {
+    if (titles[i]) {
+      s_titles[i] = malloc(strlen(titles[i]) + 1);
+      if (s_titles[i]) strcpy(s_titles[i], titles[i]);
+    }
+    if (uris[i]) {
+      s_uris[i] = malloc(strlen(uris[i]) + 1);
+      if (s_uris[i]) strcpy(s_uris[i], uris[i]);
+    }
+  }
   
   if (!s_window) {
     s_window = window_create();

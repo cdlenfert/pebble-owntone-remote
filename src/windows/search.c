@@ -10,8 +10,13 @@ static DictationSession *s_dictation;
 static const char *s_content_types[] = {"Playlist", "Artist", "Album"};
 static ContentType s_selected_type;
 
+static void search_results_handler(int count, char *titles[], char *uris[]) {
+  results_window_push(count, titles, uris, s_selected_type);
+}
+
 static void dictation_callback(DictationSession *session, DictationSessionStatus status, char *transcription, void *context) {
   if (status == DictationSessionStatusSuccess && transcription) {
+    message_set_results_callback(search_results_handler);
     message_send_search(s_selected_type, transcription);
   } else {
     vibes_double_pulse();
