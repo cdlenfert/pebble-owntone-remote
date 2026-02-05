@@ -58,8 +58,8 @@ static void player_status_handler(int status) {
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // Next track
-  message_send_command(CMD_NEXT);
+  // Previous track
+  message_send_command(CMD_PREVIOUS);
   vibes_short_pulse();
 }
 
@@ -84,8 +84,8 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // Previous track
-  message_send_command(CMD_PREVIOUS);
+  // Next track
+  message_send_command(CMD_NEXT);
   vibes_short_pulse();
 }
 
@@ -121,8 +121,8 @@ static void window_load(Window *window) {
   s_icon_volume_up = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_UP);
   s_icon_volume_down = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_DOWN);
   
-  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_next);
-  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_prev);
+  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_prev);
+  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_next);
   
   // Adjust bounds for action bar
   bounds.size.w -= ACTION_BAR_WIDTH;
