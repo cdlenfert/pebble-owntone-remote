@@ -217,7 +217,8 @@
     }
     
     function addFavorite(category) {
-      var input = document.getElementById(category.substring(0, category.length - 1) + '-input');
+      var inputId = category === 'playlists' ? 'playlist-input' : category + '-input';
+      var input = document.getElementById(inputId);
       var value = input.value.trim();
       
       if (value && favorites[category].length < 10) {
