@@ -1,0 +1,143 @@
+{
+  "name": "pebble-owntone-remote",
+  "author": "Personal",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "pebble": {
+    "displayName": "OwnTone Remote",
+    "uuid": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+    "sdkVersion": "3",
+    "enableMultiJS": false,
+    "targetPlatforms": ["basalt"],
+    "watchapp": {
+      "watchface": false
+    },
+    "capabilities": ["configurable"],
+    "messageKeys": [
+      "CMD",
+      "TYPE",
+      "QUERY",
+      "URI",
+      "VOLUME",
+      "OUTPUT_ID",
+      "RESULT_COUNT",
+      "RESULT_TITLE_0",
+      "RESULT_TITLE_1",
+      "RESULT_TITLE_2",
+      "RESULT_TITLE_3",
+      "RESULT_TITLE_4",
+      "RESULT_TITLE_5",
+      "RESULT_TITLE_6",
+      "RESULT_TITLE_7",
+      "RESULT_URI_0",
+      "RESULT_URI_1",
+      "RESULT_URI_2",
+      "RESULT_URI_3",
+      "RESULT_URI_4",
+      "RESULT_URI_5",
+      "RESULT_URI_6",
+      "RESULT_URI_7",
+      "PLAYER_STATE",
+      "PLAYER_TRACK",
+      "PLAYER_ARTIST",
+      "PLAYER_ALBUM",
+      "PLAYER_VOLUME",
+      "OUTPUT_COUNT",
+      "OUTPUT_NAME_0",
+      "OUTPUT_NAME_1",
+      "OUTPUT_NAME_2",
+      "OUTPUT_NAME_3",
+      "OUTPUT_NAME_4",
+      "OUTPUT_NAME_5",
+      "OUTPUT_NAME_6",
+      "OUTPUT_NAME_7",
+      "OUTPUT_ID_0",
+      "OUTPUT_ID_1",
+      "OUTPUT_ID_2",
+      "OUTPUT_ID_3",
+      "OUTPUT_ID_4",
+      "OUTPUT_ID_5",
+      "OUTPUT_ID_6",
+      "OUTPUT_ID_7",
+      "OUTPUT_VOLUME_0",
+      "OUTPUT_VOLUME_1",
+      "OUTPUT_VOLUME_2",
+      "OUTPUT_VOLUME_3",
+      "OUTPUT_VOLUME_4",
+      "OUTPUT_VOLUME_5",
+      "OUTPUT_VOLUME_6",
+      "OUTPUT_VOLUME_7",
+      "OUTPUT_ENABLED_0",
+      "OUTPUT_ENABLED_1",
+      "OUTPUT_ENABLED_2",
+      "OUTPUT_ENABLED_3",
+      "OUTPUT_ENABLED_4",
+      "OUTPUT_ENABLED_5",
+      "OUTPUT_ENABLED_6",
+      "OUTPUT_ENABLED_7",
+      "STATUS",
+      "FAVORITE_COUNT",
+      "FAVORITE_NAME_0",
+      "FAVORITE_NAME_1",
+      "FAVORITE_NAME_2",
+      "FAVORITE_NAME_3",
+      "FAVORITE_NAME_4",
+      "FAVORITE_NAME_5",
+      "FAVORITE_NAME_6",
+      "FAVORITE_NAME_7",
+      "FAVORITE_NAME_8",
+      "FAVORITE_NAME_9",
+      "FAVORITE_TYPE_0",
+      "FAVORITE_TYPE_1",
+      "FAVORITE_TYPE_2",
+      "FAVORITE_TYPE_3",
+      "FAVORITE_TYPE_4",
+      "FAVORITE_TYPE_5",
+      "FAVORITE_TYPE_6",
+      "FAVORITE_TYPE_7",
+      "FAVORITE_TYPE_8",
+      "FAVORITE_TYPE_9"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "png",
+          "name": "MENU_ICON",
+          "file": "images/menu_icon.png",
+          "menuIcon": true
+        },
+        {
+          "type": "png",
+          "name": "ICON_PLAY",
+          "file": "images/icon_play.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_PAUSE",
+          "file": "images/icon_pause.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_NEXT",
+          "file": "images/icon_next.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_PREV",
+          "file": "images/icon_prev.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_VOLUME_UP",
+          "file": "images/icon_volume_up.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_VOLUME_DOWN",
+          "file": "images/icon_volume_down.png"
+        }
+      ]
+    }
+  }
+}

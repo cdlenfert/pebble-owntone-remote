@@ -28,7 +28,11 @@ var MessageKeys = {
   OUTPUT_VOLUME_BASE: 80,
   OUTPUT_ENABLED_BASE: 90,
   
-  STATUS: 100
+  STATUS: 100,
+  
+  FAVORITE_COUNT: 110,
+  FAVORITE_NAME_BASE: 120,
+  FAVORITE_TYPE_BASE: 130
 };
 
 // Command types
@@ -44,7 +48,8 @@ var Commands = {
   GET_OUTPUTS: 9,
   SET_OUTPUT_EXCLUSIVE: 10,
   TOGGLE_OUTPUT: 11,
-  SET_OUTPUT_VOLUME: 12
+  SET_OUTPUT_VOLUME: 12,
+  GET_FAVORITES: 13
 };
 
 // Content types
@@ -162,8 +167,13 @@ function getCurrentTrack(callback) {
 
 function playPause() {
   httpPut(Config.OWNTONE_BASE + '/api/player/toggle', function(status, response) {
-    console.log('Play/Pause: ' + status);
-    getPlayerState(); // Refresh state
+    console.log('OwnTone Remote: Play/Pause: ' + status);
+    if (status === 200 || status === 204) {
+      // Notify watch that toggle succeeded
+      var dict = {};
+      dict[MessageKeys.STATUS] = 1; // Success
+      sendToPebble(dict);
+    }
   });
 }
 
@@ -317,53 +327,111 @@ function getOutputs() {
 }
 
 function setOutputExclusive(outputId) {
-  // First get all outputs, disable them, then enable only the selected one
-  httpGet(Config.OWNTONE_BASE + '/api/outputs', function(status, response) {
-    if (status === 200) {
-      try {
-        var data = JSON.parse(response);
-        var outputs = data.outputs || [];
-        
-        // Disable all outputs except the selected one
-        outputs.forEach(function(output) {
-          var shouldEnable = String(output.id) === outputId;
-          httpPut(Config.OWNTONE_BASE + '/api/outputs/' + output.id + '?selected=' + shouldEnable, function() {});
-        });
-        
-        // Start playback
-        setTimeout(function() {
-          httpPut(Config.OWNTONE_BASE + '/api/player/play', function() {
-            getOutputs();
-          });
-        }, 500);
-      } catch (e) {
-        console.log('Error setting exclusive output: ' + e);
-      }
-    }
-  });
+  // Use the /api/outputs/set endpoint to enable only the selected output
+  console.log('OwnTone Remote: Setting exclusive output: ' + outputId);
+  var data = JSON.stringify({ outputs: [outputId] });
+  var xhr = new XMLHttpRequest();
+  xhr.open('PUT', Config.OWNTONE_BASE + '/api/outputs/set', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function() {
+    console.log('OwnTone Remote: Set exclusive output response: ' + xhr.status);
+    // Refresh outputs list after switching
+    setTimeout(getOutputs, 500);
+  };
+  xhr.onerror = function() {
+    console.log('OwnTone Remote: Error setting exclusive output');
+  };
+  
+  try {
+    xhr.send(data);
+  } catch (e) {
+    console.log('OwnTone Remote: Error setting exclusive output: ' + e);
+  }
 }
 
 function toggleOutput(outputId) {
+  console.log('OwnTone Remote: Toggling output ' + outputId);
   httpGet(Config.OWNTONE_BASE + '/api/outputs/' + outputId, function(status, response) {
+    console.log('OwnTone Remote: Get output status: ' + status);
     if (status === 200) {
       try {
         var data = JSON.parse(response);
         var newState = !data.selected;
+        console.log('OwnTone Remote: Setting output selected=' + newState);
         
-        httpPut(Config.OWNTONE_BASE + '/api/outputs/' + outputId + '?selected=' + newState, function() {
+        // Use proper JSON body for PUT request
+        var updateData = JSON.stringify({ selected: newState });
+        var xhr = new XMLHttpRequest();
+        xhr.open('PUT', Config.OWNTONE_BASE + '/api/outputs/' + outputId, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+          console.log('OwnTone Remote: Toggle output response: ' + xhr.status);
           getOutputs();
-        });
+        };
+        xhr.send(updateData);
       } catch (e) {
-        console.log('Error toggling output: ' + e);
+        console.log('OwnTone Remote: Error toggling output: ' + e);
       }
     }
   });
 }
 
 function setOutputVolume(outputId, volume) {
-  httpPut(Config.OWNTONE_BASE + '/api/outputs/' + outputId + '?volume=' + volume, function(status, response) {
-    console.log('Set output volume: ' + status);
-  });
+  console.log('OwnTone Remote: Setting output ' + outputId + ' volume to ' + volume);
+  var data = JSON.stringify({ volume: volume });
+  var xhr = new XMLHttpRequest();
+  xhr.open('PUT', Config.OWNTONE_BASE + '/api/outputs/' + outputId, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function() {
+    console.log('OwnTone Remote: Set output volume response: ' + xhr.status);
+  };
+  xhr.send(data);
+}
+
+function getFavorites() {
+  var stored = localStorage.getItem('owntone_favorites');
+  var favorites = { playlists: [], artists: [], albums: [] };
+  
+  if (stored) {
+    try {
+      favorites = JSON.parse(stored);
+    } catch (e) {
+      console.log('Error loading favorites: ' + e);
+    }
+  }
+  
+  sendFavorites(favorites);
+}
+
+function sendFavorites(favorites) {
+  // Flatten favorites into a single array with type info
+  var allFavorites = [];
+  
+  // Add playlists (type 0)
+  for (var i = 0; i < favorites.playlists.length && i < 10; i++) {
+    allFavorites.push({ name: favorites.playlists[i], type: ContentTypes.PLAYLIST });
+  }
+  
+  // Add artists (type 1)
+  for (var i = 0; i < favorites.artists.length && allFavorites.length < 10; i++) {
+    allFavorites.push({ name: favorites.artists[i], type: ContentTypes.ARTIST });
+  }
+  
+  // Add albums (type 2)
+  for (var i = 0; i < favorites.albums.length && allFavorites.length < 10; i++) {
+    allFavorites.push({ name: favorites.albums[i], type: ContentTypes.ALBUM });
+  }
+  
+  var dict = {};
+  dict[MessageKeys.FAVORITE_COUNT] = allFavorites.length;
+  
+  for (var i = 0; i < allFavorites.length && i < 10; i++) {
+    dict[MessageKeys.FAVORITE_NAME_BASE + i] = allFavorites[i].name;
+    dict[MessageKeys.FAVORITE_TYPE_BASE + i] = allFavorites[i].type;
+  }
+  
+  console.log('Sending ' + allFavorites.length + ' favorites to watch');
+  sendToPebble(dict);
 }
 
 // Pebble event handlers
@@ -374,15 +442,13 @@ Pebble.addEventListener('ready', function(e) {
 
 Pebble.addEventListener('appmessage', function(e) {
   var payload = e.payload;
-  console.log('Received message: ' + JSON.stringify(payload));
   
   if (!payload) {
-    console.log('No payload in message');
     return;
   }
   
-  var cmd = payload[MessageKeys.CMD];
-  console.log('Command: ' + cmd);
+  // PebbleKit JS converts numeric keys to their string names from appinfo.json
+  var cmd = payload.CMD || payload[MessageKeys.CMD];
   
   switch (cmd) {
     case Commands.GET_PLAYER_STATE:
@@ -402,19 +468,19 @@ Pebble.addEventListener('appmessage', function(e) {
       break;
       
     case Commands.SET_VOLUME:
-      setVolume(payload[MessageKeys.VOLUME]);
+      setVolume(payload.VOLUME || payload[MessageKeys.VOLUME]);
       break;
       
     case Commands.SEARCH:
-      search(payload[MessageKeys.TYPE], payload[MessageKeys.QUERY]);
+      search(payload.TYPE || payload[MessageKeys.TYPE], payload.QUERY || payload[MessageKeys.QUERY]);
       break;
       
     case Commands.RANDOM:
-      random(payload[MessageKeys.TYPE]);
+      random(payload.TYPE || payload[MessageKeys.TYPE]);
       break;
       
     case Commands.ADD_TO_QUEUE:
-      addToQueue(payload[MessageKeys.URI], payload[MessageKeys.TYPE]);
+      addToQueue(payload.URI || payload[MessageKeys.URI], payload.TYPE || payload[MessageKeys.TYPE]);
       break;
       
     case Commands.GET_OUTPUTS:
@@ -422,25 +488,45 @@ Pebble.addEventListener('appmessage', function(e) {
       break;
       
     case Commands.SET_OUTPUT_EXCLUSIVE:
-      setOutputExclusive(payload[MessageKeys.OUTPUT_ID]);
+      setOutputExclusive(payload.OUTPUT_ID || payload[MessageKeys.OUTPUT_ID]);
       break;
       
     case Commands.TOGGLE_OUTPUT:
-      toggleOutput(payload[MessageKeys.OUTPUT_ID]);
+      toggleOutput(payload.OUTPUT_ID || payload[MessageKeys.OUTPUT_ID]);
       break;
       
     case Commands.SET_OUTPUT_VOLUME:
-      setOutputVolume(payload[MessageKeys.OUTPUT_ID], payload[MessageKeys.VOLUME]);
+      setOutputVolume(payload.OUTPUT_ID || payload[MessageKeys.OUTPUT_ID], payload.VOLUME || payload[MessageKeys.VOLUME]);
+      break;
+      
+    case Commands.GET_FAVORITES:
+      getFavorites();
       break;
   }
 });
 
 Pebble.addEventListener('showConfiguration', function(e) {
-  // Phase 2: Open configuration page
-  console.log('Configuration requested');
+  var currentSettings = localStorage.getItem('owntone_favorites');
+  var url = 'https://cdlenfert.github.io/pebble-owntone-remote/config.html';
+  if (currentSettings) {
+    url += '?settings=' + encodeURIComponent(currentSettings);
+  }
+  console.log('Opening configuration');
+  Pebble.openURL(url);
 });
 
 Pebble.addEventListener('webviewclosed', function(e) {
-  // Phase 2: Handle configuration changes
-  console.log('Configuration closed');
+  if (e && e.response) {
+    try {
+      var settings = JSON.parse(decodeURIComponent(e.response));
+      console.log('Configuration received:', settings);
+      
+      if (settings.favorites) {
+        localStorage.setItem('owntone_favorites', JSON.stringify(settings.favorites));
+        sendFavorites(settings.favorites);
+      }
+    } catch (err) {
+      console.log('Error parsing config response: ' + err);
+    }
+  }
 });

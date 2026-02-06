@@ -4,14 +4,16 @@
 #include "search.h"
 #include "random.h"
 #include "outputs.h"
+#include "favorites.h"
 
-#define NUM_MENU_ITEMS 4
+#define NUM_MENU_ITEMS 5
 
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 
 static const char *menu_items[] = {
   "Player",
+  "Favorites",
   "Search",
   "Random",
   "Outputs"
@@ -31,12 +33,15 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
       player_window_push();
       break;
     case 1:
-      search_window_push();
+      favorites_window_push();
       break;
     case 2:
-      random_window_push();
+      search_window_push();
       break;
     case 3:
+      random_window_push();
+      break;
+    case 4:
       outputs_window_push();
       break;
   }

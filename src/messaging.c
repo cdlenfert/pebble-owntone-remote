@@ -13,11 +13,13 @@ typedef void (*PlayerStateCallback)(PlayerState state, const char *track, const 
 typedef void (*SearchResultsCallback)(int count, char *titles[], char *uris[]);
 typedef void (*OutputsCallback)(int count, char *names[], char *ids[], int volumes[], bool enabled[]);
 typedef void (*StatusCallback)(int status);
+typedef void (*FavoritesCallback)(int count, char *names[], int types[]);
 
 static PlayerStateCallback s_player_callback = NULL;
 static SearchResultsCallback s_results_callback = NULL;
 static OutputsCallback s_outputs_callback = NULL;
 static StatusCallback s_status_callback = NULL;
+static FavoritesCallback s_favorites_callback = NULL;
 
 void message_init(void) {
   app_message_register_inbox_received(inbox_received_callback);
@@ -45,6 +47,10 @@ void message_set_outputs_callback(OutputsCallback callback) {
 
 void message_set_status_callback(StatusCallback callback) {
   s_status_callback = callback;
+}
+
+void message_set_favorites_callback(FavoritesCallback callback) {
+  s_favorites_callback = callback;
 }
 
 void message_send_command(CommandType cmd) {
@@ -117,6 +123,14 @@ void message_send_set_output_volume(const char *output_id, int volume) {
     dict_write_uint8(out, KEY_CMD, CMD_SET_OUTPUT_VOLUME);
     dict_write_cstring(out, KEY_OUTPUT_ID, output_id);
     dict_write_uint8(out, KEY_VOLUME, volume);
+    app_message_outbox_send();
+  }
+}
+
+void message_send_get_favorites(void) {
+  DictionaryIterator *out;
+  if (app_message_outbox_begin(&out) == APP_MSG_OK) {
+    dict_write_uint8(out, KEY_CMD, CMD_GET_FAVORITES);
     app_message_outbox_send();
   }
 }
@@ -233,6 +247,35 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     
     s_outputs_callback(count, names, ids, volumes, enabled);
+  }
+  
+  // Check for favorites list
+  t = dict_find(iterator, KEY_FAVORITE_COUNT);
+  if (t && s_favorites_callback) {
+    int count = t->value->uint8;
+    static char *names[MAX_FAVORITES];
+    static int types[MAX_FAVORITES];
+    
+    for (int i = 0; i < MAX_FAVORITES; i++) {
+      if (names[i]) {
+        free(names[i]);
+        names[i] = NULL;
+      }
+      types[i] = 0;
+    }
+    
+    for (int i = 0; i < count && i < MAX_FAVORITES; i++) {
+      Tuple *name_t = dict_find(iterator, KEY_FAVORITE_NAME_BASE + i);
+      if (name_t) {
+        names[i] = malloc(strlen(name_t->value->cstring) + 1);
+        if (names[i]) strcpy(names[i], name_t->value->cstring);
+      }
+      
+      Tuple *type_t = dict_find(iterator, KEY_FAVORITE_TYPE_BASE + i);
+      if (type_t) types[i] = type_t->value->uint8;
+    }
+    
+    s_favorites_callback(count, names, types);
   }
 }
 

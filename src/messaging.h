@@ -11,12 +11,14 @@ typedef void (*PlayerStateCallback)(PlayerState state, const char *track, const 
 typedef void (*SearchResultsCallback)(int count, char *titles[], char *uris[]);
 typedef void (*OutputsCallback)(int count, char *names[], char *ids[], int volumes[], bool enabled[]);
 typedef void (*StatusCallback)(int status);
+typedef void (*FavoritesCallback)(int count, char *names[], int types[]);
 
 // Register callbacks
 void message_set_player_callback(PlayerStateCallback callback);
 void message_set_results_callback(SearchResultsCallback callback);
 void message_set_outputs_callback(OutputsCallback callback);
 void message_set_status_callback(StatusCallback callback);
+void message_set_favorites_callback(FavoritesCallback callback);
 
 // Send messages to phone
 void message_send_command(CommandType cmd);
@@ -27,3 +29,4 @@ void message_send_set_volume(int volume);
 void message_send_set_output_exclusive(const char *output_id);
 void message_send_toggle_output(const char *output_id);
 void message_send_set_output_volume(const char *output_id, int volume);
+void message_send_get_favorites(void);

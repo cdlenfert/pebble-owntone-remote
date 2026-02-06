@@ -13,7 +13,8 @@ typedef enum {
   CMD_GET_OUTPUTS = 9,
   CMD_SET_OUTPUT_EXCLUSIVE = 10,
   CMD_TOGGLE_OUTPUT = 11,
-  CMD_SET_OUTPUT_VOLUME = 12
+  CMD_SET_OUTPUT_VOLUME = 12,
+  CMD_GET_FAVORITES = 13
 } CommandType;
 
 // Content types for search/random
@@ -48,7 +49,11 @@ typedef enum {
   KEY_OUTPUT_VOLUME_BASE = 80,
   KEY_OUTPUT_ENABLED_BASE = 90,
   
-  KEY_STATUS = 100
+  KEY_STATUS = 100,
+  
+  KEY_FAVORITE_COUNT = 110,
+  KEY_FAVORITE_NAME_BASE = 120,
+  KEY_FAVORITE_TYPE_BASE = 130
 } MessageKey;
 
 // Player states
@@ -60,4 +65,5 @@ typedef enum {
 
 #define MAX_RESULTS 8
 #define MAX_OUTPUTS 8
+#define MAX_FAVORITES 10
 #define MAX_STRING_LENGTH 64

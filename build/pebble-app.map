@@ -21,10 +21,8 @@ Discarded input sections
  .bss           0x0000000000000000        0x0 src/main.c.9.o
  .text          0x0000000000000000        0x0 src/messaging.c.9.o
  .bss           0x0000000000000000        0x0 src/messaging.c.9.o
- .text.message_set_results_callback
-                0x0000000000000000        0xc src/messaging.c.9.o
- .text.message_send_add_to_queue
-                0x0000000000000000       0x32 src/messaging.c.9.o
+ .text          0x0000000000000000        0x0 src/windows/favorites.c.9.o
+ .bss           0x0000000000000000        0x0 src/windows/favorites.c.9.o
  .text          0x0000000000000000        0x0 src/windows/main_menu.c.9.o
  .bss           0x0000000000000000        0x0 src/windows/main_menu.c.9.o
  .text          0x0000000000000000        0x0 src/windows/outputs.c.9.o
@@ -35,35 +33,6 @@ Discarded input sections
  .bss           0x0000000000000000        0x0 src/windows/random.c.9.o
  .text          0x0000000000000000        0x0 src/windows/results.c.9.o
  .bss           0x0000000000000000        0x0 src/windows/results.c.9.o
- .text.menu_get_num_rows
-                0x0000000000000000       0x14 src/windows/results.c.9.o
- .text.cleanup_results
-                0x0000000000000000       0x40 src/windows/results.c.9.o
- .text.window_unload
-                0x0000000000000000       0x24 src/windows/results.c.9.o
- .text.window_disappear
-                0x0000000000000000       0x14 src/windows/results.c.9.o
- .text.window_load
-                0x0000000000000000       0xa0 src/windows/results.c.9.o
- .text.menu_select
-                0x0000000000000000       0x44 src/windows/results.c.9.o
- .text.menu_draw_row
-                0x0000000000000000       0x44 src/windows/results.c.9.o
- .text.results_window_push
-                0x0000000000000000       0x6c src/windows/results.c.9.o
- .text.results_handler
-                0x0000000000000000       0xb4 src/windows/results.c.9.o
- .bss.s_titles  0x0000000000000000       0x20 src/windows/results.c.9.o
- .rodata.str1.1
-                0x0000000000000000        0xb src/windows/results.c.9.o
- .bss.s_result_count
-                0x0000000000000000        0x4 src/windows/results.c.9.o
- .bss.s_window  0x0000000000000000        0x4 src/windows/results.c.9.o
- .bss.s_uris    0x0000000000000000       0x20 src/windows/results.c.9.o
- .bss.s_menu_layer
-                0x0000000000000000        0x4 src/windows/results.c.9.o
- .bss.s_current_type
-                0x0000000000000000        0x1 src/windows/results.c.9.o
  .text          0x0000000000000000        0x0 src/windows/search.c.9.o
  .bss           0x0000000000000000        0x0 src/windows/search.c.9.o
  .text          0x0000000000000000        0x0 basalt/appinfo.auto.c.9.o
@@ -75,6 +44,8 @@ Discarded input sections
  .data.RESOURCE_ID_ICON_PREV
                 0x0000000000000000        0x4 basalt/src/resource_ids.auto.c.9.o
  .data.RESOURCE_ID_ICON_VOLUME_DOWN
+                0x0000000000000000        0x4 basalt/src/resource_ids.auto.c.9.o
+ .data.RESOURCE_ID_MENU_ICON
                 0x0000000000000000        0x4 basalt/src/resource_ids.auto.c.9.o
  .data.RESOURCE_ID_ICON_PAUSE
                 0x0000000000000000        0x4 basalt/src/resource_ids.auto.c.9.o
@@ -94,7 +65,7 @@ Discarded input sections
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_OUTPUT_ID_1
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
- .data.MESSAGE_KEY_OUTPUT_ID_2
+ .data.MESSAGE_KEY_CMD
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_OUTPUT_ID_3
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
@@ -108,13 +79,29 @@ Discarded input sections
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_PLAYER_ALBUM
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_OUTPUT_ID_2
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_RESULT_COUNT
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_0
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_1
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_PLAYER_TRACK
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_3
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_OUTPUT_ID_6
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_5
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_3
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_7
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_OUTPUT_ENABLED_3
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_9
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_OUTPUT_ENABLED_4
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
@@ -198,15 +185,41 @@ Discarded input sections
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_OUTPUT_COUNT
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
- .bss.MESSAGE_KEY_CMD
+ .data.MESSAGE_KEY_FAVORITE_COUNT
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_4
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_PLAYER_ARTIST
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_1
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_2
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_0
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_OUTPUT_ID
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_2
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_4
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_5
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_PLAYER_VOLUME
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_6
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_6
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_7
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_NAME_8
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_8
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .data.MESSAGE_KEY_QUERY
+                0x0000000000000000        0x4 src/message_keys.auto.c.9.o
+ .data.MESSAGE_KEY_FAVORITE_TYPE_9
                 0x0000000000000000        0x4 src/message_keys.auto.c.9.o
  .bss           0x0000000000000000        0x0 /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.accel_data_service_subscribe__deprecated
@@ -492,8 +505,6 @@ Discarded input sections
                 0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.menu_layer_get_scroll_layer
                 0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
- .text.menu_layer_get_selected_index
-                0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.menu_layer_legacy2_set_callbacks__deprecated
                 0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.menu_layer_set_selected_index
@@ -625,7 +636,6 @@ Discarded input sections
                 0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.strncat  0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.strncmp  0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
- .text.strncpy  0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.text_layer_legacy2_create
                 0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.text_layer_legacy2_destroy
@@ -680,11 +690,7 @@ Discarded input sections
                 0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.window_set_status_bar_icon
                 0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
- .text.window_stack_contains_window
-                0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.window_stack_get_top_window
-                0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
- .text.window_stack_pop
                 0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .text.window_stack_pop_all
                 0x0000000000000000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
@@ -1336,6 +1342,7 @@ LOAD /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2
 LOAD /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
 LOAD src/main.c.9.o
 LOAD src/messaging.c.9.o
+LOAD src/windows/favorites.c.9.o
 LOAD src/windows/main_menu.c.9.o
 LOAD src/windows/outputs.c.9.o
 LOAD src/windows/player.c.9.o
@@ -1366,7 +1373,7 @@ LOAD /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2
  .note.gnu.build-id
                 0x0000000000000084       0x24 linker stubs
 
-.text           0x00000000000000a8     0x19e2
+.text           0x00000000000000a8     0x222b
  *(.text)
  .text          0x00000000000000a8       0x14 /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  *(.text.*)
@@ -1375,508 +1382,603 @@ LOAD /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2
                 0x00000000000000bc                main
  *fill*         0x00000000000000d2        0x2 
  .text.outbox_sent_callback
-                0x00000000000000d4       0x18 src/messaging.c.9.o
+                0x00000000000000d4       0x1c src/messaging.c.9.o
  .text.outbox_failed_callback
-                0x00000000000000ec       0x20 src/messaging.c.9.o
+                0x00000000000000f0       0x20 src/messaging.c.9.o
  .text.inbox_dropped_callback
-                0x000000000000010c       0x20 src/messaging.c.9.o
+                0x0000000000000110       0x20 src/messaging.c.9.o
  .text.inbox_received_callback
-                0x000000000000012c      0x2e4 src/messaging.c.9.o
+                0x0000000000000130      0x3a8 src/messaging.c.9.o
  .text.message_init
-                0x0000000000000410       0x44 src/messaging.c.9.o
-                0x0000000000000410                message_init
+                0x00000000000004d8       0x44 src/messaging.c.9.o
+                0x00000000000004d8                message_init
  .text.message_deinit
-                0x0000000000000454        0x4 src/messaging.c.9.o
-                0x0000000000000454                message_deinit
+                0x000000000000051c        0x4 src/messaging.c.9.o
+                0x000000000000051c                message_deinit
  .text.message_set_player_callback
-                0x0000000000000458        0xc src/messaging.c.9.o
-                0x0000000000000458                message_set_player_callback
+                0x0000000000000520        0xc src/messaging.c.9.o
+                0x0000000000000520                message_set_player_callback
+ .text.message_set_results_callback
+                0x000000000000052c        0xc src/messaging.c.9.o
+                0x000000000000052c                message_set_results_callback
  .text.message_set_outputs_callback
-                0x0000000000000464        0xc src/messaging.c.9.o
-                0x0000000000000464                message_set_outputs_callback
+                0x0000000000000538        0xc src/messaging.c.9.o
+                0x0000000000000538                message_set_outputs_callback
  .text.message_set_status_callback
-                0x0000000000000470        0xc src/messaging.c.9.o
-                0x0000000000000470                message_set_status_callback
+                0x0000000000000544        0xc src/messaging.c.9.o
+                0x0000000000000544                message_set_status_callback
+ .text.message_set_favorites_callback
+                0x0000000000000550        0xc src/messaging.c.9.o
+                0x0000000000000550                message_set_favorites_callback
  .text.message_send_command
-                0x000000000000047c       0x1c src/messaging.c.9.o
-                0x000000000000047c                message_send_command
+                0x000000000000055c       0x1c src/messaging.c.9.o
+                0x000000000000055c                message_send_command
  .text.message_send_search
-                0x0000000000000498       0x32 src/messaging.c.9.o
-                0x0000000000000498                message_send_search
+                0x0000000000000578       0x32 src/messaging.c.9.o
+                0x0000000000000578                message_send_search
  .text.message_send_random
-                0x00000000000004ca       0x26 src/messaging.c.9.o
-                0x00000000000004ca                message_send_random
+                0x00000000000005aa       0x26 src/messaging.c.9.o
+                0x00000000000005aa                message_send_random
+ .text.message_send_add_to_queue
+                0x00000000000005d0       0x32 src/messaging.c.9.o
+                0x00000000000005d0                message_send_add_to_queue
  .text.message_send_set_volume
-                0x00000000000004f0       0x26 src/messaging.c.9.o
-                0x00000000000004f0                message_send_set_volume
+                0x0000000000000602       0x26 src/messaging.c.9.o
+                0x0000000000000602                message_send_set_volume
  .text.message_send_set_output_exclusive
-                0x0000000000000516       0x26 src/messaging.c.9.o
-                0x0000000000000516                message_send_set_output_exclusive
+                0x0000000000000628       0x26 src/messaging.c.9.o
+                0x0000000000000628                message_send_set_output_exclusive
  .text.message_send_toggle_output
-                0x000000000000053c       0x26 src/messaging.c.9.o
-                0x000000000000053c                message_send_toggle_output
+                0x000000000000064e       0x26 src/messaging.c.9.o
+                0x000000000000064e                message_send_toggle_output
  .text.message_send_set_output_volume
-                0x0000000000000562       0x32 src/messaging.c.9.o
-                0x0000000000000562                message_send_set_output_volume
+                0x0000000000000674       0x32 src/messaging.c.9.o
+                0x0000000000000674                message_send_set_output_volume
+ .text.message_send_get_favorites
+                0x00000000000006a6       0x1a src/messaging.c.9.o
+                0x00000000000006a6                message_send_get_favorites
  .text.menu_get_num_rows
-                0x0000000000000594        0x4 src/windows/main_menu.c.9.o
+                0x00000000000006c0        0xc src/windows/favorites.c.9.o
  .text.window_unload
-                0x0000000000000598       0x28 src/windows/main_menu.c.9.o
+                0x00000000000006cc       0x28 src/windows/favorites.c.9.o
  .text.window_load
-                0x00000000000005c0       0x94 src/windows/main_menu.c.9.o
- .text.menu_select
-                0x0000000000000654       0x20 src/windows/main_menu.c.9.o
+                0x00000000000006f4       0xa4 src/windows/favorites.c.9.o
+ .text.search_results_handler
+                0x0000000000000798       0x28 src/windows/favorites.c.9.o
  .text.menu_draw_row
-                0x0000000000000674       0x1c src/windows/main_menu.c.9.o
+                0x00000000000007c0       0x88 src/windows/favorites.c.9.o
+ .text.menu_select
+                0x0000000000000848       0x44 src/windows/favorites.c.9.o
+ .text.favorites_window_push
+                0x000000000000088c       0x58 src/windows/favorites.c.9.o
+                0x000000000000088c                favorites_window_push
+ .text.favorites_set_data
+                0x00000000000008e4       0x80 src/windows/favorites.c.9.o
+                0x00000000000008e4                favorites_set_data
+ .text.favorites_data_handler
+                0x0000000000000964        0x4 src/windows/favorites.c.9.o
+ .text.menu_get_num_rows
+                0x0000000000000968        0x4 src/windows/main_menu.c.9.o
+ .text.window_unload
+                0x000000000000096c       0x28 src/windows/main_menu.c.9.o
+ .text.window_load
+                0x0000000000000994       0x94 src/windows/main_menu.c.9.o
+ .text.menu_select
+                0x0000000000000a28       0x26 src/windows/main_menu.c.9.o
+ *fill*         0x0000000000000a4e        0x2 
+ .text.menu_draw_row
+                0x0000000000000a50       0x1c src/windows/main_menu.c.9.o
  .text.main_menu_push
-                0x0000000000000690       0x58 src/windows/main_menu.c.9.o
-                0x0000000000000690                main_menu_push
+                0x0000000000000a6c       0x58 src/windows/main_menu.c.9.o
+                0x0000000000000a6c                main_menu_push
  .text.menu_get_num_rows
-                0x00000000000006e8       0x14 src/windows/outputs.c.9.o
+                0x0000000000000ac4       0x14 src/windows/outputs.c.9.o
  .text.window_disappear
-                0x00000000000006fc        0x2 src/windows/outputs.c.9.o
+                0x0000000000000ad8        0x2 src/windows/outputs.c.9.o
  .text.volume_window_disappear
-                0x00000000000006fe        0x2 src/windows/outputs.c.9.o
+                0x0000000000000ada        0x2 src/windows/outputs.c.9.o
  .text.cleanup_outputs
-                0x0000000000000700       0x60 src/windows/outputs.c.9.o
+                0x0000000000000adc       0x60 src/windows/outputs.c.9.o
  .text.window_unload
-                0x0000000000000760       0x24 src/windows/outputs.c.9.o
+                0x0000000000000b3c       0x24 src/windows/outputs.c.9.o
  .text.window_appear
-                0x0000000000000784       0x18 src/windows/outputs.c.9.o
+                0x0000000000000b60       0x18 src/windows/outputs.c.9.o
  .text.request_player_state_timer_callback
-                0x000000000000079c       0x14 src/windows/outputs.c.9.o
+                0x0000000000000b78       0x14 src/windows/outputs.c.9.o
  .text.outputs_handler
-                0x00000000000007b0       0xc4 src/windows/outputs.c.9.o
+                0x0000000000000b8c       0xc4 src/windows/outputs.c.9.o
  .text.window_load
-                0x0000000000000874       0xb0 src/windows/outputs.c.9.o
+                0x0000000000000c50       0xb0 src/windows/outputs.c.9.o
  .text.output_volume_window_push
-                0x0000000000000924       0x88 src/windows/outputs.c.9.o
+                0x0000000000000d00       0x88 src/windows/outputs.c.9.o
  .text.volume_window_unload
-                0x00000000000009ac       0x9c src/windows/outputs.c.9.o
+                0x0000000000000d88       0x9c src/windows/outputs.c.9.o
  .text.volume_window_appear
-                0x0000000000000a48       0x48 src/windows/outputs.c.9.o
+                0x0000000000000e24       0x48 src/windows/outputs.c.9.o
  .text.update_output_play_pause_icon
-                0x0000000000000a90       0x38 src/windows/outputs.c.9.o
+                0x0000000000000e6c       0x38 src/windows/outputs.c.9.o
  .text.output_volume_status_handler
-                0x0000000000000ac8       0x20 src/windows/outputs.c.9.o
+                0x0000000000000ea4       0x20 src/windows/outputs.c.9.o
  .text.output_volume_player_state_handler
-                0x0000000000000ae8       0x10 src/windows/outputs.c.9.o
+                0x0000000000000ec4       0x10 src/windows/outputs.c.9.o
  .text.volume_select_click
-                0x0000000000000af8       0x2c src/windows/outputs.c.9.o
+                0x0000000000000ed4       0x2c src/windows/outputs.c.9.o
  .text.update_volume_display
-                0x0000000000000b24       0x38 src/windows/outputs.c.9.o
+                0x0000000000000f00       0x38 src/windows/outputs.c.9.o
  .text.volume_window_load
-                0x0000000000000b5c      0x170 src/windows/outputs.c.9.o
+                0x0000000000000f38      0x170 src/windows/outputs.c.9.o
  .text.volume_click_config_provider
-                0x0000000000000ccc       0x30 src/windows/outputs.c.9.o
+                0x00000000000010a8       0x30 src/windows/outputs.c.9.o
  .text.volume_down_click
-                0x0000000000000cfc       0x38 src/windows/outputs.c.9.o
+                0x00000000000010d8       0x38 src/windows/outputs.c.9.o
  .text.volume_up_click
-                0x0000000000000d34       0x38 src/windows/outputs.c.9.o
+                0x0000000000001110       0x38 src/windows/outputs.c.9.o
  .text.menu_select
-                0x0000000000000d6c       0x58 src/windows/outputs.c.9.o
+                0x0000000000001148       0x58 src/windows/outputs.c.9.o
  .text.menu_select_long
-                0x0000000000000dc4       0x64 src/windows/outputs.c.9.o
+                0x00000000000011a0       0x64 src/windows/outputs.c.9.o
  .text.menu_draw_row
-                0x0000000000000e28       0x8c src/windows/outputs.c.9.o
+                0x0000000000001204       0x8c src/windows/outputs.c.9.o
  .text.outputs_window_push
-                0x0000000000000eb4       0x50 src/windows/outputs.c.9.o
-                0x0000000000000eb4                outputs_window_push
+                0x0000000000001290       0x50 src/windows/outputs.c.9.o
+                0x0000000000001290                outputs_window_push
  .text.window_unload
-                0x0000000000000f04       0xa0 src/windows/player.c.9.o
+                0x00000000000012e0       0xa0 src/windows/player.c.9.o
  .text.window_appear
-                0x0000000000000fa4       0x24 src/windows/player.c.9.o
+                0x0000000000001380       0x24 src/windows/player.c.9.o
  .text.click_config_provider
-                0x0000000000000fc8       0x58 src/windows/player.c.9.o
+                0x00000000000013a4       0x58 src/windows/player.c.9.o
  .text.down_long_click_handler
-                0x0000000000001020       0x2c src/windows/player.c.9.o
+                0x00000000000013fc       0x2c src/windows/player.c.9.o
  .text.down_click_handler
-                0x000000000000104c       0x10 src/windows/player.c.9.o
+                0x0000000000001428       0x10 src/windows/player.c.9.o
  .text.up_long_click_handler
-                0x000000000000105c       0x2c src/windows/player.c.9.o
+                0x0000000000001438       0x2c src/windows/player.c.9.o
  .text.up_click_handler
-                0x0000000000001088       0x10 src/windows/player.c.9.o
+                0x0000000000001464       0x10 src/windows/player.c.9.o
  .text.update_action_bar
-                0x0000000000001098       0x40 src/windows/player.c.9.o
+                0x0000000000001474       0x40 src/windows/player.c.9.o
  .text.player_status_handler
-                0x00000000000010d8       0x20 src/windows/player.c.9.o
+                0x00000000000014b4       0x20 src/windows/player.c.9.o
  .text.player_state_handler
-                0x00000000000010f8       0xc8 src/windows/player.c.9.o
+                0x00000000000014d4       0xc8 src/windows/player.c.9.o
  .text.window_load
-                0x00000000000011c0      0x1e0 src/windows/player.c.9.o
+                0x000000000000159c      0x1e0 src/windows/player.c.9.o
  .text.select_click_handler
-                0x00000000000013a0       0x2c src/windows/player.c.9.o
+                0x000000000000177c       0x2c src/windows/player.c.9.o
  .text.player_window_push
-                0x00000000000013cc       0x64 src/windows/player.c.9.o
-                0x00000000000013cc                player_window_push
+                0x00000000000017a8       0x64 src/windows/player.c.9.o
+                0x00000000000017a8                player_window_push
  .text.menu_get_num_rows
-                0x0000000000001430        0x4 src/windows/random.c.9.o
+                0x000000000000180c        0x4 src/windows/random.c.9.o
  .text.window_unload
-                0x0000000000001434       0x28 src/windows/random.c.9.o
+                0x0000000000001810       0x2c src/windows/random.c.9.o
  .text.window_load
-                0x000000000000145c       0x94 src/windows/random.c.9.o
+                0x000000000000183c       0x94 src/windows/random.c.9.o
  .text.menu_select
-                0x00000000000014f0        0x6 src/windows/random.c.9.o
- *fill*         0x00000000000014f6        0x2 
+                0x00000000000018d0       0x20 src/windows/random.c.9.o
+ .text.random_results_handler
+                0x00000000000018f0       0x3c src/windows/random.c.9.o
  .text.menu_draw_row
-                0x00000000000014f8       0x1c src/windows/random.c.9.o
+                0x000000000000192c       0x1c src/windows/random.c.9.o
  .text.random_window_push
-                0x0000000000001514       0x58 src/windows/random.c.9.o
-                0x0000000000001514                random_window_push
+                0x0000000000001948       0x58 src/windows/random.c.9.o
+                0x0000000000001948                random_window_push
  .text.menu_get_num_rows
-                0x000000000000156c        0x4 src/windows/search.c.9.o
+                0x00000000000019a0       0x14 src/windows/results.c.9.o
+ .text.cleanup_results
+                0x00000000000019b4       0x40 src/windows/results.c.9.o
  .text.window_unload
-                0x0000000000001570       0x3c src/windows/search.c.9.o
+                0x00000000000019f4       0x24 src/windows/results.c.9.o
+ .text.window_disappear
+                0x0000000000001a18       0x14 src/windows/results.c.9.o
  .text.window_load
-                0x00000000000015ac       0xac src/windows/search.c.9.o
+                0x0000000000001a2c       0xa0 src/windows/results.c.9.o
  .text.menu_select
-                0x0000000000001658       0x20 src/windows/search.c.9.o
+                0x0000000000001acc       0x44 src/windows/results.c.9.o
  .text.menu_draw_row
-                0x0000000000001678       0x1c src/windows/search.c.9.o
+                0x0000000000001b10       0x44 src/windows/results.c.9.o
+ .text.results_window_push
+                0x0000000000001b54       0xe0 src/windows/results.c.9.o
+                0x0000000000001b54                results_window_push
+ .text.results_handler
+                0x0000000000001c34       0xd4 src/windows/results.c.9.o
+ .text.menu_get_num_rows
+                0x0000000000001d08        0x4 src/windows/search.c.9.o
+ .text.window_unload
+                0x0000000000001d0c       0x3c src/windows/search.c.9.o
+ .text.window_load
+                0x0000000000001d48       0xac src/windows/search.c.9.o
+ .text.search_results_handler
+                0x0000000000001df4       0x10 src/windows/search.c.9.o
+ .text.menu_select
+                0x0000000000001e04       0x20 src/windows/search.c.9.o
+ .text.menu_draw_row
+                0x0000000000001e24       0x1c src/windows/search.c.9.o
  .text.dictation_callback
-                0x0000000000001694       0x18 src/windows/search.c.9.o
+                0x0000000000001e40       0x30 src/windows/search.c.9.o
  .text.search_window_push
-                0x00000000000016ac       0x58 src/windows/search.c.9.o
-                0x00000000000016ac                search_window_push
+                0x0000000000001e70       0x58 src/windows/search.c.9.o
+                0x0000000000001e70                search_window_push
  .text.app_event_loop
-                0x0000000000001704        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001704                app_event_loop
- .text.app_log  0x0000000000001710        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001710                app_log
+                0x0000000000001ec8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001ec8                app_event_loop
+ .text.app_log  0x0000000000001ed4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001ed4                app_log
  .text.app_message_deregister_callbacks
-                0x000000000000171c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000171c                app_message_deregister_callbacks
+                0x0000000000001ee0        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001ee0                app_message_deregister_callbacks
  .text.app_message_open
-                0x0000000000001728        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001728                app_message_open
+                0x0000000000001eec        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001eec                app_message_open
  .text.app_timer_cancel
-                0x0000000000001734        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001734                app_timer_cancel
+                0x0000000000001ef8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001ef8                app_timer_cancel
  .text.app_timer_register
-                0x0000000000001740        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001740                app_timer_register
+                0x0000000000001f04        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f04                app_timer_register
  .text.dict_find
-                0x000000000000174c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000174c                dict_find
+                0x0000000000001f10        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f10                dict_find
  .text.dict_write_cstring
-                0x0000000000001758        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001758                dict_write_cstring
+                0x0000000000001f1c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f1c                dict_write_cstring
  .text.dict_write_uint8
-                0x0000000000001764        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001764                dict_write_uint8
+                0x0000000000001f28        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f28                dict_write_uint8
  .text.fonts_get_system_font
-                0x0000000000001770        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001770                fonts_get_system_font
- .text.free     0x000000000000177c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000177c                free
+                0x0000000000001f34        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f34                fonts_get_system_font
+ .text.free     0x0000000000001f40        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f40                free
  .text.gbitmap_create_with_resource
-                0x0000000000001788        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001788                gbitmap_create_with_resource
+                0x0000000000001f4c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f4c                gbitmap_create_with_resource
  .text.gbitmap_destroy
-                0x0000000000001794        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001794                gbitmap_destroy
+                0x0000000000001f58        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f58                gbitmap_destroy
  .text.layer_add_child
-                0x00000000000017a0        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000017a0                layer_add_child
+                0x0000000000001f64        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f64                layer_add_child
  .text.layer_get_bounds
-                0x00000000000017ac        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000017ac                layer_get_bounds
- .text.malloc   0x00000000000017b8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000017b8                malloc
- .text.memset   0x00000000000017c4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000017c4                memset
+                0x0000000000001f70        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f70                layer_get_bounds
+ .text.malloc   0x0000000000001f7c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f7c                malloc
+ .text.memset   0x0000000000001f88        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f88                memset
  .text.menu_cell_basic_draw
-                0x00000000000017d0        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000017d0                menu_cell_basic_draw
+                0x0000000000001f94        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001f94                menu_cell_basic_draw
  .text.menu_layer_destroy
-                0x00000000000017dc        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000017dc                menu_layer_destroy
+                0x0000000000001fa0        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001fa0                menu_layer_destroy
  .text.menu_layer_get_layer
-                0x00000000000017e8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000017e8                menu_layer_get_layer
+                0x0000000000001fac        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001fac                menu_layer_get_layer
+ .text.menu_layer_get_selected_index
+                0x0000000000001fb8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001fb8                menu_layer_get_selected_index
  .text.menu_layer_reload_data
-                0x00000000000017f4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000017f4                menu_layer_reload_data
+                0x0000000000001fc4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001fc4                menu_layer_reload_data
  .text.menu_layer_set_click_config_onto_window
-                0x0000000000001800        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001800                menu_layer_set_click_config_onto_window
+                0x0000000000001fd0        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001fd0                menu_layer_set_click_config_onto_window
  .text.snprintf
-                0x000000000000180c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000180c                snprintf
- .text.strcpy   0x0000000000001818        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001818                strcpy
- .text.strlen   0x0000000000001824        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001824                strlen
+                0x0000000000001fdc        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001fdc                snprintf
+ .text.strcpy   0x0000000000001fe8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001fe8                strcpy
+ .text.strlen   0x0000000000001ff4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000001ff4                strlen
+ .text.strncpy  0x0000000000002000        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002000                strncpy
  .text.vibes_double_pulse
-                0x0000000000001830        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001830                vibes_double_pulse
+                0x000000000000200c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x000000000000200c                vibes_double_pulse
  .text.vibes_short_pulse
-                0x000000000000183c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000183c                vibes_short_pulse
+                0x0000000000002018        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002018                vibes_short_pulse
  .text.window_create
-                0x0000000000001848        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001848                window_create
+                0x0000000000002024        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002024                window_create
  .text.window_destroy
-                0x0000000000001854        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001854                window_destroy
+                0x0000000000002030        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002030                window_destroy
  .text.window_get_root_layer
-                0x0000000000001860        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001860                window_get_root_layer
+                0x000000000000203c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x000000000000203c                window_get_root_layer
  .text.window_set_window_handlers
-                0x000000000000186c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000186c                window_set_window_handlers
+                0x0000000000002048        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002048                window_set_window_handlers
+ .text.window_stack_contains_window
+                0x0000000000002054        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002054                window_stack_contains_window
+ .text.window_stack_pop
+                0x0000000000002060        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002060                window_stack_pop
  .text.window_stack_push
-                0x0000000000001878        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001878                window_stack_push
+                0x000000000000206c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x000000000000206c                window_stack_push
  .text.app_message_outbox_begin
-                0x0000000000001884        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001884                app_message_outbox_begin
+                0x0000000000002078        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002078                app_message_outbox_begin
  .text.app_message_outbox_send
-                0x0000000000001890        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001890                app_message_outbox_send
+                0x0000000000002084        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002084                app_message_outbox_send
  .text.app_message_register_inbox_dropped
-                0x000000000000189c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000189c                app_message_register_inbox_dropped
+                0x0000000000002090        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002090                app_message_register_inbox_dropped
  .text.app_message_register_inbox_received
-                0x00000000000018a8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000018a8                app_message_register_inbox_received
+                0x000000000000209c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x000000000000209c                app_message_register_inbox_received
  .text.app_message_register_outbox_failed
-                0x00000000000018b4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000018b4                app_message_register_outbox_failed
+                0x00000000000020a8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x00000000000020a8                app_message_register_outbox_failed
  .text.app_message_register_outbox_sent
-                0x00000000000018c0        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000018c0                app_message_register_outbox_sent
+                0x00000000000020b4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x00000000000020b4                app_message_register_outbox_sent
  .text.window_long_click_subscribe
-                0x00000000000018cc        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000018cc                window_long_click_subscribe
+                0x00000000000020c0        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x00000000000020c0                window_long_click_subscribe
  .text.window_single_click_subscribe
-                0x00000000000018d8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000018d8                window_single_click_subscribe
+                0x00000000000020cc        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x00000000000020cc                window_single_click_subscribe
  .text.menu_layer_create
-                0x00000000000018e4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000018e4                menu_layer_create
+                0x00000000000020d8        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x00000000000020d8                menu_layer_create
  .text.action_bar_layer_add_to_window
-                0x00000000000018f0        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000018f0                action_bar_layer_add_to_window
+                0x00000000000020e4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x00000000000020e4                action_bar_layer_add_to_window
  .text.action_bar_layer_create
-                0x00000000000018fc        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000018fc                action_bar_layer_create
+                0x00000000000020f0        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x00000000000020f0                action_bar_layer_create
  .text.action_bar_layer_destroy
-                0x0000000000001908        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001908                action_bar_layer_destroy
+                0x00000000000020fc        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x00000000000020fc                action_bar_layer_destroy
  .text.action_bar_layer_set_click_config_provider
-                0x0000000000001914        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001914                action_bar_layer_set_click_config_provider
+                0x0000000000002108        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002108                action_bar_layer_set_click_config_provider
  .text.action_bar_layer_set_icon
-                0x0000000000001920        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001920                action_bar_layer_set_icon
+                0x0000000000002114        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002114                action_bar_layer_set_icon
  .text.text_layer_create
-                0x000000000000192c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000192c                text_layer_create
+                0x0000000000002120        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002120                text_layer_create
  .text.text_layer_destroy
-                0x0000000000001938        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001938                text_layer_destroy
+                0x000000000000212c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x000000000000212c                text_layer_destroy
  .text.text_layer_get_layer
-                0x0000000000001944        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001944                text_layer_get_layer
+                0x0000000000002138        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002138                text_layer_get_layer
  .text.text_layer_set_font
-                0x0000000000001950        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001950                text_layer_set_font
+                0x0000000000002144        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002144                text_layer_set_font
  .text.text_layer_set_overflow_mode
-                0x000000000000195c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000195c                text_layer_set_overflow_mode
+                0x0000000000002150        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002150                text_layer_set_overflow_mode
  .text.text_layer_set_text
-                0x0000000000001968        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001968                text_layer_set_text
+                0x000000000000215c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x000000000000215c                text_layer_set_text
  .text.text_layer_set_text_alignment
-                0x0000000000001974        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001974                text_layer_set_text_alignment
+                0x0000000000002168        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002168                text_layer_set_text_alignment
  .text.menu_layer_set_callbacks
-                0x0000000000001980        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001980                menu_layer_set_callbacks
+                0x0000000000002174        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002174                menu_layer_set_callbacks
  .text.dictation_session_create
-                0x000000000000198c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x000000000000198c                dictation_session_create
+                0x0000000000002180        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002180                dictation_session_create
  .text.dictation_session_destroy
-                0x0000000000001998        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x0000000000001998                dictation_session_destroy
+                0x000000000000218c        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x000000000000218c                dictation_session_destroy
  .text.dictation_session_start
-                0x00000000000019a4        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
-                0x00000000000019a4                dictation_session_start
+                0x0000000000002198        0xc /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000002198                dictation_session_start
  *(.rodata)
  *(.rodata*)
  .rodata.str1.1
-                0x00000000000019b0       0x4b src/messaging.c.9.o
+                0x00000000000021a4       0x4b src/messaging.c.9.o
                                          0x4c (size before relaxing)
  .rodata.str1.1
-                0x00000000000019fb       0x1d src/windows/main_menu.c.9.o
+                0x00000000000021ef       0x14 src/windows/favorites.c.9.o
+                                         0x15 (size before relaxing)
  .rodata.str1.1
-                0x0000000000001a18       0x53 src/windows/outputs.c.9.o
+                0x0000000000002203       0x27 src/windows/main_menu.c.9.o
+ .rodata.str1.1
+                0x000000000000222a       0x50 src/windows/outputs.c.9.o
                                          0x58 (size before relaxing)
  .rodata.str1.1
-                0x0000000000001a6b        0x9 src/windows/player.c.9.o
+                0x000000000000227a        0x9 src/windows/player.c.9.o
                                          0x28 (size before relaxing)
  .rodata.str1.1
-                0x0000000000001a74       0x16 src/windows/random.c.9.o
+                0x0000000000002283       0x16 src/windows/random.c.9.o
+ .rodata.str1.1
+                0x0000000000002299       0x3a src/windows/results.c.9.o
  .rodata.str1.1
                 0x0000000000000000       0x16 src/windows/search.c.9.o
 
-.glue_7         0x0000000000001a8c        0x0
+.glue_7         0x00000000000022d4        0x0
  .glue_7        0x0000000000000000        0x0 linker stubs
 
-.glue_7t        0x0000000000001a8c        0x0
+.glue_7t        0x00000000000022d4        0x0
  .glue_7t       0x0000000000000000        0x0 linker stubs
 
-.vfp11_veneer   0x0000000000001a8c        0x0
+.vfp11_veneer   0x00000000000022d4        0x0
  .vfp11_veneer  0x0000000000000000        0x0 linker stubs
 
-.v4_bx          0x0000000000001a8c        0x0
+.v4_bx          0x00000000000022d4        0x0
  .v4_bx         0x0000000000000000        0x0 linker stubs
 
-.iplt           0x0000000000001a8c        0x0
+.iplt           0x00000000000022d4        0x0
  .iplt          0x0000000000000000        0x0 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
 
-.rel.dyn        0x0000000000001a8c        0x0
+.rel.dyn        0x00000000000022d4        0x0
  .rel.iplt      0x0000000000000000        0x0 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
 
-.data           0x0000000000001a8c       0x50
+.data           0x00000000000022d4       0x54
  *(.data)
- .data          0x0000000000001a8c        0x0 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crti.o
- .data          0x0000000000001a8c        0x4 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
-                0x0000000000001a8c                __dso_handle
- .data          0x0000000000001a90        0x0 src/main.c.9.o
- .data          0x0000000000001a90        0x0 src/messaging.c.9.o
- .data          0x0000000000001a90        0x0 src/windows/main_menu.c.9.o
- .data          0x0000000000001a90       0x20 src/windows/outputs.c.9.o
- .data          0x0000000000001ab0        0x0 src/windows/player.c.9.o
- .data          0x0000000000001ab0        0x0 src/windows/random.c.9.o
- .data          0x0000000000001ab0        0x0 src/windows/results.c.9.o
- .data          0x0000000000001ab0        0x0 src/windows/search.c.9.o
- .data          0x0000000000001ab0        0x0 basalt/appinfo.auto.c.9.o
- .data          0x0000000000001ab0        0x0 basalt/src/resource_ids.auto.c.9.o
- .data          0x0000000000001ab0        0x0 src/message_keys.auto.c.9.o
- .data          0x0000000000001ab0        0x0 /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
- .data          0x0000000000001ab0        0x0 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtend.o
- .data          0x0000000000001ab0        0x0 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtn.o
+ .data          0x00000000000022d4        0x0 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crti.o
+ .data          0x00000000000022d4        0x4 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
+                0x00000000000022d4                __dso_handle
+ .data          0x00000000000022d8        0x0 src/main.c.9.o
+ .data          0x00000000000022d8        0x0 src/messaging.c.9.o
+ .data          0x00000000000022d8        0x0 src/windows/favorites.c.9.o
+ .data          0x00000000000022d8        0x0 src/windows/main_menu.c.9.o
+ .data          0x00000000000022d8       0x20 src/windows/outputs.c.9.o
+ .data          0x00000000000022f8        0x0 src/windows/player.c.9.o
+ .data          0x00000000000022f8        0x0 src/windows/random.c.9.o
+ .data          0x00000000000022f8        0x0 src/windows/results.c.9.o
+ .data          0x00000000000022f8        0x0 src/windows/search.c.9.o
+ .data          0x00000000000022f8        0x0 basalt/appinfo.auto.c.9.o
+ .data          0x00000000000022f8        0x0 basalt/src/resource_ids.auto.c.9.o
+ .data          0x00000000000022f8        0x0 src/message_keys.auto.c.9.o
+ .data          0x00000000000022f8        0x0 /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+ .data          0x00000000000022f8        0x0 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtend.o
+ .data          0x00000000000022f8        0x0 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtn.o
  *(.data.*)
  .data.rel.ro.local.menu_items
-                0x0000000000001ab0       0x10 src/windows/main_menu.c.9.o
+                0x00000000000022f8       0x14 src/windows/main_menu.c.9.o
  .data.s_current_volume
-                0x0000000000001ac0        0x4 src/windows/player.c.9.o
+                0x000000000000230c        0x4 src/windows/player.c.9.o
  .data.rel.ro.local.s_content_types
-                0x0000000000001ac4        0xc src/windows/random.c.9.o
+                0x0000000000002310        0xc src/windows/random.c.9.o
  .data.rel.ro.local.s_content_types
-                0x0000000000001ad0        0xc src/windows/search.c.9.o
+                0x000000000000231c        0xc src/windows/search.c.9.o
 
-.igot.plt       0x0000000000001adc        0x0
+.igot.plt       0x0000000000002328        0x0
  .igot.plt      0x0000000000000000        0x0 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
 
-.bss            0x0000000000001adc      0x2f8
+.bss            0x0000000000002328      0x534
  *(.bss)
  *(.bss.*)
  .bss.s_player_callback
-                0x0000000000001adc        0x4 src/messaging.c.9.o
- .bss.names.7791
-                0x0000000000001ae0       0x20 src/messaging.c.9.o
- .bss.ids.7792  0x0000000000001b00       0x20 src/messaging.c.9.o
- .bss.uris.7779
-                0x0000000000001b20       0x20 src/messaging.c.9.o
+                0x0000000000002328        0x4 src/messaging.c.9.o
+ .bss.names.7836
+                0x000000000000232c       0x20 src/messaging.c.9.o
+ .bss.uris.7824
+                0x000000000000234c       0x20 src/messaging.c.9.o
+ .bss.names.7853
+                0x000000000000236c       0x28 src/messaging.c.9.o
+ .bss.ids.7837  0x0000000000002394       0x20 src/messaging.c.9.o
+ .bss.s_favorites_callback
+                0x00000000000023b4        0x4 src/messaging.c.9.o
  .bss.s_outputs_callback
-                0x0000000000001b40        0x4 src/messaging.c.9.o
- .bss.volumes.7793
-                0x0000000000001b44       0x20 src/messaging.c.9.o
- .bss.enabled.7794
-                0x0000000000001b64        0x8 src/messaging.c.9.o
+                0x00000000000023b8        0x4 src/messaging.c.9.o
+ .bss.volumes.7838
+                0x00000000000023bc       0x20 src/messaging.c.9.o
+ .bss.titles.7823
+                0x00000000000023dc       0x20 src/messaging.c.9.o
  .bss.s_results_callback
-                0x0000000000001b6c        0x4 src/messaging.c.9.o
- .bss.titles.7778
-                0x0000000000001b70       0x20 src/messaging.c.9.o
+                0x00000000000023fc        0x4 src/messaging.c.9.o
+ .bss.enabled.7839
+                0x0000000000002400        0x8 src/messaging.c.9.o
  .bss.s_status_callback
-                0x0000000000001b90        0x4 src/messaging.c.9.o
- .bss.s_window  0x0000000000001b94        0x4 src/windows/main_menu.c.9.o
+                0x0000000000002408        0x4 src/messaging.c.9.o
+ .bss.types.7854
+                0x000000000000240c       0x28 src/messaging.c.9.o
+ .bss.s_count   0x0000000000002434        0x4 src/windows/favorites.c.9.o
+ .bss.s_names   0x0000000000002438      0x140 src/windows/favorites.c.9.o
+ .bss.s_window  0x0000000000002578        0x4 src/windows/favorites.c.9.o
+ .bss.display_text.7754
+                0x000000000000257c       0x28 src/windows/favorites.c.9.o
+ .bss.s_types   0x00000000000025a4       0x28 src/windows/favorites.c.9.o
  .bss.s_menu_layer
-                0x0000000000001b98        0x4 src/windows/main_menu.c.9.o
+                0x00000000000025cc        0x4 src/windows/favorites.c.9.o
+ .bss.s_window  0x00000000000025d0        0x4 src/windows/main_menu.c.9.o
+ .bss.s_menu_layer
+                0x00000000000025d4        0x4 src/windows/main_menu.c.9.o
  .bss.s_icon_play
-                0x0000000000001b9c        0x4 src/windows/outputs.c.9.o
+                0x00000000000025d8        0x4 src/windows/outputs.c.9.o
  .bss.s_icon_pause
-                0x0000000000001ba0        0x4 src/windows/outputs.c.9.o
- .bss.volume_text.7766
-                0x0000000000001ba4       0x10 src/windows/outputs.c.9.o
+                0x00000000000025dc        0x4 src/windows/outputs.c.9.o
+ .bss.volume_text.7799
+                0x00000000000025e0       0x10 src/windows/outputs.c.9.o
  .bss.s_current_output_volume
-                0x0000000000001bb4        0x4 src/windows/outputs.c.9.o
+                0x00000000000025f0        0x4 src/windows/outputs.c.9.o
  .bss.s_name_layer
-                0x0000000000001bb8        0x4 src/windows/outputs.c.9.o
+                0x00000000000025f4        0x4 src/windows/outputs.c.9.o
  .bss.s_output_player_state
-                0x0000000000001bbc        0x1 src/windows/outputs.c.9.o
- *fill*         0x0000000000001bbd        0x3 
+                0x00000000000025f8        0x1 src/windows/outputs.c.9.o
+ *fill*         0x00000000000025f9        0x3 
  .bss.s_volume_layer
-                0x0000000000001bc0        0x4 src/windows/outputs.c.9.o
+                0x00000000000025fc        0x4 src/windows/outputs.c.9.o
  .bss.s_volume_window
-                0x0000000000001bc4        0x4 src/windows/outputs.c.9.o
+                0x0000000000002600        0x4 src/windows/outputs.c.9.o
  .bss.s_volume_action_bar
-                0x0000000000001bc8        0x4 src/windows/outputs.c.9.o
+                0x0000000000002604        0x4 src/windows/outputs.c.9.o
  .bss.s_icon_vol_down
-                0x0000000000001bcc        0x4 src/windows/outputs.c.9.o
+                0x0000000000002608        0x4 src/windows/outputs.c.9.o
  .bss.s_state_request_timer
-                0x0000000000001bd0        0x4 src/windows/outputs.c.9.o
+                0x000000000000260c        0x4 src/windows/outputs.c.9.o
  .bss.s_current_output_name
-                0x0000000000001bd4       0x40 src/windows/outputs.c.9.o
- .bss.s_names   0x0000000000001c14       0x20 src/windows/outputs.c.9.o
+                0x0000000000002610       0x40 src/windows/outputs.c.9.o
+ .bss.s_names   0x0000000000002650       0x20 src/windows/outputs.c.9.o
  .bss.s_current_output_id
-                0x0000000000001c34       0x40 src/windows/outputs.c.9.o
- .bss.s_window  0x0000000000001c74        0x4 src/windows/outputs.c.9.o
+                0x0000000000002670       0x40 src/windows/outputs.c.9.o
+ .bss.s_window  0x00000000000026b0        0x4 src/windows/outputs.c.9.o
  .bss.s_volumes
-                0x0000000000001c78       0x20 src/windows/outputs.c.9.o
+                0x00000000000026b4       0x20 src/windows/outputs.c.9.o
  .bss.s_output_count
-                0x0000000000001c98        0x4 src/windows/outputs.c.9.o
+                0x00000000000026d4        0x4 src/windows/outputs.c.9.o
  .bss.s_icon_vol_up
-                0x0000000000001c9c        0x4 src/windows/outputs.c.9.o
+                0x00000000000026d8        0x4 src/windows/outputs.c.9.o
  .bss.s_enabled
-                0x0000000000001ca0        0x8 src/windows/outputs.c.9.o
+                0x00000000000026dc        0x8 src/windows/outputs.c.9.o
  .bss.s_menu_layer
-                0x0000000000001ca8        0x4 src/windows/outputs.c.9.o
- .bss.s_ids     0x0000000000001cac       0x20 src/windows/outputs.c.9.o
+                0x00000000000026e4        0x4 src/windows/outputs.c.9.o
+ .bss.s_ids     0x00000000000026e8       0x20 src/windows/outputs.c.9.o
  .bss.s_icon_play
-                0x0000000000001ccc        0x4 src/windows/player.c.9.o
+                0x0000000000002708        0x4 src/windows/player.c.9.o
  .bss.s_icon_pause
-                0x0000000000001cd0        0x4 src/windows/player.c.9.o
+                0x000000000000270c        0x4 src/windows/player.c.9.o
  .bss.s_artist_layer
-                0x0000000000001cd4        0x4 src/windows/player.c.9.o
+                0x0000000000002710        0x4 src/windows/player.c.9.o
  .bss.s_album_layer
-                0x0000000000001cd8        0x4 src/windows/player.c.9.o
- .bss.s_window  0x0000000000001cdc        0x4 src/windows/player.c.9.o
+                0x0000000000002714        0x4 src/windows/player.c.9.o
+ .bss.s_window  0x0000000000002718        0x4 src/windows/player.c.9.o
  .bss.s_player_state
-                0x0000000000001ce0        0x1 src/windows/player.c.9.o
- *fill*         0x0000000000001ce1        0x3 
+                0x000000000000271c        0x1 src/windows/player.c.9.o
+ *fill*         0x000000000000271d        0x3 
  .bss.s_icon_volume_down
-                0x0000000000001ce4        0x4 src/windows/player.c.9.o
+                0x0000000000002720        0x4 src/windows/player.c.9.o
  .bss.s_icon_prev
-                0x0000000000001ce8        0x4 src/windows/player.c.9.o
+                0x0000000000002724        0x4 src/windows/player.c.9.o
  .bss.s_artist_text
-                0x0000000000001cec       0x40 src/windows/player.c.9.o
+                0x0000000000002728       0x40 src/windows/player.c.9.o
  .bss.s_icon_volume_up
-                0x0000000000001d2c        0x4 src/windows/player.c.9.o
+                0x0000000000002768        0x4 src/windows/player.c.9.o
  .bss.s_track_layer
-                0x0000000000001d30        0x4 src/windows/player.c.9.o
+                0x000000000000276c        0x4 src/windows/player.c.9.o
  .bss.s_track_text
-                0x0000000000001d34       0x40 src/windows/player.c.9.o
+                0x0000000000002770       0x40 src/windows/player.c.9.o
  .bss.s_action_bar
-                0x0000000000001d74        0x4 src/windows/player.c.9.o
+                0x00000000000027b0        0x4 src/windows/player.c.9.o
  .bss.s_icon_next
-                0x0000000000001d78        0x4 src/windows/player.c.9.o
+                0x00000000000027b4        0x4 src/windows/player.c.9.o
  .bss.s_album_text
-                0x0000000000001d7c       0x40 src/windows/player.c.9.o
- .bss.s_window  0x0000000000001dbc        0x4 src/windows/random.c.9.o
+                0x00000000000027b8       0x40 src/windows/player.c.9.o
+ .bss.s_window  0x00000000000027f8        0x4 src/windows/random.c.9.o
  .bss.s_menu_layer
-                0x0000000000001dc0        0x4 src/windows/random.c.9.o
+                0x00000000000027fc        0x4 src/windows/random.c.9.o
+ .bss.s_titles  0x0000000000002800       0x20 src/windows/results.c.9.o
+ .bss.s_result_count
+                0x0000000000002820        0x4 src/windows/results.c.9.o
+ .bss.s_window  0x0000000000002824        0x4 src/windows/results.c.9.o
+ .bss.s_uris    0x0000000000002828       0x20 src/windows/results.c.9.o
+ .bss.s_menu_layer
+                0x0000000000002848        0x4 src/windows/results.c.9.o
+ .bss.s_current_type
+                0x000000000000284c        0x1 src/windows/results.c.9.o
  .bss.s_selected_type
-                0x0000000000001dc4        0x1 src/windows/search.c.9.o
- *fill*         0x0000000000001dc5        0x3 
- .bss.s_window  0x0000000000001dc8        0x4 src/windows/search.c.9.o
+                0x000000000000284d        0x1 src/windows/search.c.9.o
+ *fill*         0x000000000000284e        0x2 
+ .bss.s_window  0x0000000000002850        0x4 src/windows/search.c.9.o
  .bss.s_menu_layer
-                0x0000000000001dcc        0x4 src/windows/search.c.9.o
+                0x0000000000002854        0x4 src/windows/search.c.9.o
  .bss.s_dictation
-                0x0000000000001dd0        0x4 src/windows/search.c.9.o
+                0x0000000000002858        0x4 src/windows/search.c.9.o
 
 DISCARD
  libc.a(*)
@@ -1896,35 +1998,38 @@ OUTPUT(/pebble/build/basalt/pebble-app.elf elf32-littlearm)
  .ARM.attributes
                 0x0000000000000075       0x33 src/messaging.c.9.o
  .ARM.attributes
-                0x00000000000000a8       0x33 src/windows/main_menu.c.9.o
+                0x00000000000000a8       0x33 src/windows/favorites.c.9.o
  .ARM.attributes
-                0x00000000000000db       0x33 src/windows/outputs.c.9.o
+                0x00000000000000db       0x33 src/windows/main_menu.c.9.o
  .ARM.attributes
-                0x000000000000010e       0x33 src/windows/player.c.9.o
+                0x000000000000010e       0x33 src/windows/outputs.c.9.o
  .ARM.attributes
-                0x0000000000000141       0x33 src/windows/random.c.9.o
+                0x0000000000000141       0x33 src/windows/player.c.9.o
  .ARM.attributes
-                0x0000000000000174       0x33 src/windows/results.c.9.o
+                0x0000000000000174       0x33 src/windows/random.c.9.o
  .ARM.attributes
-                0x00000000000001a7       0x33 src/windows/search.c.9.o
+                0x00000000000001a7       0x33 src/windows/results.c.9.o
  .ARM.attributes
-                0x00000000000001da       0x33 basalt/appinfo.auto.c.9.o
+                0x00000000000001da       0x33 src/windows/search.c.9.o
  .ARM.attributes
-                0x000000000000020d       0x33 basalt/src/resource_ids.auto.c.9.o
+                0x000000000000020d       0x33 basalt/appinfo.auto.c.9.o
  .ARM.attributes
-                0x0000000000000240       0x33 src/message_keys.auto.c.9.o
+                0x0000000000000240       0x33 basalt/src/resource_ids.auto.c.9.o
  .ARM.attributes
-                0x0000000000000273       0x21 /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
+                0x0000000000000273       0x33 src/message_keys.auto.c.9.o
  .ARM.attributes
-                0x0000000000000294       0x29 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtend.o
+                0x00000000000002a6       0x21 /root/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/lib/libpebble.a(tmpFRPTsFpebble.o)
  .ARM.attributes
-                0x00000000000002bd       0x19 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtn.o
+                0x00000000000002c7       0x29 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtend.o
+ .ARM.attributes
+                0x00000000000002f0       0x19 /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtn.o
 
 .comment        0x0000000000000000       0x4e
  .comment       0x0000000000000000       0x4e /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
                                          0x4f (size before relaxing)
  .comment       0x0000000000000000       0x4f src/main.c.9.o
  .comment       0x0000000000000000       0x4f src/messaging.c.9.o
+ .comment       0x0000000000000000       0x4f src/windows/favorites.c.9.o
  .comment       0x0000000000000000       0x4f src/windows/main_menu.c.9.o
  .comment       0x0000000000000000       0x4f src/windows/outputs.c.9.o
  .comment       0x0000000000000000       0x4f src/windows/player.c.9.o
@@ -1936,119 +2041,129 @@ OUTPUT(/pebble/build/basalt/pebble-app.elf elf32-littlearm)
  .comment       0x0000000000000000       0x4f src/message_keys.auto.c.9.o
  .comment       0x0000000000000000       0x4f /opt/pebble-sdk-4.5-linux64/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtend.o
 
-.debug_info     0x0000000000000000     0x73e2
+.debug_info     0x0000000000000000     0x8847
  .debug_info    0x0000000000000000      0x12b src/main.c.9.o
- .debug_info    0x000000000000012b     0x13d8 src/messaging.c.9.o
- .debug_info    0x0000000000001503      0x9eb src/windows/main_menu.c.9.o
- .debug_info    0x0000000000001eee     0x19f6 src/windows/outputs.c.9.o
- .debug_info    0x00000000000038e4      0xf91 src/windows/player.c.9.o
- .debug_info    0x0000000000004875      0x9ee src/windows/random.c.9.o
- .debug_info    0x0000000000005263      0xca9 src/windows/results.c.9.o
- .debug_info    0x0000000000005f0c      0xbe7 src/windows/search.c.9.o
- .debug_info    0x0000000000006af3      0x349 basalt/appinfo.auto.c.9.o
- .debug_info    0x0000000000006e3c       0xdb basalt/src/resource_ids.auto.c.9.o
- .debug_info    0x0000000000006f17      0x4cb src/message_keys.auto.c.9.o
+ .debug_info    0x000000000000012b     0x1629 src/messaging.c.9.o
+ .debug_info    0x0000000000001754      0xd68 src/windows/favorites.c.9.o
+ .debug_info    0x00000000000024bc      0x9ff src/windows/main_menu.c.9.o
+ .debug_info    0x0000000000002ebb     0x19fc src/windows/outputs.c.9.o
+ .debug_info    0x00000000000048b7      0xf97 src/windows/player.c.9.o
+ .debug_info    0x000000000000584e      0xb49 src/windows/random.c.9.o
+ .debug_info    0x0000000000006397      0xd7b src/windows/results.c.9.o
+ .debug_info    0x0000000000007112      0xcba src/windows/search.c.9.o
+ .debug_info    0x0000000000007dcc      0x349 basalt/appinfo.auto.c.9.o
+ .debug_info    0x0000000000008115       0xed basalt/src/resource_ids.auto.c.9.o
+ .debug_info    0x0000000000008202      0x645 src/message_keys.auto.c.9.o
 
-.debug_abbrev   0x0000000000000000     0x14a8
+.debug_abbrev   0x0000000000000000     0x17dc
  .debug_abbrev  0x0000000000000000       0x95 src/main.c.9.o
- .debug_abbrev  0x0000000000000095      0x346 src/messaging.c.9.o
- .debug_abbrev  0x00000000000003db      0x22a src/windows/main_menu.c.9.o
- .debug_abbrev  0x0000000000000605      0x3af src/windows/outputs.c.9.o
- .debug_abbrev  0x00000000000009b4      0x265 src/windows/player.c.9.o
- .debug_abbrev  0x0000000000000c19      0x242 src/windows/random.c.9.o
- .debug_abbrev  0x0000000000000e5b      0x26f src/windows/results.c.9.o
- .debug_abbrev  0x00000000000010ca      0x2b8 src/windows/search.c.9.o
- .debug_abbrev  0x0000000000001382       0x9e basalt/appinfo.auto.c.9.o
- .debug_abbrev  0x0000000000001420       0x44 basalt/src/resource_ids.auto.c.9.o
- .debug_abbrev  0x0000000000001464       0x44 src/message_keys.auto.c.9.o
+ .debug_abbrev  0x0000000000000095      0x36f src/messaging.c.9.o
+ .debug_abbrev  0x0000000000000404      0x300 src/windows/favorites.c.9.o
+ .debug_abbrev  0x0000000000000704      0x22a src/windows/main_menu.c.9.o
+ .debug_abbrev  0x000000000000092e      0x3af src/windows/outputs.c.9.o
+ .debug_abbrev  0x0000000000000cdd      0x265 src/windows/player.c.9.o
+ .debug_abbrev  0x0000000000000f42      0x23b src/windows/random.c.9.o
+ .debug_abbrev  0x000000000000117d      0x281 src/windows/results.c.9.o
+ .debug_abbrev  0x00000000000013fe      0x2b8 src/windows/search.c.9.o
+ .debug_abbrev  0x00000000000016b6       0x9e basalt/appinfo.auto.c.9.o
+ .debug_abbrev  0x0000000000001754       0x44 basalt/src/resource_ids.auto.c.9.o
+ .debug_abbrev  0x0000000000001798       0x44 src/message_keys.auto.c.9.o
 
-.debug_loc      0x0000000000000000     0x203f
+.debug_loc      0x0000000000000000     0x26c3
  .debug_loc     0x0000000000000000       0x20 src/main.c.9.o
- .debug_loc     0x0000000000000020      0x729 src/messaging.c.9.o
- .debug_loc     0x0000000000000749      0x25c src/windows/main_menu.c.9.o
- .debug_loc     0x00000000000009a5      0x8d0 src/windows/outputs.c.9.o
- .debug_loc     0x0000000000001275      0x4a7 src/windows/player.c.9.o
- .debug_loc     0x000000000000171c      0x21a src/windows/random.c.9.o
- .debug_loc     0x0000000000001936      0x3ef src/windows/results.c.9.o
- .debug_loc     0x0000000000001d25      0x31a src/windows/search.c.9.o
+ .debug_loc     0x0000000000000020      0x7b2 src/messaging.c.9.o
+ .debug_loc     0x00000000000007d2      0x49f src/windows/favorites.c.9.o
+ .debug_loc     0x0000000000000c71      0x275 src/windows/main_menu.c.9.o
+ .debug_loc     0x0000000000000ee6      0x8d0 src/windows/outputs.c.9.o
+ .debug_loc     0x00000000000017b6      0x4a7 src/windows/player.c.9.o
+ .debug_loc     0x0000000000001c5d      0x2bf src/windows/random.c.9.o
+ .debug_loc     0x0000000000001f1c      0x413 src/windows/results.c.9.o
+ .debug_loc     0x000000000000232f      0x394 src/windows/search.c.9.o
 
-.debug_aranges  0x0000000000000000      0x3b0
+.debug_aranges  0x0000000000000000      0x430
  .debug_aranges
                 0x0000000000000000       0x20 src/main.c.9.o
  .debug_aranges
-                0x0000000000000020       0xa8 src/messaging.c.9.o
+                0x0000000000000020       0xb8 src/messaging.c.9.o
  .debug_aranges
-                0x00000000000000c8       0x48 src/windows/main_menu.c.9.o
+                0x00000000000000d8       0x60 src/windows/favorites.c.9.o
  .debug_aranges
-                0x0000000000000110       0xe0 src/windows/outputs.c.9.o
+                0x0000000000000138       0x48 src/windows/main_menu.c.9.o
  .debug_aranges
-                0x00000000000001f0       0x80 src/windows/player.c.9.o
+                0x0000000000000180       0xe0 src/windows/outputs.c.9.o
  .debug_aranges
-                0x0000000000000270       0x48 src/windows/random.c.9.o
+                0x0000000000000260       0x80 src/windows/player.c.9.o
  .debug_aranges
-                0x00000000000002b8       0x60 src/windows/results.c.9.o
+                0x00000000000002e0       0x50 src/windows/random.c.9.o
  .debug_aranges
-                0x0000000000000318       0x50 src/windows/search.c.9.o
+                0x0000000000000330       0x60 src/windows/results.c.9.o
  .debug_aranges
-                0x0000000000000368       0x18 basalt/appinfo.auto.c.9.o
+                0x0000000000000390       0x58 src/windows/search.c.9.o
  .debug_aranges
-                0x0000000000000380       0x18 basalt/src/resource_ids.auto.c.9.o
+                0x00000000000003e8       0x18 basalt/appinfo.auto.c.9.o
  .debug_aranges
-                0x0000000000000398       0x18 src/message_keys.auto.c.9.o
+                0x0000000000000400       0x18 basalt/src/resource_ids.auto.c.9.o
+ .debug_aranges
+                0x0000000000000418       0x18 src/message_keys.auto.c.9.o
 
-.debug_ranges   0x0000000000000000      0x468
+.debug_ranges   0x0000000000000000      0x5a8
  .debug_ranges  0x0000000000000000       0x10 src/main.c.9.o
- .debug_ranges  0x0000000000000010      0x138 src/messaging.c.9.o
- .debug_ranges  0x0000000000000148       0x38 src/windows/main_menu.c.9.o
- .debug_ranges  0x0000000000000180      0x148 src/windows/outputs.c.9.o
- .debug_ranges  0x00000000000002c8       0x70 src/windows/player.c.9.o
- .debug_ranges  0x0000000000000338       0x38 src/windows/random.c.9.o
- .debug_ranges  0x0000000000000370       0x88 src/windows/results.c.9.o
- .debug_ranges  0x00000000000003f8       0x70 src/windows/search.c.9.o
+ .debug_ranges  0x0000000000000010      0x198 src/messaging.c.9.o
+ .debug_ranges  0x00000000000001a8       0xb0 src/windows/favorites.c.9.o
+ .debug_ranges  0x0000000000000258       0x38 src/windows/main_menu.c.9.o
+ .debug_ranges  0x0000000000000290      0x148 src/windows/outputs.c.9.o
+ .debug_ranges  0x00000000000003d8       0x70 src/windows/player.c.9.o
+ .debug_ranges  0x0000000000000448       0x40 src/windows/random.c.9.o
+ .debug_ranges  0x0000000000000488       0xa8 src/windows/results.c.9.o
+ .debug_ranges  0x0000000000000530       0x78 src/windows/search.c.9.o
 
-.debug_line     0x0000000000000000     0x1714
+.debug_line     0x0000000000000000     0x1aaa
  .debug_line    0x0000000000000000       0xbd src/main.c.9.o
- .debug_line    0x00000000000000bd      0x393 src/messaging.c.9.o
- .debug_line    0x0000000000000450      0x1c2 src/windows/main_menu.c.9.o
- .debug_line    0x0000000000000612      0x4eb src/windows/outputs.c.9.o
- .debug_line    0x0000000000000afd      0x358 src/windows/player.c.9.o
- .debug_line    0x0000000000000e55      0x1ae src/windows/random.c.9.o
- .debug_line    0x0000000000001003      0x2d3 src/windows/results.c.9.o
- .debug_line    0x00000000000012d6      0x1cc src/windows/search.c.9.o
- .debug_line    0x00000000000014a2      0x107 basalt/appinfo.auto.c.9.o
- .debug_line    0x00000000000015a9       0xb9 basalt/src/resource_ids.auto.c.9.o
- .debug_line    0x0000000000001662       0xb2 src/message_keys.auto.c.9.o
+ .debug_line    0x00000000000000bd      0x3df src/messaging.c.9.o
+ .debug_line    0x000000000000049c      0x2b4 src/windows/favorites.c.9.o
+ .debug_line    0x0000000000000750      0x1d7 src/windows/main_menu.c.9.o
+ .debug_line    0x0000000000000927      0x4eb src/windows/outputs.c.9.o
+ .debug_line    0x0000000000000e12      0x358 src/windows/player.c.9.o
+ .debug_line    0x000000000000116a      0x1d4 src/windows/random.c.9.o
+ .debug_line    0x000000000000133e      0x30d src/windows/results.c.9.o
+ .debug_line    0x000000000000164b      0x1ed src/windows/search.c.9.o
+ .debug_line    0x0000000000001838      0x107 basalt/appinfo.auto.c.9.o
+ .debug_line    0x000000000000193f       0xb9 basalt/src/resource_ids.auto.c.9.o
+ .debug_line    0x00000000000019f8       0xb2 src/message_keys.auto.c.9.o
 
-.debug_str      0x0000000000000000     0x23e1
+.debug_str      0x0000000000000000     0x27b1
  .debug_str     0x0000000000000000       0xc6 src/main.c.9.o
                                         0x10b (size before relaxing)
- .debug_str     0x00000000000000c6      0x8cb src/messaging.c.9.o
-                                        0xae1 (size before relaxing)
- .debug_str     0x0000000000000991      0x4a7 src/windows/main_menu.c.9.o
-                                        0x605 (size before relaxing)
- .debug_str     0x0000000000000e38      0x6d1 src/windows/outputs.c.9.o
-                                        0xef0 (size before relaxing)
- .debug_str     0x0000000000001509      0x17f src/windows/player.c.9.o
-                                        0x8c1 (size before relaxing)
- .debug_str     0x0000000000001688       0x28 src/windows/random.c.9.o
-                                        0x620 (size before relaxing)
- .debug_str     0x00000000000016b0       0xbf src/windows/results.c.9.o
-                                        0x734 (size before relaxing)
- .debug_str     0x000000000000176f      0x295 src/windows/search.c.9.o
-                                        0x8b0 (size before relaxing)
- .debug_str     0x0000000000001a04      0x2ed basalt/appinfo.auto.c.9.o
+ .debug_str     0x00000000000000c6      0x961 src/messaging.c.9.o
+                                        0xb90 (size before relaxing)
+ .debug_str     0x0000000000000a27      0x54c src/windows/favorites.c.9.o
+                                        0x779 (size before relaxing)
+ .debug_str     0x0000000000000f73       0x73 src/windows/main_menu.c.9.o
+                                        0x61b (size before relaxing)
+ .debug_str     0x0000000000000fe6      0x697 src/windows/outputs.c.9.o
+                                        0xf02 (size before relaxing)
+ .debug_str     0x000000000000167d      0x17f src/windows/player.c.9.o
+                                        0x8d3 (size before relaxing)
+ .debug_str     0x00000000000017fc       0x5d src/windows/random.c.9.o
+                                        0x6c6 (size before relaxing)
+ .debug_str     0x0000000000001859       0x85 src/windows/results.c.9.o
+                                        0x7b1 (size before relaxing)
+ .debug_str     0x00000000000018de      0x295 src/windows/search.c.9.o
+                                        0x920 (size before relaxing)
+ .debug_str     0x0000000000001b73      0x2ed basalt/appinfo.auto.c.9.o
                                         0x3bf (size before relaxing)
- .debug_str     0x0000000000001cf1       0xb0 basalt/src/resource_ids.auto.c.9.o
-                                        0x157 (size before relaxing)
- .debug_str     0x0000000000001da1      0x640 src/message_keys.auto.c.9.o
-                                        0x6e7 (size before relaxing)
+ .debug_str     0x0000000000001e60       0xc6 basalt/src/resource_ids.auto.c.9.o
+                                        0x16d (size before relaxing)
+ .debug_str     0x0000000000001f26      0x88b src/message_keys.auto.c.9.o
+                                        0x932 (size before relaxing)
 
-.debug_frame    0x0000000000000000      0x908
+.debug_frame    0x0000000000000000      0xa8c
  .debug_frame   0x0000000000000000       0x28 src/main.c.9.o
- .debug_frame   0x0000000000000028      0x1d8 src/messaging.c.9.o
- .debug_frame   0x0000000000000200       0xac src/windows/main_menu.c.9.o
- .debug_frame   0x00000000000002ac      0x288 src/windows/outputs.c.9.o
- .debug_frame   0x0000000000000534      0x154 src/windows/player.c.9.o
- .debug_frame   0x0000000000000688       0xac src/windows/random.c.9.o
- .debug_frame   0x0000000000000734      0x114 src/windows/results.c.9.o
- .debug_frame   0x0000000000000848       0xc0 src/windows/search.c.9.o
+ .debug_frame   0x0000000000000028      0x204 src/messaging.c.9.o
+ .debug_frame   0x000000000000022c      0x108 src/windows/favorites.c.9.o
+ .debug_frame   0x0000000000000334       0xac src/windows/main_menu.c.9.o
+ .debug_frame   0x00000000000003e0      0x288 src/windows/outputs.c.9.o
+ .debug_frame   0x0000000000000668      0x154 src/windows/player.c.9.o
+ .debug_frame   0x00000000000007bc       0xd8 src/windows/random.c.9.o
+ .debug_frame   0x0000000000000894      0x120 src/windows/results.c.9.o
+ .debug_frame   0x00000000000009b4       0xd8 src/windows/search.c.9.o

@@ -9,7 +9,9 @@
   "watchapp": {
     "watchface": false
   },
+  "enableMultiJS": true,
   "targetPlatforms": ["basalt"],
+  "capabilities": ["configurable"],
   "appKeys": {
     "CMD": 0,
     "TYPE": 1,
@@ -72,7 +74,28 @@
     "OUTPUT_ENABLED_5": 95,
     "OUTPUT_ENABLED_6": 96,
     "OUTPUT_ENABLED_7": 97,
-    "STATUS": 100
+    "STATUS": 100,
+    "FAVORITE_COUNT": 110,
+    "FAVORITE_NAME_0": 120,
+    "FAVORITE_NAME_1": 121,
+    "FAVORITE_NAME_2": 122,
+    "FAVORITE_NAME_3": 123,
+    "FAVORITE_NAME_4": 124,
+    "FAVORITE_NAME_5": 125,
+    "FAVORITE_NAME_6": 126,
+    "FAVORITE_NAME_7": 127,
+    "FAVORITE_NAME_8": 128,
+    "FAVORITE_NAME_9": 129,
+    "FAVORITE_TYPE_0": 130,
+    "FAVORITE_TYPE_1": 131,
+    "FAVORITE_TYPE_2": 132,
+    "FAVORITE_TYPE_3": 133,
+    "FAVORITE_TYPE_4": 134,
+    "FAVORITE_TYPE_5": 135,
+    "FAVORITE_TYPE_6": 136,
+    "FAVORITE_TYPE_7": 137,
+    "FAVORITE_TYPE_8": 138,
+    "FAVORITE_TYPE_9": 139
   },
   "resources": {
     "media": [
