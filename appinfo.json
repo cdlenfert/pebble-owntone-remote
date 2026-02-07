@@ -9,7 +9,7 @@
   "watchapp": {
     "watchface": false
   },
-  "enableMultiJS": true,
+  "enableMultiJS": false,
   "targetPlatforms": ["basalt"],
   "capabilities": ["configurable"],
   "appKeys": {

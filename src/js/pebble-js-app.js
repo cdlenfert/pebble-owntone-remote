@@ -506,13 +506,7 @@ Pebble.addEventListener('appmessage', function(e) {
 });
 
 Pebble.addEventListener('showConfiguration', function(e) {
-  var currentSettings = localStorage.getItem('owntone_favorites');
-  var url = 'https://cdlenfert.github.io/pebble-owntone-remote/config.html';
-  if (currentSettings) {
-    url += '?settings=' + encodeURIComponent(currentSettings);
-  }
-  console.log('Opening configuration');
-  Pebble.openURL(url);
+  Pebble.openURL('https://cdlenfert.github.io/pebble-owntone-remote/config.html');
 });
 
 Pebble.addEventListener('webviewclosed', function(e) {
