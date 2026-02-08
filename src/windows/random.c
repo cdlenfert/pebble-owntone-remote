@@ -9,6 +9,16 @@ static MenuLayer *s_menu_layer;
 
 static const char *s_content_types[] = {"Playlist", "Artist", "Album"};
 
+// Custom light vibration pattern (20ms pulse)
+static void light_vibe(void) {
+  uint32_t segments[] = { 20 };
+  VibePattern pat = {
+    .durations = segments,
+    .num_segments = 1,
+  };
+  vibes_enqueue_custom_pattern(pat);
+}
+
 // Forward declaration
 static void random_results_handler(int count, char *titles[], char *uris[]);
 
@@ -40,7 +50,7 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
   
   // Send random request
   message_send_random(type);
-  vibes_short_pulse();
+  light_vibe();
 }
 
 static void window_load(Window *window) {

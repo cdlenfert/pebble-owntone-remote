@@ -14,6 +14,16 @@ static char *s_titles[MAX_RESULTS];
 static char *s_uris[MAX_RESULTS];
 static int s_result_count = 0;
 
+// Custom light vibration pattern (20ms pulse)
+static void light_vibe(void) {
+  uint32_t segments[] = { 20 };
+  VibePattern pat = {
+    .durations = segments,
+    .num_segments = 1,
+  };
+  vibes_enqueue_custom_pattern(pat);
+}
+
 static void cleanup_results(void) {
   for (int i = 0; i < MAX_RESULTS; i++) {
     if (s_titles[i]) {
@@ -66,7 +76,7 @@ static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cel
 static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   if (s_result_count > 0 && cell_index->row < s_result_count && s_uris[cell_index->row]) {
     message_send_add_to_queue(s_uris[cell_index->row], s_current_type);
-    vibes_short_pulse();
+    light_vibe();
     window_stack_pop(true);
   }
 }

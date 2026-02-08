@@ -14,6 +14,7 @@ static GBitmap *s_icon_next;
 static GBitmap *s_icon_prev;
 static GBitmap *s_icon_volume_up;
 static GBitmap *s_icon_volume_down;
+static GBitmap *s_icon_ellipsis;
 
 static PlayerState s_player_state = PLAYER_STATE_STOPPED;
 static int s_current_volume = 50;
@@ -21,15 +22,144 @@ static char s_track_text[MAX_STRING_LENGTH];
 static char s_artist_text[MAX_STRING_LENGTH];
 static char s_album_text[MAX_STRING_LENGTH];
 
-static void update_action_bar(void) {
+// Mode tracking
+typedef enum {
+  CONTROL_MODE_TRANSPORT,  // Normal mode: prev/play-pause/next
+  CONTROL_MODE_VOLUME      // Volume mode: vol up/play-pause/vol down
+} ControlMode;
+
+static ControlMode s_control_mode = CONTROL_MODE_TRANSPORT;
+static AppTimer *s_mode_timer = NULL;
+static AppTimer *s_status_check_timer = NULL;
+static AppTimer *s_poll_timer = NULL;
+static AppTimer *s_volume_repeat_timer = NULL;
+static bool s_volume_up_held = false;
+static bool s_volume_down_held = false;
+
+// Custom light vibration pattern (20ms pulse)
+static void light_vibe(void) {
+  uint32_t segments[] = { 20 };
+  VibePattern pat = {
+    .durations = segments,
+    .num_segments = 1,
+  };
+  vibes_enqueue_custom_pattern(pat);
+}
+
+static void cancel_volume_repeat_timer(void) {
+  if (s_volume_repeat_timer) {
+    app_timer_cancel(s_volume_repeat_timer);
+    s_volume_repeat_timer = NULL;
+  }
+  s_volume_up_held = false;
+  s_volume_down_held = false;
+}
+
+static void volume_repeat_callback(void *data) {
+  if (s_volume_up_held) {
+    s_current_volume = (s_current_volume >= 95) ? 100 : s_current_volume + 5;
+    message_send_set_volume(s_current_volume);
+    light_vibe();
+    s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
+  } else if (s_volume_down_held) {
+    s_current_volume = (s_current_volume <= 5) ? 0 : s_current_volume - 5;
+    message_send_set_volume(s_current_volume);
+    light_vibe();
+    s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
+  }
+}
+
+static void revert_to_transport_mode(void *data) {
+  s_mode_timer = NULL;
+  s_control_mode = CONTROL_MODE_TRANSPORT;
+  
+  // Restore transport controls
+  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_prev);
+  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_next);
+  // Show play icon when paused, ellipsis when playing
   if (s_player_state == PLAYER_STATE_PLAYING) {
-    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_pause);
+    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_ellipsis);
   } else {
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
   }
 }
 
+static void cancel_mode_timer(void) {
+  if (s_mode_timer) {
+    app_timer_cancel(s_mode_timer);
+    s_mode_timer = NULL;
+  }
+}
+
+static void cancel_status_check_timer(void) {
+  if (s_status_check_timer) {
+    app_timer_cancel(s_status_check_timer);
+    s_status_check_timer = NULL;
+  }
+}
+
+static void cancel_poll_timer(void) {
+  if (s_poll_timer) {
+    app_timer_cancel(s_poll_timer);
+    s_poll_timer = NULL;
+  }
+}
+
+static void poll_callback(void *data) {
+  s_poll_timer = NULL;
+  message_send_command(CMD_GET_PLAYER_STATE);
+  // Only reschedule if music is playing
+  if (s_player_state == PLAYER_STATE_PLAYING) {
+    s_poll_timer = app_timer_register(5000, poll_callback, NULL);
+  }
+}
+
+static void start_polling_if_playing(void) {
+  cancel_poll_timer();
+  if (s_player_state == PLAYER_STATE_PLAYING) {
+    s_poll_timer = app_timer_register(5000, poll_callback, NULL);
+  }
+}
+
+static void status_check_callback(void *data) {
+  s_status_check_timer = NULL;
+  message_send_command(CMD_GET_PLAYER_STATE);
+}
+
+static void schedule_status_check(void) {
+  cancel_status_check_timer();
+  s_status_check_timer = app_timer_register(1500, status_check_callback, NULL);
+}
+
+static void start_mode_timer(void) {
+  cancel_mode_timer();
+  s_mode_timer = app_timer_register(2000, revert_to_transport_mode, NULL);
+}
+
+static void update_action_bar(void) {
+  if (s_control_mode == CONTROL_MODE_TRANSPORT) {
+    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_prev);
+    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_next);
+    // Show play icon when paused, ellipsis when playing
+    if (s_player_state == PLAYER_STATE_PLAYING) {
+      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_ellipsis);
+    } else {
+      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
+    }
+  } else {
+    // Volume mode
+    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_volume_up);
+    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_volume_down);
+    if (s_player_state == PLAYER_STATE_PLAYING) {
+      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_pause);
+    } else {
+      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
+    }
+  }
+}
+
 static void player_state_handler(PlayerState state, const char *track, const char *artist, const char *album, int volume) {
+  PlayerState previous_state = s_player_state;
   s_player_state = state;
   s_current_volume = volume;
   
@@ -42,6 +172,15 @@ static void player_state_handler(PlayerState state, const char *track, const cha
   text_layer_set_text(s_album_layer, s_album_text);
   
   update_action_bar();
+  
+  // Manage polling based on playback state
+  if (state == PLAYER_STATE_PLAYING && previous_state != PLAYER_STATE_PLAYING) {
+    // Just started playing - start polling
+    start_polling_if_playing();
+  } else if (state != PLAYER_STATE_PLAYING && previous_state == PLAYER_STATE_PLAYING) {
+    // Just stopped/paused - stop polling
+    cancel_poll_timer();
+  }
 }
 
 static void player_status_handler(int status) {
@@ -58,50 +197,114 @@ static void player_status_handler(int status) {
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // Previous track
-  message_send_command(CMD_PREVIOUS);
-  vibes_short_pulse();
-}
-
-static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // Volume up
-  s_current_volume = (s_current_volume >= 95) ? 100 : s_current_volume + 5;
-  message_send_set_volume(s_current_volume);
-  vibes_short_pulse();
+  if (s_control_mode == CONTROL_MODE_VOLUME) {
+    // Volume up
+    s_current_volume = (s_current_volume >= 95) ? 100 : s_current_volume + 5;
+    message_send_set_volume(s_current_volume);
+    light_vibe();
+    start_mode_timer();
+  } else {
+    // Previous track
+    message_send_command(CMD_PREVIOUS);
+    schedule_status_check();
+    light_vibe();
+  }
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // Play/Pause toggle - update icon immediately for responsive UI
-  if (s_player_state == PLAYER_STATE_PLAYING) {
-    s_player_state = PLAYER_STATE_PAUSED;
+  if (s_control_mode == CONTROL_MODE_TRANSPORT) {
+    if (s_player_state == PLAYER_STATE_PLAYING) {
+      // Playing - switch to volume mode (no vibration for ellipsis)
+      s_control_mode = CONTROL_MODE_VOLUME;
+      update_action_bar();
+      start_mode_timer();
+    } else {
+      // Paused - play the music
+      s_player_state = PLAYER_STATE_PLAYING;
+      update_action_bar();
+      message_send_command(CMD_PLAY_PAUSE);
+      schedule_status_check();
+      light_vibe();
+    }
   } else {
-    s_player_state = PLAYER_STATE_PLAYING;
+    // Volume mode: Play/Pause toggle
+    if (s_player_state == PLAYER_STATE_PLAYING) {
+      s_player_state = PLAYER_STATE_PAUSED;
+    } else {
+      s_player_state = PLAYER_STATE_PLAYING;
+    }
+    update_action_bar();
+    
+    message_send_command(CMD_PLAY_PAUSE);
+    schedule_status_check();
+    light_vibe();
+    start_mode_timer();
   }
-  update_action_bar();
-  
-  message_send_command(CMD_PLAY_PAUSE);
-  vibes_short_pulse();
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // Next track
-  message_send_command(CMD_NEXT);
-  vibes_short_pulse();
+  if (s_control_mode == CONTROL_MODE_VOLUME) {
+    // Volume down
+    s_current_volume = (s_current_volume <= 5) ? 0 : s_current_volume - 5;
+    message_send_set_volume(s_current_volume);
+    light_vibe();
+    start_mode_timer();
+  } else {
+    // Next track
+    message_send_command(CMD_NEXT);
+    schedule_status_check();
+    light_vibe();
+  }
+}
+
+static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
+  // Show volume icons during long press
+  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_volume_up);
+  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_volume_down);
+  
+  // Volume up (first press)
+  s_current_volume = (s_current_volume >= 95) ? 100 : s_current_volume + 5;
+  message_send_set_volume(s_current_volume);
+  light_vibe();
+  
+  // Start repeating
+  s_volume_up_held = true;
+  s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
+}
+
+static void up_long_click_release_handler(ClickRecognizerRef recognizer, void *context) {
+  // Stop repeating and restore transport mode icons
+  cancel_volume_repeat_timer();
+  update_action_bar();
 }
 
 static void down_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // Volume down
+  // Show volume icons during long press
+  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_volume_up);
+  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_volume_down);
+  
+  // Volume down (first press)
   s_current_volume = (s_current_volume <= 5) ? 0 : s_current_volume - 5;
   message_send_set_volume(s_current_volume);
-  vibes_short_pulse();
+  light_vibe();
+  
+  // Start repeating
+  s_volume_down_held = true;
+  s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
+}
+
+static void down_long_click_release_handler(ClickRecognizerRef recognizer, void *context) {
+  // Stop repeating and restore transport mode icons
+  cancel_volume_repeat_timer();
+  update_action_bar();
 }
 
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
-  window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_click_handler, NULL);
+  window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_click_handler, up_long_click_release_handler);
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
-  window_long_click_subscribe(BUTTON_ID_DOWN, 500, down_long_click_handler, NULL);
+  window_long_click_subscribe(BUTTON_ID_DOWN, 500, down_long_click_handler, down_long_click_release_handler);
 }
 
 static void window_load(Window *window) {
@@ -120,9 +323,13 @@ static void window_load(Window *window) {
   s_icon_prev = gbitmap_create_with_resource(RESOURCE_ID_ICON_PREV);
   s_icon_volume_up = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_UP);
   s_icon_volume_down = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_DOWN);
+  s_icon_ellipsis = gbitmap_create_with_resource(RESOURCE_ID_ICON_ELLIPSIS);
   
+  // Start in transport mode with play icon (default assumes paused)
+  s_control_mode = CONTROL_MODE_TRANSPORT;
   action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_prev);
   action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_next);
+  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
   
   // Adjust bounds for action bar
   bounds.size.w -= ACTION_BAR_WIDTH;
@@ -156,6 +363,11 @@ static void window_unload(Window *window) {
   message_set_player_callback(NULL);
   message_set_status_callback(NULL);
   
+  cancel_mode_timer();
+  cancel_status_check_timer();
+  cancel_poll_timer();
+  cancel_volume_repeat_timer();
+  
   text_layer_destroy(s_track_layer);
   text_layer_destroy(s_artist_layer);
   text_layer_destroy(s_album_layer);
@@ -166,6 +378,7 @@ static void window_unload(Window *window) {
   gbitmap_destroy(s_icon_prev);
   gbitmap_destroy(s_icon_volume_up);
   gbitmap_destroy(s_icon_volume_down);
+  gbitmap_destroy(s_icon_ellipsis);
   
   action_bar_layer_destroy(s_action_bar);
 }
@@ -175,6 +388,23 @@ static void window_appear(Window *window) {
   message_set_player_callback(player_state_handler);
   message_set_status_callback(player_status_handler);
   message_send_command(CMD_GET_PLAYER_STATE);
+  
+  // Reset to transport mode
+  cancel_mode_timer();
+  s_control_mode = CONTROL_MODE_TRANSPORT;
+  update_action_bar();
+  
+  // Start polling only if playing (will be determined after state update)
+  cancel_poll_timer();
+  start_polling_if_playing();
+}
+
+static void window_disappear(Window *window) {
+  // Stop polling when window is not visible
+  cancel_poll_timer();
+  cancel_status_check_timer();
+  cancel_mode_timer();
+  cancel_volume_repeat_timer();
 }
 
 void player_window_push(void) {
@@ -183,7 +413,8 @@ void player_window_push(void) {
     window_set_window_handlers(s_window, (WindowHandlers){
       .load = window_load,
       .unload = window_unload,
-      .appear = window_appear
+      .appear = window_appear,
+      .disappear = window_disappear
     });
   }
   window_stack_push(s_window, true);

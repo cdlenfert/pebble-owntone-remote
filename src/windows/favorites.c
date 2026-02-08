@@ -13,6 +13,16 @@ static int s_count = 0;
 static char s_names[MAX_FAVORITES][32];
 static int s_types[MAX_FAVORITES];
 
+// Custom light vibration pattern (20ms pulse)
+static void light_vibe(void) {
+  uint32_t segments[] = { 20 };
+  VibePattern pat = {
+    .durations = segments,
+    .num_segments = 1,
+  };
+  vibes_enqueue_custom_pattern(pat);
+}
+
 // State for category browsing
 static bool s_showing_categories = true;
 static int s_selected_category = 0; // 0=playlists, 1=artists, 2=albums
@@ -28,7 +38,7 @@ static void search_results_handler(int count, char *titles[], char *uris[]) {
     }
     results_window_push(count, titles, uris, type);
   } else {
-    vibes_short_pulse();
+    light_vibe();
   }
 }
 
