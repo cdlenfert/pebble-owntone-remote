@@ -35,6 +35,7 @@ static AppTimer *s_poll_timer = NULL;
 static AppTimer *s_volume_repeat_timer = NULL;
 static bool s_volume_up_held = false;
 static bool s_volume_down_held = false;
+static int s_consecutive_paused_count = 0;
 
 // Custom light vibration pattern (20ms pulse)
 static void light_vibe(void) {
@@ -128,7 +129,7 @@ static void status_check_callback(void *data) {
 
 static void schedule_status_check(void) {
   cancel_status_check_timer();
-  s_status_check_timer = app_timer_register(1500, status_check_callback, NULL);
+  s_status_check_timer = app_timer_register(2000, status_check_callback, NULL);
 }
 
 static void start_mode_timer(void) {
@@ -159,7 +160,6 @@ static void update_action_bar(void) {
 }
 
 static void player_state_handler(PlayerState state, const char *track, const char *artist, const char *album, int volume) {
-  PlayerState previous_state = s_player_state;
   s_player_state = state;
   s_current_volume = volume;
   
@@ -171,15 +171,18 @@ static void player_state_handler(PlayerState state, const char *track, const cha
   text_layer_set_text(s_artist_layer, s_artist_text);
   text_layer_set_text(s_album_layer, s_album_text);
   
-  update_action_bar();
-  
-  // Manage polling based on playback state
-  if (state == PLAYER_STATE_PLAYING && previous_state != PLAYER_STATE_PLAYING) {
-    // Just started playing - start polling
+  // Sync polling state with playback state (with debouncing for paused state)
+  if (state == PLAYER_STATE_PLAYING) {
+    s_consecutive_paused_count = 0;
+    update_action_bar();
     start_polling_if_playing();
-  } else if (state != PLAYER_STATE_PLAYING && previous_state == PLAYER_STATE_PLAYING) {
-    // Just stopped/paused - stop polling
-    cancel_poll_timer();
+  } else {
+    s_consecutive_paused_count++;
+    // Only update UI and stop polling after 3 consecutive paused states to avoid flicker during track changes
+    if (s_consecutive_paused_count >= 3) {
+      update_action_bar();
+      cancel_poll_timer();
+    }
   }
 }
 
@@ -205,8 +208,8 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     start_mode_timer();
   } else {
     // Previous track
+    s_consecutive_paused_count = 0;
     message_send_command(CMD_PREVIOUS);
-    schedule_status_check();
     light_vibe();
   }
 }
@@ -223,7 +226,6 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       s_player_state = PLAYER_STATE_PLAYING;
       update_action_bar();
       message_send_command(CMD_PLAY_PAUSE);
-      schedule_status_check();
       light_vibe();
     }
   } else {
@@ -234,9 +236,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       s_player_state = PLAYER_STATE_PLAYING;
     }
     update_action_bar();
-    
     message_send_command(CMD_PLAY_PAUSE);
-    schedule_status_check();
     light_vibe();
     start_mode_timer();
   }
@@ -251,8 +251,8 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     start_mode_timer();
   } else {
     // Next track
+    s_consecutive_paused_count = 0;
     message_send_command(CMD_NEXT);
-    schedule_status_check();
     light_vibe();
   }
 }

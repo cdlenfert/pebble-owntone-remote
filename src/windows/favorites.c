@@ -28,15 +28,10 @@ static bool s_showing_categories = true;
 static int s_selected_category = 0; // 0=playlists, 1=artists, 2=albums
 
 static void search_results_handler(int count, char *titles[], char *uris[]) {
-  // When search results come back, show them using the stored type for the selected favorite
+  // When search results come back, show them using the selected category's type
   if (count > 0) {
-    // Find the type to use - use the first type in our list for now (could be more sophisticated)
-    ContentType type = CONTENT_TYPE_PLAYLIST;
-    for (int i = 0; i < s_count; i++) {
-      type = s_types[i];
-      break;
-    }
-    results_window_push(count, titles, uris, type);
+    // Use the selected category as the content type (0=playlist, 1=artist, 2=album)
+    results_window_push(count, titles, uris, s_selected_category);
   } else {
     light_vibe();
   }
