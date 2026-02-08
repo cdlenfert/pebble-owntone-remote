@@ -207,8 +207,12 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     light_vibe();
     start_mode_timer();
   } else {
-    // Previous track
+    // Previous track - OwnTone auto-plays when skipping
+    s_player_state = PLAYER_STATE_PLAYING;
     s_consecutive_paused_count = 0;
+    update_action_bar();
+    cancel_poll_timer();
+    s_poll_timer = app_timer_register(5000, poll_callback, NULL);
     message_send_command(CMD_PREVIOUS);
     light_vibe();
   }
@@ -225,18 +229,20 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       // Paused - play the music
       s_player_state = PLAYER_STATE_PLAYING;
       update_action_bar();
-      message_send_command(CMD_PLAY_PAUSE);
+      message_send_command(CMD_PLAY);
       light_vibe();
     }
   } else {
     // Volume mode: Play/Pause toggle
     if (s_player_state == PLAYER_STATE_PLAYING) {
       s_player_state = PLAYER_STATE_PAUSED;
+      update_action_bar();
+      message_send_command(CMD_PAUSE);
     } else {
       s_player_state = PLAYER_STATE_PLAYING;
+      update_action_bar();
+      message_send_command(CMD_PLAY);
     }
-    update_action_bar();
-    message_send_command(CMD_PLAY_PAUSE);
     light_vibe();
     start_mode_timer();
   }
@@ -250,8 +256,12 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     light_vibe();
     start_mode_timer();
   } else {
-    // Next track
+    // Next track - OwnTone auto-plays when skipping
+    s_player_state = PLAYER_STATE_PLAYING;
     s_consecutive_paused_count = 0;
+    update_action_bar();
+    cancel_poll_timer();
+    s_poll_timer = app_timer_register(5000, poll_callback, NULL);
     message_send_command(CMD_NEXT);
     light_vibe();
   }

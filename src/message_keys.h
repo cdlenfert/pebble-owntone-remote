@@ -14,7 +14,9 @@ typedef enum {
   CMD_SET_OUTPUT_EXCLUSIVE = 10,
   CMD_TOGGLE_OUTPUT = 11,
   CMD_SET_OUTPUT_VOLUME = 12,
-  CMD_GET_FAVORITES = 13
+  CMD_GET_FAVORITES = 13,
+  CMD_PLAY = 14,
+  CMD_PAUSE = 15
 } CommandType;
 
 // Content types for search/random

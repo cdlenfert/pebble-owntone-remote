@@ -49,7 +49,9 @@ var Commands = {
   SET_OUTPUT_EXCLUSIVE: 10,
   TOGGLE_OUTPUT: 11,
   SET_OUTPUT_VOLUME: 12,
-  GET_FAVORITES: 13
+  GET_FAVORITES: 13,
+  PLAY: 14,
+  PAUSE: 15
 };
 
 // Content types
@@ -162,6 +164,18 @@ function getCurrentTrack(callback) {
       dict[MessageKeys.PLAYER_ALBUM] = '';
     }
     callback(dict);
+  });
+}
+
+function play() {
+  httpPut(Config.OWNTONE_BASE + '/api/player/play', function(status, response) {
+    console.log('Play: ' + status);
+  });
+}
+
+function pause() {
+  httpPut(Config.OWNTONE_BASE + '/api/player/pause', function(status, response) {
+    console.log('Pause: ' + status);
   });
 }
 
@@ -457,6 +471,14 @@ Pebble.addEventListener('appmessage', function(e) {
       
     case Commands.PLAY_PAUSE:
       playPause();
+      break;
+      
+    case Commands.PLAY:
+      play();
+      break;
+      
+    case Commands.PAUSE:
+      pause();
       break;
       
     case Commands.NEXT:
