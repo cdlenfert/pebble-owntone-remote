@@ -441,8 +441,21 @@ function sendFavorites(favorites) {
   dict[MessageKeys.FAVORITE_COUNT] = allFavorites.length;
   
   for (var i = 0; i < allFavorites.length && i < 30; i++) {
-    dict[MessageKeys.FAVORITE_NAME_BASE + i] = allFavorites[i].name;
-    dict[MessageKeys.FAVORITE_TYPE_BASE + i] = allFavorites[i].type;
+    // Compute keys to match appinfo.json layout (names and types are split into groups)
+    var nameKey, typeKey;
+    if (i < 10) {
+      nameKey = MessageKeys.FAVORITE_NAME_BASE + i;        // 120..129
+      typeKey = MessageKeys.FAVORITE_TYPE_BASE + i;        // 130..139
+    } else {
+      nameKey = MessageKeys.FAVORITE_NAME_BASE + 10 + i;   // 140..159 (for i>=10)
+      typeKey = MessageKeys.FAVORITE_TYPE_BASE + 20 + i;   // 160..179 (for i>=10)
+    }
+
+    // Debug keys
+    // console.log('favorite keys for i=' + i + ': nameKey=' + nameKey + ' typeKey=' + typeKey);
+
+    dict[nameKey] = allFavorites[i].name;
+    dict[typeKey] = allFavorites[i].type;
   }
   
   console.log('Sending ' + allFavorites.length + ' favorites to watch');
