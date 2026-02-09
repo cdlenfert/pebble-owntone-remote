@@ -455,8 +455,6 @@ function sendFavorites(favorites) {
     }
 
     // Debug: log keys and values to help diagnose any key/collision issues
-    console.log('Sending favorite[' + i + '] nameKey=' + nameKey + ' name="' + allFavorites[i].name + '" typeKey=' + typeKey + ' type=' + allFavorites[i].type);
-
     // Send both name and type as strings to ensure consistent encoding across the bridge
     dict[nameKey] = String(allFavorites[i].name);
     dict[typeKey] = String(allFavorites[i].type);

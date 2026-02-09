@@ -193,12 +193,6 @@ void favorites_set_data(int count, char *names[], int types[]) {
     s_types[i] = types[i];
   }
 
-  // Debug: log prepared favorites
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "favorites_set_data: s_count=%d", s_count);
-  for (int i = 0; i < s_count; i++) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "s_names[%d]='%s' type=%d", i, s_names[i], s_types[i]);
-  }
-  
   if (s_menu_layer) {
     menu_layer_reload_data(s_menu_layer);
   }

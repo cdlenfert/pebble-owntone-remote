@@ -286,24 +286,13 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Handle both integer and string-encoded types coming from JS
         if (type_t->value->cstring) {
           types[i] = atoi(type_t->value->cstring);
-          APP_LOG(APP_LOG_LEVEL_DEBUG, "favorite type[%d] received as cstring '%s' -> %d", i, type_t->value->cstring, types[i]);
         } else {
           types[i] = type_t->value->uint8;
-          APP_LOG(APP_LOG_LEVEL_DEBUG, "favorite type[%d] received as uint8 -> %d", i, types[i]);
         }
       }
     }
 
-    // Debug: log received favorites
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Received %d favorites", count);
-    for (int i = 0; i < count && i < MAX_FAVORITES; i++) {
-      if (names[i]) {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "favorite[%d] = '%s' (type %d)", i, names[i], types[i]);
-      } else {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "favorite[%d] = <null> (type %d)", i, types[i]);
-      }
-    }
-    
+    // Favorites received; hand off to callback
     s_favorites_callback(count, names, types);
   }
 }
