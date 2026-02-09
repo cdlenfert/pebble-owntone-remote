@@ -274,6 +274,16 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       Tuple *type_t = dict_find(iterator, KEY_FAVORITE_TYPE_BASE + i);
       if (type_t) types[i] = type_t->value->uint8;
     }
+
+    // Debug: log received favorites
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Received %d favorites", count);
+    for (int i = 0; i < count && i < MAX_FAVORITES; i++) {
+      if (names[i]) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "favorite[%d] = '%s' (type %d)", i, names[i], types[i]);
+      } else {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "favorite[%d] = <null> (type %d)", i, types[i]);
+      }
+    }
     
     s_favorites_callback(count, names, types);
   }
