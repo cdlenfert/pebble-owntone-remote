@@ -68,12 +68,12 @@
     .favorite-item {
       display: flex;
       align-items: center;
-      padding: 8px;
+      padding: 8px 12px 8px 0;
       background: #f9f9f9;
       border-radius: 4px;
       margin-bottom: 8px;
-      cursor: move;
       transition: background 0.2s;
+      /* Remove cursor: move from the whole item */
     }
     .favorite-item:hover {
       background: #e9e9e9;
@@ -82,16 +82,25 @@
       opacity: 0.5;
     }
     .drag-handle {
-      margin-right: 8px;
+      margin-right: 4px;
       color: #999;
       cursor: grab;
+      font-size: 18px;
+      user-select: none;
+      display: flex;
+      align-items: center;
     }
     .drag-handle:active {
       cursor: grabbing;
     }
-    .favorite-item span {
+    .favorite-item .favorite-text {
       flex: 1;
-      margin-right: 10px;
+      margin-right: 6px;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
     }
     .favorite-item button {
       background: #dc3545;
@@ -216,30 +225,37 @@
       favorites[category].forEach(function(item, index) {
         var div = document.createElement('div');
         div.className = 'favorite-item';
-        div.setAttribute('draggable', 'true');
         div.setAttribute('data-index', index);
         div.setAttribute('data-category', category);
-        
+
         var handle = document.createElement('span');
         handle.className = 'drag-handle';
         handle.textContent = '☰';
-        
+        handle.setAttribute('draggable', 'true');
+
+        // Only the handle is draggable
+        handle.addEventListener('dragstart', function(e) {
+          handleDragStart.call(div, e);
+        });
+        handle.addEventListener('dragend', function(e) {
+          handleDragEnd.call(div, e);
+        });
+
+        div.addEventListener('dragover', handleDragOver);
+        div.addEventListener('drop', handleDrop);
+
         var span = document.createElement('span');
+        span.className = 'favorite-text';
         span.textContent = item;
-        
+
         var btn = document.createElement('button');
         btn.textContent = 'Remove';
         btn.onclick = function() { removeFavorite(category, index); };
-        
+
         div.appendChild(handle);
         div.appendChild(span);
         div.appendChild(btn);
-        
-        div.addEventListener('dragstart', handleDragStart);
-        div.addEventListener('dragover', handleDragOver);
-        div.addEventListener('drop', handleDrop);
-        div.addEventListener('dragend', handleDragEnd);
-        
+
         list.appendChild(div);
       });
     }
