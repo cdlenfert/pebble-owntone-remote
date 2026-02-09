@@ -1,0 +1,13 @@
+# Build artifacts
+build/
+.lock-waf*
+.waf*
+
+# OS files
+.DS_Store
+*.swp
+*~
+
+# Temporary files
+*.tmp
+menu_icon_color.png
