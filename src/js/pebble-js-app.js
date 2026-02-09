@@ -441,18 +441,21 @@ function sendFavorites(favorites) {
   dict[MessageKeys.FAVORITE_COUNT] = allFavorites.length;
   
   for (var i = 0; i < allFavorites.length && i < 30; i++) {
-    // Compute keys to match appinfo.json layout (names and types are split into groups)
+    // Compute keys to match appinfo.json layout (three groups: 0-9, 10-19, 20-29)
     var nameKey, typeKey;
     if (i < 10) {
-      nameKey = MessageKeys.FAVORITE_NAME_BASE + i;        // 120..129
-      typeKey = MessageKeys.FAVORITE_TYPE_BASE + i;        // 130..139
+      nameKey = MessageKeys.FAVORITE_NAME_BASE + i;               // 120..129
+      typeKey = MessageKeys.FAVORITE_TYPE_BASE + i;               // 130..139
+    } else if (i < 20) {
+      nameKey = MessageKeys.FAVORITE_NAME_BASE + 20 + (i - 10);   // 140..149
+      typeKey = MessageKeys.FAVORITE_TYPE_BASE + 30 + (i - 10);   // 160..169
     } else {
-      nameKey = MessageKeys.FAVORITE_NAME_BASE + 10 + i;   // 140..159 (for i>=10)
-      typeKey = MessageKeys.FAVORITE_TYPE_BASE + 20 + i;   // 160..179 (for i>=10)
+      nameKey = MessageKeys.FAVORITE_NAME_BASE + 30 + (i - 20);   // 150..159
+      typeKey = MessageKeys.FAVORITE_TYPE_BASE + 40 + (i - 20);   // 170..179
     }
 
-    // Debug keys
-    // console.log('favorite keys for i=' + i + ': nameKey=' + nameKey + ' typeKey=' + typeKey);
+    // Debug: log keys and values to help diagnose any key/collision issues
+    console.log('favorite[' + i + '] nameKey=' + nameKey + ' name="' + allFavorites[i].name + '" typeKey=' + typeKey + ' type=' + allFavorites[i].type);
 
     dict[nameKey] = allFavorites[i].name;
     dict[typeKey] = allFavorites[i].type;
