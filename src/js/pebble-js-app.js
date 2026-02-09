@@ -419,27 +419,28 @@ function getFavorites() {
 
 function sendFavorites(favorites) {
   // Flatten favorites into a single array with type info
+  // Support up to 10 of each type (30 total)
   var allFavorites = [];
   
-  // Add playlists (type 0)
+  // Add playlists (type 0) - up to 10
   for (var i = 0; i < favorites.playlists.length && i < 10; i++) {
     allFavorites.push({ name: favorites.playlists[i], type: ContentTypes.PLAYLIST });
   }
   
-  // Add artists (type 1)
-  for (var i = 0; i < favorites.artists.length && allFavorites.length < 10; i++) {
+  // Add artists (type 1) - up to 10
+  for (var i = 0; i < favorites.artists.length && i < 10; i++) {
     allFavorites.push({ name: favorites.artists[i], type: ContentTypes.ARTIST });
   }
   
-  // Add albums (type 2)
-  for (var i = 0; i < favorites.albums.length && allFavorites.length < 10; i++) {
+  // Add albums (type 2) - up to 10
+  for (var i = 0; i < favorites.albums.length && i < 10; i++) {
     allFavorites.push({ name: favorites.albums[i], type: ContentTypes.ALBUM });
   }
   
   var dict = {};
   dict[MessageKeys.FAVORITE_COUNT] = allFavorites.length;
   
-  for (var i = 0; i < allFavorites.length && i < 10; i++) {
+  for (var i = 0; i < allFavorites.length && i < 30; i++) {
     dict[MessageKeys.FAVORITE_NAME_BASE + i] = allFavorites[i].name;
     dict[MessageKeys.FAVORITE_TYPE_BASE + i] = allFavorites[i].type;
   }

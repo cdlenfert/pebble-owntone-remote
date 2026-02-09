@@ -67,5 +67,5 @@ typedef enum {
 
 #define MAX_RESULTS 8
 #define MAX_OUTPUTS 8
-#define MAX_FAVORITES 10
+#define MAX_FAVORITES 30
 #define MAX_STRING_LENGTH 64

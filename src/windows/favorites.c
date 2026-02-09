@@ -4,8 +4,6 @@
 #include "../message_keys.h"
 #include "../messaging.h"
 
-#define MAX_FAVORITES 10
-
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 
