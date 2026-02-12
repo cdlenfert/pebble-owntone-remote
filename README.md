@@ -10,6 +10,7 @@ A modern, extensible remote control for OwnTone music server on Pebble smartwatc
 - Skip to next/previous track
 - Volume control (±5% increments)
 - Action bar with standard Pebble music controls
+- Quick navigation with long-press shortcuts
 
 ### Search
 - Voice search for playlists, artists, and albums
@@ -76,21 +77,30 @@ pebble install --phone <phone-ip>
 ```
 
 ## Usage
+Quick Navigation
+**Long-press SELECT button (500ms) for instant navigation:**
+- From **any menu** (Main Menu, Favorites, Search, Random, Results): Jump to **Player**
+- From **Player**: Jump to **Outputs** list
+- From **Output Volume window**: Jump to **Player**
+- **Outputs list** preserves existing behavior: Long-press toggles output on/off
 
+This provides fast access to the player from anywhere in the app.
+
+###  (long press: jump to Outputs)
 ### Main Menu
 1. **Player** - Current track + playback controls
 2. **Search** - Voice search by content type
 3. **Random** - Random content by type
 4. **Outputs** - Manage audio outputs
 
-### Player Window
+### Player Wind (long press SELECT: jump to Player)ow
 - **UP button**: Next track (long press: volume up)
 - **SELECT button**: Play/Pause
 - **DOWN button**: Previous track (long press: volume down)
 - Icons update based on playback state
 
 ### Search/Random Flow
-1. Select content type (Playlist, Artist, Album)
+1. Select content type (Playlist, Artist, Album) (long press: jump to Player)
 2. Speak your search query (Search only)
 3. View results
 4. Select an item to add to queue

@@ -83,9 +83,8 @@ static void proceed_to_app(void) {
   message_set_player_callback(NULL);
   message_set_status_callback(NULL);
 
-  // Push main menu (so it's underneath) then player window
+  // Push main menu - player will be shown when user navigates to it or long-presses
   main_menu_push();
-  player_window_push();
 
   // Remove splash window from stack
   if (s_window) {
@@ -110,14 +109,8 @@ static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
   window_stack_pop_all(true);
 }
 
-static void splash_select_long_click(ClickRecognizerRef recognizer, void *context) {
-  // Jump to player when long-pressing Select on splash
-  player_window_push();
-}
-
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_BACK, back_click_handler);
-  window_long_click_subscribe(BUTTON_ID_SELECT, 500, splash_select_long_click, NULL);
 }
 
 static void window_load(Window *window) {

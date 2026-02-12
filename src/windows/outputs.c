@@ -227,10 +227,15 @@ static void volume_select_click(ClickRecognizerRef recognizer, void *context) {
   light_vibe();
 }
 
+static void volume_select_long_click(ClickRecognizerRef recognizer, void *context) {
+  player_window_push();
+}
+
 static void volume_click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, volume_up_click);
   window_single_click_subscribe(BUTTON_ID_DOWN, volume_down_click);
   window_single_click_subscribe(BUTTON_ID_SELECT, volume_select_click);
+  window_long_click_subscribe(BUTTON_ID_SELECT, 500, volume_select_long_click, NULL);
 }
 
 static void volume_window_load(Window *window) {

@@ -108,9 +108,8 @@ static void window_unload(Window *window) {
   menu_layer_destroy(s_menu_layer);
   s_menu_layer = NULL;
   cleanup_results();
-}
-
-static void window_disappear(Window *window) {
+  
+  // Destroy window when actually unloaded from stack
   window_destroy(window);
   s_window = NULL;
 }
@@ -137,8 +136,7 @@ void results_window_push(int count, char *titles[], char *uris[], ContentType ty
     s_window = window_create();
     window_set_window_handlers(s_window, (WindowHandlers){
       .load = window_load,
-      .unload = window_unload,
-      .disappear = window_disappear
+      .unload = window_unload
     });
   }
   

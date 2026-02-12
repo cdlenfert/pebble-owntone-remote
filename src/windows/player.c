@@ -510,5 +510,12 @@ void player_window_push(void) {
       .disappear = window_disappear
     });
   }
+  
+  // If player window is already on top, do nothing
+  if (window_stack_get_top_window() == s_window) {
+    return;
+  }
+  
+  // Otherwise push it - this may create a duplicate in the stack, but pressing Back will work correctly
   window_stack_push(s_window, true);
 }
