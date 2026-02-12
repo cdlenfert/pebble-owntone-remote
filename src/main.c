@@ -1,11 +1,11 @@
 #include <pebble.h>
 #include "message_keys.h"
 #include "messaging.h"
-#include "windows/main_menu.h"
+#include "windows/splash.h"
 
 static void init(void) {
   message_init();
-  main_menu_push();
+  splash_window_push();
 }
 
 static void deinit(void) {

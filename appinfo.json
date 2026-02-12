@@ -10,7 +10,7 @@
     "watchface": false
   },
   "enableMultiJS": false,
-  "targetPlatforms": ["basalt"],
+  "targetPlatforms": ["basalt", "aplite"],
   "capabilities": ["configurable"],
   "appKeys": {
     "CMD": 0,
@@ -179,6 +179,17 @@
         "type": "png",
         "name": "ICON_ELLIPSIS",
         "file": "images/icon_ellipsis.png"
+      }
+      ,
+      {
+        "type": "png",
+        "name": "LOGO_OWNTONE_BW",
+        "file": "images/owntone_logo-bw.png"
+      },
+      {
+        "type": "png",
+        "name": "LOGO_OWNTONE",
+        "file": "images/owntone_logo.png"
       }
     ]
   }

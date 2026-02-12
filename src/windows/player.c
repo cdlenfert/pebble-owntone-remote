@@ -32,6 +32,8 @@ static ControlMode s_control_mode = CONTROL_MODE_TRANSPORT;
 static AppTimer *s_mode_timer = NULL;
 static AppTimer *s_status_check_timer = NULL;
 static AppTimer *s_poll_timer = NULL;
+static AppTimer *s_state_retry_timer = NULL;
+static int s_state_retry_attempts = 0;
 static AppTimer *s_volume_repeat_timer = NULL;
 static bool s_volume_up_held = false;
 static bool s_volume_down_held = false;
@@ -106,6 +108,48 @@ static void cancel_poll_timer(void) {
   }
 }
 
+// Retry/backoff for initial player state requests
+#define STATE_RETRY_INITIAL_MS 300
+#define STATE_RETRY_MAX_ATTEMPTS 5
+#define STATE_RETRY_MAX_DELAY_MS 8000
+
+static void cancel_state_retry(void) {
+  if (s_state_retry_timer) {
+    app_timer_cancel(s_state_retry_timer);
+    s_state_retry_timer = NULL;
+  }
+  s_state_retry_attempts = 0;
+}
+
+static void state_retry_callback(void *data) {
+  s_state_retry_timer = NULL;
+
+  // If we've exhausted attempts, give up
+  if (s_state_retry_attempts >= STATE_RETRY_MAX_ATTEMPTS) {
+    return;
+  }
+
+  // Send another request and schedule next backoff
+  message_send_command(CMD_GET_PLAYER_STATE);
+  s_state_retry_attempts++;
+
+  // Exponential backoff: initial * 2^(attempts-1), capped
+  int64_t next_delay = STATE_RETRY_INITIAL_MS * ((int64_t)1 << (s_state_retry_attempts - 1));
+  if (next_delay > STATE_RETRY_MAX_DELAY_MS) {
+    next_delay = STATE_RETRY_MAX_DELAY_MS;
+  }
+
+  if (s_state_retry_attempts < STATE_RETRY_MAX_ATTEMPTS) {
+    s_state_retry_timer = app_timer_register((uint32_t)next_delay, state_retry_callback, NULL);
+  }
+}
+
+static void start_state_retry(void) {
+  cancel_state_retry();
+  s_state_retry_attempts = 0;
+  s_state_retry_timer = app_timer_register(STATE_RETRY_INITIAL_MS, state_retry_callback, NULL);
+}
+
 static void poll_callback(void *data) {
   s_poll_timer = NULL;
   message_send_command(CMD_GET_PLAYER_STATE);
@@ -160,6 +204,9 @@ static void update_action_bar(void) {
 }
 
 static void player_state_handler(PlayerState state, const char *track, const char *artist, const char *album, int volume) {
+  // Cancel any outstanding retries once we receive a valid state
+  cancel_state_retry();
+
   s_player_state = state;
   s_current_volume = volume;
   
@@ -187,9 +234,16 @@ static void player_state_handler(PlayerState state, const char *track, const cha
 }
 
 static void player_status_handler(int status) {
-  // Status response from play/pause command - icon already toggled optimistically
+  // Status response from JS bridge. A value of 1 indicates success/acknowledgement.
+  // If we receive a generic acknowledgement, cancel any outstanding state retries
+  // since the JS bridge has received our request and will (or already did) send state.
+  if (status == 1) {
+    cancel_state_retry();
+    return;
+  }
+
+  // Non-OK status for play/pause toggles: revert optimistic icon change
   if (status != 1) {
-    // Failed - revert the icon (shouldn't happen often)
     if (s_player_state == PLAYER_STATE_PLAYING) {
       s_player_state = PLAYER_STATE_PAUSED;
     } else {
@@ -318,6 +372,7 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
+
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   
@@ -361,11 +416,26 @@ static void window_load(Window *window) {
   text_layer_set_overflow_mode(s_album_layer, GTextOverflowModeTrailingEllipsis);
   layer_add_child(window_layer, text_layer_get_layer(s_album_layer));
   
-  // Set callbacks and request player state
+  // Set callbacks and request player state. Use any cached state first to
+  // avoid the race where JS replies while the player UI isn't registered.
   message_set_player_callback(player_state_handler);
   message_set_status_callback(player_status_handler);
-  message_send_command(CMD_GET_PLAYER_STATE);
-  
+
+  if (message_has_cached_player_state()) {
+    PlayerState cs = PLAYER_STATE_STOPPED;
+    char track[MAX_STRING_LENGTH] = {0};
+    char artist[MAX_STRING_LENGTH] = {0};
+    char album[MAX_STRING_LENGTH] = {0};
+    int vol = 50;
+    message_get_cached_player_state(&cs, track, artist, album, &vol);
+    APP_LOG(APP_LOG_LEVEL_INFO, "player: using cached player state on load");
+    player_state_handler(cs, track, artist, album, vol);
+  } else {
+    // Immediate request and start retry/backoff
+    message_send_command(CMD_GET_PLAYER_STATE);
+    start_state_retry();
+  }
+
   update_action_bar();
 }
 
@@ -375,6 +445,7 @@ static void window_unload(Window *window) {
   
   cancel_mode_timer();
   cancel_status_check_timer();
+  cancel_state_retry();
   cancel_poll_timer();
   cancel_volume_repeat_timer();
   
@@ -394,10 +465,13 @@ static void window_unload(Window *window) {
 }
 
 static void window_appear(Window *window) {
+
   // Refresh player state when window appears
   message_set_player_callback(player_state_handler);
   message_set_status_callback(player_status_handler);
   message_send_command(CMD_GET_PLAYER_STATE);
+  // Start retry/backoff in case JS doesn't respond immediately
+  start_state_retry();
   
   // Reset to transport mode
   cancel_mode_timer();
@@ -415,9 +489,11 @@ static void window_disappear(Window *window) {
   cancel_status_check_timer();
   cancel_mode_timer();
   cancel_volume_repeat_timer();
+  cancel_state_retry();
 }
 
 void player_window_push(void) {
+
   if (!s_window) {
     s_window = window_create();
     window_set_window_handlers(s_window, (WindowHandlers){

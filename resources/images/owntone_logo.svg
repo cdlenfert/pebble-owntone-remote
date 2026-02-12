@@ -3,9 +3,11 @@
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#107A66;}
-	.st1{fill:#479386;}
-	.st2{fill:#00D1B2;}
+	/* Colors quantized to RGB565-friendly values so Pebble displays them
+		 without unexpected desaturation during resource conversion. */
+	.st0{fill:#107963;} /* was #107A66 -> quantized to R5=2,G6=30,B5=12 */
+	.st1{fill:#4A9284;} /* was #479386 -> quantized to R5=9,G6=36,B5=16 */
+	.st2{fill:#00D2B5;} /* was #00D1B2 -> quantized to R5=0,G6=52,B5=22 */
 	.st3{fill:#FFFFFF;}
 </style>
 <path class="st0" d="M390.5,193.9h30.3c18.5,49.6,13.9,104.8-12.7,150.6c-5.1,8.8-11,17.2-17.6,24.9V193.9z"/>
