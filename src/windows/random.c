@@ -1,11 +1,15 @@
 #include <pebble.h>
 #include "random.h"
 #include "search.h"
+#include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
 
 static Window *s_window;
 static MenuLayer *s_menu_layer;
+
+// Forward declaration for click config provider
+static void random_click_config_provider(void *context);
 
 static const char *s_content_types[] = {"Playlist", "Artist", "Album"};
 

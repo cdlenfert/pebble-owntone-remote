@@ -1,12 +1,16 @@
 #if !defined(PBL_PLATFORM_APLITE)
 #include <pebble.h>
 #include "search.h"
+#include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
 
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 static DictationSession *s_dictation;
+
+// Forward declaration for click config provider
+static void search_click_config_provider(void *context);
 
 static const char *s_content_types[] = {"Playlist", "Artist", "Album"};
 static ContentType s_selected_type;

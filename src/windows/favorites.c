@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "favorites.h"
 #include "search.h"
+#include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
 

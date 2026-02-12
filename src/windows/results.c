@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "search.h"
+#include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
 
@@ -9,6 +10,9 @@ static void results_handler(int count, char *titles[], char *uris[]);
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 static ContentType s_current_type;
+
+// Forward declaration for click config provider
+static void results_click_config_provider(void *context);
 
 static char *s_titles[MAX_RESULTS];
 static char *s_uris[MAX_RESULTS];

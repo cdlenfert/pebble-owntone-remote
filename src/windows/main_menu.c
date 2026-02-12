@@ -34,6 +34,9 @@ static uint16_t menu_get_num_rows(MenuLayer *menu_layer, uint16_t section_index,
   return NUM_MENU_ITEMS;
 }
 
+// Forward declaration for click config provider used in window_load
+static void main_menu_click_config_provider(void *context);
+
 static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   menu_cell_basic_draw(ctx, cell_layer, menu_items[cell_index->row], NULL, NULL);
 }
