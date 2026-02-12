@@ -21,6 +21,14 @@ static OutputsCallback s_outputs_callback = NULL;
 static StatusCallback s_status_callback = NULL;
 static FavoritesCallback s_favorites_callback = NULL;
 
+// Cached player state (helps avoid race where JS replies while UI not yet registered)
+static bool s_have_cached_player = false;
+static PlayerState s_cached_state = PLAYER_STATE_STOPPED;
+static char s_cached_track[MAX_STRING_LENGTH] = {0};
+static char s_cached_artist[MAX_STRING_LENGTH] = {0};
+static char s_cached_album[MAX_STRING_LENGTH] = {0};
+static int s_cached_volume = 50;
+
 void message_init(void) {
   app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
@@ -147,7 +155,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   
   // Check for player state update
   t = dict_find(iterator, KEY_PLAYER_STATE);
-  if (t && s_player_callback) {
+  if (t) {
     PlayerState state = (PlayerState)t->value->uint8;
     const char *track = "";
     const char *artist = "";
@@ -166,10 +174,23 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Tuple *vol_t = dict_find(iterator, KEY_PLAYER_VOLUME);
     if (vol_t) volume = vol_t->value->uint8;
 
-    // Log incoming player state for debugging initial-load race
-    APP_LOG(APP_LOG_LEVEL_INFO, "inbox: PLAYER_STATE=%d track='%s' artist='%s' album='%s' vol=%d", (int)state, track, artist, album, volume);
+    // Cache the latest player state so UI can pick it up after a race
+    s_cached_state = state;
+    strncpy(s_cached_track, track, sizeof(s_cached_track)-1);
+    s_cached_track[sizeof(s_cached_track)-1] = '\0';
+    strncpy(s_cached_artist, artist, sizeof(s_cached_artist)-1);
+    s_cached_artist[sizeof(s_cached_artist)-1] = '\0';
+    strncpy(s_cached_album, album, sizeof(s_cached_album)-1);
+    s_cached_album[sizeof(s_cached_album)-1] = '\0';
+    s_cached_volume = volume;
+    s_have_cached_player = true;
 
-    s_player_callback(state, track, artist, album, volume);
+    
+
+    // Deliver to registered callback if any
+    if (s_player_callback) {
+      s_player_callback(state, track, artist, album, volume);
+    }
   }
   
   // Check for search/random results
@@ -310,4 +331,18 @@ static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResul
 
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Outbox send success");
+}
+
+// Expose cached-player helpers to avoid race where JS replies before UI registers
+bool message_has_cached_player_state(void) {
+  return s_have_cached_player;
+}
+
+void message_get_cached_player_state(PlayerState *state, char *track, char *artist, char *album, int *volume) {
+  if (!s_have_cached_player) return;
+  if (state) *state = s_cached_state;
+  if (track) strncpy(track, s_cached_track, MAX_STRING_LENGTH-1);
+  if (artist) strncpy(artist, s_cached_artist, MAX_STRING_LENGTH-1);
+  if (album) strncpy(album, s_cached_album, MAX_STRING_LENGTH-1);
+  if (volume) *volume = s_cached_volume;
 }

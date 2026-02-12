@@ -109,7 +109,6 @@ function httpPost(url, callback) {
 // API Handlers
 function getPlayerState() {
   httpGet(Config.OWNTONE_BASE + '/api/player', function(status, response) {
-    console.log('JS: /api/player status=' + status);
     if (status === 200) {
       try {
         var data = JSON.parse(response);
@@ -128,14 +127,11 @@ function getPlayerState() {
           for (var key in trackDict) {
             dict[key] = trackDict[key];
           }
-          console.log('JS: sending player state to watch', dict);
           sendToPebble(dict);
         });
       } catch (e) {
         console.log('Error parsing player state: ' + e);
       }
-    } else {
-      console.log('JS: /api/player returned ' + status);
     }
   });
 }
@@ -486,7 +482,6 @@ Pebble.addEventListener('appmessage', function(e) {
   
   switch (cmd) {
     case Commands.GET_PLAYER_STATE:
-      console.log('JS: received GET_PLAYER_STATE from watch');
       // Send immediate small status to indicate connectivity, then fetch full state
       var statusDict = {};
       statusDict[MessageKeys.STATUS] = 1;

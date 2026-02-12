@@ -20,6 +20,10 @@ void message_set_outputs_callback(OutputsCallback callback);
 void message_set_status_callback(StatusCallback callback);
 void message_set_favorites_callback(FavoritesCallback callback);
 
+// Cached player-state helpers (avoid race where JS responds before UI is ready)
+bool message_has_cached_player_state(void);
+void message_get_cached_player_state(PlayerState *state, char *track, char *artist, char *album, int *volume);
+
 // Send messages to phone
 void message_send_command(CommandType cmd);
 void message_send_search(ContentType type, const char *query);

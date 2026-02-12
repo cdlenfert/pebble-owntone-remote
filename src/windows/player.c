@@ -207,10 +207,6 @@ static void player_state_handler(PlayerState state, const char *track, const cha
   // Cancel any outstanding retries once we receive a valid state
   cancel_state_retry();
 
-  // Debug log so we can confirm the native handler got the data
-  APP_LOG(APP_LOG_LEVEL_INFO, "player_state_handler: state=%d track='%s' artist='%s' album='%s' vol=%d",
-          (int)state, track ? track : "(null)", artist ? artist : "(null)", album ? album : "(null)", volume);
-
   s_player_state = state;
   s_current_volume = volume;
   
@@ -376,7 +372,7 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "player: window_load called");
+
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   
@@ -420,16 +416,26 @@ static void window_load(Window *window) {
   text_layer_set_overflow_mode(s_album_layer, GTextOverflowModeTrailingEllipsis);
   layer_add_child(window_layer, text_layer_get_layer(s_album_layer));
   
-  // Set callbacks and request player state. Send an immediate request so
-  // the UI is populated when the window first loads. Start a retry/backoff
-  // sequence as a fallback in case the JS bridge needs a moment.
+  // Set callbacks and request player state. Use any cached state first to
+  // avoid the race where JS replies while the player UI isn't registered.
   message_set_player_callback(player_state_handler);
   message_set_status_callback(player_status_handler);
-  // Immediate request
-  message_send_command(CMD_GET_PLAYER_STATE);
-  // Start retry/backoff sequence (initial delay defined by STATE_RETRY_INITIAL_MS)
-  start_state_retry();
-  
+
+  if (message_has_cached_player_state()) {
+    PlayerState cs = PLAYER_STATE_STOPPED;
+    char track[MAX_STRING_LENGTH] = {0};
+    char artist[MAX_STRING_LENGTH] = {0};
+    char album[MAX_STRING_LENGTH] = {0};
+    int vol = 50;
+    message_get_cached_player_state(&cs, track, artist, album, &vol);
+    APP_LOG(APP_LOG_LEVEL_INFO, "player: using cached player state on load");
+    player_state_handler(cs, track, artist, album, vol);
+  } else {
+    // Immediate request and start retry/backoff
+    message_send_command(CMD_GET_PLAYER_STATE);
+    start_state_retry();
+  }
+
   update_action_bar();
 }
 
@@ -459,7 +465,7 @@ static void window_unload(Window *window) {
 }
 
 static void window_appear(Window *window) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "player: window_appear called");
+
   // Refresh player state when window appears
   message_set_player_callback(player_state_handler);
   message_set_status_callback(player_status_handler);
@@ -487,7 +493,7 @@ static void window_disappear(Window *window) {
 }
 
 void player_window_push(void) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "player: player_window_push()");
+
   if (!s_window) {
     s_window = window_create();
     window_set_window_handlers(s_window, (WindowHandlers){
