@@ -83,8 +83,9 @@ static void proceed_to_app(void) {
   message_set_player_callback(NULL);
   message_set_status_callback(NULL);
 
-  // Push main menu - player will be shown when user navigates to it or long-presses
+  // Push main menu (so it's underneath) then player window
   main_menu_push();
+  player_window_push();
 
   // Remove splash window from stack
   if (s_window) {
