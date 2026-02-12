@@ -36,15 +36,17 @@ static void cancel_min_timer(void) {
 
 static void proceed_to_app(void);
 
-static void splash_player_callback(PlayerState state, const char *track, const char *artist, const char *album, int volume) {
-  // Any player state response indicates the JS could reach the server
+static void splash_status_callback(int status) {
+  // Any status response indicates the JS could reach the server
   if (s_connected) return;
-  s_connected = true;
-  text_layer_set_text(s_status_layer, "Connected");
-  cancel_retry_timer();
-  // If min display time elapsed, proceed now
-  if (s_min_elapsed) {
-    proceed_to_app();
+  if (status == 1) {
+    s_connected = true;
+    text_layer_set_text(s_status_layer, "Connected");
+    cancel_retry_timer();
+    // If min display time elapsed, proceed now
+    if (s_min_elapsed) {
+      proceed_to_app();
+    }
   }
 }
 
@@ -65,7 +67,8 @@ static void send_ping(void) {
     return;
   }
   s_attempts++;
-  message_set_player_callback(splash_player_callback);
+  // Listen for a small status response instead of the full player state
+  message_set_status_callback(splash_status_callback);
   message_send_command(CMD_GET_PLAYER_STATE);
   // Schedule next retry if still not connected
   cancel_retry_timer();
@@ -77,6 +80,7 @@ static void proceed_to_app(void) {
   cancel_retry_timer();
   cancel_min_timer();
   message_set_player_callback(NULL);
+  message_set_status_callback(NULL);
 
   // Push main menu (so it's underneath) then player window
   main_menu_push();
@@ -144,6 +148,7 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
   message_set_player_callback(NULL);
+  message_set_status_callback(NULL);
   cancel_retry_timer();
   cancel_min_timer();
 

@@ -482,6 +482,10 @@ Pebble.addEventListener('appmessage', function(e) {
   
   switch (cmd) {
     case Commands.GET_PLAYER_STATE:
+      // Send immediate small status to indicate connectivity, then fetch full state
+      var statusDict = {};
+      statusDict[MessageKeys.STATUS] = 1;
+      sendToPebble(statusDict);
       getPlayerState();
       break;
       
