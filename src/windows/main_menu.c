@@ -6,10 +6,20 @@
 #include "outputs.h"
 #include "favorites.h"
 
-#define NUM_MENU_ITEMS 5
-
 static Window *s_window;
 static MenuLayer *s_menu_layer;
+
+#if defined(PBL_PLATFORM_APLITE)
+#define NUM_MENU_ITEMS 4
+
+static const char *menu_items[] = {
+  "Player",
+  "Favorites",
+  "Random",
+  "Outputs"
+};
+#else
+#define NUM_MENU_ITEMS 5
 
 static const char *menu_items[] = {
   "Player",
@@ -18,6 +28,7 @@ static const char *menu_items[] = {
   "Random",
   "Outputs"
 };
+#endif
 
 static uint16_t menu_get_num_rows(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   return NUM_MENU_ITEMS;
@@ -28,6 +39,22 @@ static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cel
 }
 
 static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+#if defined(PBL_PLATFORM_APLITE)
+  switch (cell_index->row) {
+    case 0:
+      player_window_push();
+      break;
+    case 1:
+      favorites_window_push();
+      break;
+    case 2:
+      random_window_push();
+      break;
+    case 3:
+      outputs_window_push();
+      break;
+  }
+#else
   switch (cell_index->row) {
     case 0:
       player_window_push();
@@ -45,8 +72,8 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
       outputs_window_push();
       break;
   }
+#endif
 }
-
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);

@@ -1,3 +1,4 @@
+#if !defined(PBL_PLATFORM_APLITE)
 #include <pebble.h>
 #include "search.h"
 #include "../message_keys.h"
@@ -85,3 +86,5 @@ void search_window_push(void) {
   }
   window_stack_push(s_window, true);
 }
+
+#endif

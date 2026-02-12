@@ -34,6 +34,10 @@ A modern, extensible remote control for OwnTone music server on Pebble smartwatc
 - OwnTone server running at `owntone.local:3689`
 - Pebble SDK 3.x for building
 
+## Compatibility
+
+- Supported platforms: Basalt (Pebble Time) and Aplite (Pebble Classic). On Aplite the voice/search UI is hidden because the device lacks a microphone; all other features (player, random, outputs, favorites) remain available.
+
 ## Architecture
 
 ### Modular Design

@@ -27,9 +27,16 @@ fi
 # Get the project directory
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Detect host architecture and set docker platform flag when needed (Apple Silicon)
+HOST_ARCH="$(uname -m)"
+DOCKER_PLATFORM=""
+if [[ "$HOST_ARCH" == "arm64" || "$HOST_ARCH" == "aarch64" ]]; then
+    DOCKER_PLATFORM="--platform linux/amd64"
+fi
+
 # Run the build
 echo -e "${GREEN}Building OwnTone Remote...${NC}"
-docker run --rm \
+docker run $DOCKER_PLATFORM --rm \
     -v "$PROJECT_DIR:/pebble" \
     -w /pebble \
     $IMAGE_NAME \
