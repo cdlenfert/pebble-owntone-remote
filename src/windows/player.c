@@ -234,9 +234,16 @@ static void player_state_handler(PlayerState state, const char *track, const cha
 }
 
 static void player_status_handler(int status) {
-  // Status response from play/pause command - icon already toggled optimistically
+  // Status response from JS bridge. A value of 1 indicates success/acknowledgement.
+  // If we receive a generic acknowledgement, cancel any outstanding state retries
+  // since the JS bridge has received our request and will (or already did) send state.
+  if (status == 1) {
+    cancel_state_retry();
+    return;
+  }
+
+  // Non-OK status for play/pause toggles: revert optimistic icon change
   if (status != 1) {
-    // Failed - revert the icon (shouldn't happen often)
     if (s_player_state == PLAYER_STATE_PLAYING) {
       s_player_state = PLAYER_STATE_PAUSED;
     } else {
