@@ -104,11 +104,15 @@ static void window_load(Window *window) {
   // Ensure white background for splash
   window_set_background_color(window, GColorWhite);
 
-  // Try color logo first, fallback to BW
+  // Choose resource based on platform: prefer BW on Aplite (classic)
+#if defined(PBL_PLATFORM_APLITE)
+  s_logo = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE_BW);
+#else
   s_logo = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE);
   if (!s_logo) {
     s_logo = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE_BW);
   }
+#endif
 
   if (s_logo) {
     GSize bmp_size = gbitmap_get_bounds(s_logo).size;
