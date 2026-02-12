@@ -34,9 +34,6 @@ static uint16_t menu_get_num_rows(MenuLayer *menu_layer, uint16_t section_index,
   return NUM_MENU_ITEMS;
 }
 
-// Forward declaration for click config provider used in window_load
-static void main_menu_click_config_provider(void *context);
-
 static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   menu_cell_basic_draw(ctx, cell_layer, menu_items[cell_index->row], NULL, NULL);
 }
@@ -77,6 +74,11 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
   }
 #endif
 }
+
+static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  player_window_push();
+}
+
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -85,21 +87,11 @@ static void window_load(Window *window) {
   menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
     .get_num_rows = menu_get_num_rows,
     .draw_row = menu_draw_row,
-    .select_click = menu_select
+    .select_click = menu_select,
+    .select_long_click = menu_select_long
   });
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
-
-  // Long-press Select navigates to Player from the main menu
-  window_set_click_config_provider(window, main_menu_click_config_provider);
-}
-
-static void main_menu_select_long_click(ClickRecognizerRef recognizer, void *context) {
-  player_window_push();
-}
-
-static void main_menu_click_config_provider(void *context) {
-  window_long_click_subscribe(BUTTON_ID_SELECT, 500, main_menu_select_long_click, NULL);
 }
 
 

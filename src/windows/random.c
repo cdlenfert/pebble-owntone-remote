@@ -8,9 +8,6 @@
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 
-// Forward declaration for click config provider
-static void random_click_config_provider(void *context);
-
 static const char *s_content_types[] = {"Playlist", "Artist", "Album"};
 
 // Custom light vibration pattern (20ms pulse)
@@ -57,6 +54,10 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
   light_vibe();
 }
 
+static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  player_window_push();
+}
+
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -65,22 +66,11 @@ static void window_load(Window *window) {
   menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
     .get_num_rows = menu_get_num_rows,
     .draw_row = menu_draw_row,
-    .select_click = menu_select
+    .select_click = menu_select,
+    .select_long_click = menu_select_long
   });
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
-
-  // Long-press Select jumps to Player from here
-  window_set_click_config_provider(window, random_click_config_provider);
-}
-
-static void random_select_long_click(ClickRecognizerRef recognizer, void *context) {
-  player_window_push();
-}
-
-static void random_click_config_provider(void *context) {
-  window_long_click_subscribe(BUTTON_ID_SELECT, 500, random_select_long_click, NULL);
-
 }
 
 static void window_unload(Window *window) {
