@@ -120,7 +120,6 @@ static void window_load(Window *window) {
 
   if (s_logo) {
     GSize bmp_size = gbitmap_get_bounds(s_logo).size;
-    APP_LOG(APP_LOG_LEVEL_INFO, "Splash bounds: %d x %d, logo: %d x %d", bounds.size.w, bounds.size.h, bmp_size.w, bmp_size.h);
     GRect bmp_frame = GRect((bounds.size.w - bmp_size.w) / 2, (bounds.size.h - bmp_size.h) / 2 - 10, bmp_size.w, bmp_size.h);
     s_logo_layer = bitmap_layer_create(bmp_frame);
     bitmap_layer_set_bitmap(s_logo_layer, s_logo);
