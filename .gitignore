@@ -1,0 +1,16 @@
+# Ignore build artifacts and generated files
+/build/
+*.pbw
+*.elf
+*.bin
+*.raw.bin
+*.map
+*.o
+*.wafpickle*
+.lock-waf*
+build/
+build/**
+/pebble.pbw
+/.wafpickle-*
+node_modules/
+.DS_Store
