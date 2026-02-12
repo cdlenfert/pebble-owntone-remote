@@ -77,6 +77,7 @@ static void send_ping(void) {
 }
 
 static void proceed_to_app(void) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "splash: proceed_to_app — pushing main menu + player");
   // Clean up timers and callbacks
   cancel_retry_timer();
   cancel_min_timer();

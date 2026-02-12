@@ -376,6 +376,7 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "player: window_load called");
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   
@@ -458,6 +459,7 @@ static void window_unload(Window *window) {
 }
 
 static void window_appear(Window *window) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "player: window_appear called");
   // Refresh player state when window appears
   message_set_player_callback(player_state_handler);
   message_set_status_callback(player_status_handler);
@@ -485,6 +487,7 @@ static void window_disappear(Window *window) {
 }
 
 void player_window_push(void) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "player: player_window_push()");
   if (!s_window) {
     s_window = window_create();
     window_set_window_handlers(s_window, (WindowHandlers){
