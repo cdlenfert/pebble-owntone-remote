@@ -153,19 +153,22 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     const char *artist = "";
     const char *album = "";
     int volume = 50;
-    
+
     Tuple *track_t = dict_find(iterator, KEY_PLAYER_TRACK);
     if (track_t) track = track_t->value->cstring;
-    
+
     Tuple *artist_t = dict_find(iterator, KEY_PLAYER_ARTIST);
     if (artist_t) artist = artist_t->value->cstring;
-    
+
     Tuple *album_t = dict_find(iterator, KEY_PLAYER_ALBUM);
     if (album_t) album = album_t->value->cstring;
-    
+
     Tuple *vol_t = dict_find(iterator, KEY_PLAYER_VOLUME);
     if (vol_t) volume = vol_t->value->uint8;
-    
+
+    // Log incoming player state for debugging initial-load race
+    APP_LOG(APP_LOG_LEVEL_INFO, "inbox: PLAYER_STATE=%d track='%s' artist='%s' album='%s' vol=%d", (int)state, track, artist, album, volume);
+
     s_player_callback(state, track, artist, album, volume);
   }
   

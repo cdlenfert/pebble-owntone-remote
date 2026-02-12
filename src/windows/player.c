@@ -207,6 +207,10 @@ static void player_state_handler(PlayerState state, const char *track, const cha
   // Cancel any outstanding retries once we receive a valid state
   cancel_state_retry();
 
+  // Debug log so we can confirm the native handler got the data
+  APP_LOG(APP_LOG_LEVEL_INFO, "player_state_handler: state=%d track='%s' artist='%s' album='%s' vol=%d",
+          (int)state, track ? track : "(null)", artist ? artist : "(null)", album ? album : "(null)", volume);
+
   s_player_state = state;
   s_current_volume = volume;
   
