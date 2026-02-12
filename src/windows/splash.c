@@ -11,9 +11,10 @@
 #define SPLASH_MAX_ATTEMPTS 5
 
 static Window *s_window;
-static BitmapLayer *s_logo_layer;
+static Layer *s_logo_layer;
 static GBitmap *s_logo = NULL;
 static TextLayer *s_status_layer;
+static void logo_layer_update(Layer *layer, GContext *ctx);
 static AppTimer *s_retry_timer = NULL;
 static AppTimer *s_min_timer = NULL;
 static int s_attempts = 0;
@@ -92,6 +93,18 @@ static void proceed_to_app(void) {
   }
 }
 
+static void logo_layer_update(Layer *layer, GContext *ctx) {
+  if (!s_logo) return;
+  GRect bounds = layer_get_bounds(layer);
+  GSize bmp_size = gbitmap_get_bounds(s_logo).size;
+  int target_w = bounds.size.w;
+  int target_h = (bmp_size.h * target_w) / bmp_size.w;
+  int y = (bounds.size.h - target_h) / 2 - 10;
+  GRect draw_rect = GRect(0, y, target_w, target_h);
+  graphics_context_set_compositing_mode(ctx, GCompOpSet);
+  graphics_draw_bitmap_in_rect(ctx, s_logo, draw_rect);
+}
+
 static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
   // Allow user to exit the app if connection failed
   window_stack_pop_all(true);
@@ -119,12 +132,9 @@ static void window_load(Window *window) {
 #endif
 
   if (s_logo) {
-    GSize bmp_size = gbitmap_get_bounds(s_logo).size;
-    GRect bmp_frame = GRect((bounds.size.w - bmp_size.w) / 2, (bounds.size.h - bmp_size.h) / 2 - 10, bmp_size.w, bmp_size.h);
-    s_logo_layer = bitmap_layer_create(bmp_frame);
-    bitmap_layer_set_bitmap(s_logo_layer, s_logo);
-    bitmap_layer_set_compositing_mode(s_logo_layer, GCompOpSet);
-    layer_add_child(window_layer, bitmap_layer_get_layer(s_logo_layer));
+    s_logo_layer = layer_create(bounds);
+    layer_set_update_proc(s_logo_layer, logo_layer_update);
+    layer_add_child(window_layer, s_logo_layer);
   }
 
   // Status text below logo
@@ -151,7 +161,7 @@ static void window_unload(Window *window) {
   cancel_retry_timer();
   cancel_min_timer();
 
-  if (s_logo_layer) bitmap_layer_destroy(s_logo_layer);
+  if (s_logo_layer) layer_destroy(s_logo_layer);
   if (s_logo) gbitmap_destroy(s_logo);
   if (s_status_layer) text_layer_destroy(s_status_layer);
 
