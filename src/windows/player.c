@@ -361,10 +361,11 @@ static void window_load(Window *window) {
   text_layer_set_overflow_mode(s_album_layer, GTextOverflowModeTrailingEllipsis);
   layer_add_child(window_layer, text_layer_get_layer(s_album_layer));
   
-  // Set callbacks and request player state
+  // Set callbacks and request player state (delay first request slightly
+  // so the JS bridge has time to initialize)
   message_set_player_callback(player_state_handler);
   message_set_status_callback(player_status_handler);
-  message_send_command(CMD_GET_PLAYER_STATE);
+  app_timer_register(300, status_check_callback, NULL);
   
   update_action_bar();
 }
