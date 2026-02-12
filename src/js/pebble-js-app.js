@@ -419,29 +419,45 @@ function getFavorites() {
 
 function sendFavorites(favorites) {
   // Flatten favorites into a single array with type info
+  // Support up to 10 of each type (30 total)
   var allFavorites = [];
   
-  // Add playlists (type 0)
+  // Add playlists (type 0) - up to 10
   for (var i = 0; i < favorites.playlists.length && i < 10; i++) {
     allFavorites.push({ name: favorites.playlists[i], type: ContentTypes.PLAYLIST });
   }
   
-  // Add artists (type 1)
-  for (var i = 0; i < favorites.artists.length && allFavorites.length < 10; i++) {
+  // Add artists (type 1) - up to 10
+  for (var i = 0; i < favorites.artists.length && i < 10; i++) {
     allFavorites.push({ name: favorites.artists[i], type: ContentTypes.ARTIST });
   }
   
-  // Add albums (type 2)
-  for (var i = 0; i < favorites.albums.length && allFavorites.length < 10; i++) {
+  // Add albums (type 2) - up to 10
+  for (var i = 0; i < favorites.albums.length && i < 10; i++) {
     allFavorites.push({ name: favorites.albums[i], type: ContentTypes.ALBUM });
   }
   
   var dict = {};
   dict[MessageKeys.FAVORITE_COUNT] = allFavorites.length;
   
-  for (var i = 0; i < allFavorites.length && i < 10; i++) {
-    dict[MessageKeys.FAVORITE_NAME_BASE + i] = allFavorites[i].name;
-    dict[MessageKeys.FAVORITE_TYPE_BASE + i] = allFavorites[i].type;
+  for (var i = 0; i < allFavorites.length && i < 30; i++) {
+    // Compute keys to match appinfo.json layout (three groups: 0-9, 10-19, 20-29)
+    var nameKey, typeKey;
+    if (i < 10) {
+      nameKey = MessageKeys.FAVORITE_NAME_BASE + i;               // 120..129
+      typeKey = MessageKeys.FAVORITE_TYPE_BASE + i;               // 130..139
+    } else if (i < 20) {
+      nameKey = MessageKeys.FAVORITE_NAME_BASE + 20 + (i - 10);   // 140..149
+      typeKey = MessageKeys.FAVORITE_TYPE_BASE + 30 + (i - 10);   // 160..169
+    } else {
+      nameKey = MessageKeys.FAVORITE_NAME_BASE + 30 + (i - 20);   // 150..159
+      typeKey = MessageKeys.FAVORITE_TYPE_BASE + 40 + (i - 20);   // 170..179
+    }
+
+    // Debug: log keys and values to help diagnose any key/collision issues
+    // Send both name and type as strings to ensure consistent encoding across the bridge
+    dict[nameKey] = String(allFavorites[i].name);
+    dict[typeKey] = String(allFavorites[i].type);
   }
   
   console.log('Sending ' + allFavorites.length + ' favorites to watch');

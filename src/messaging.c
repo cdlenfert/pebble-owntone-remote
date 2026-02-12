@@ -265,16 +265,34 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     
     for (int i = 0; i < count && i < MAX_FAVORITES; i++) {
-      Tuple *name_t = dict_find(iterator, KEY_FAVORITE_NAME_BASE + i);
+      // Compute the expected keys based on appinfo layout
+      int name_key, type_key;
+      if (i < 10) {
+        name_key = KEY_FAVORITE_NAME_BASE + i;      // 120..129
+        type_key = KEY_FAVORITE_TYPE_BASE + i;      // 130..139
+      } else {
+        name_key = KEY_FAVORITE_NAME_BASE + 20 + (i - 10); // 140..159 for i=10..29
+        type_key = KEY_FAVORITE_TYPE_BASE + 30 + (i - 10); // 160..179 for i=10..29
+      }
+
+      Tuple *name_t = dict_find(iterator, name_key);
       if (name_t) {
         names[i] = malloc(strlen(name_t->value->cstring) + 1);
         if (names[i]) strcpy(names[i], name_t->value->cstring);
       }
       
-      Tuple *type_t = dict_find(iterator, KEY_FAVORITE_TYPE_BASE + i);
-      if (type_t) types[i] = type_t->value->uint8;
+      Tuple *type_t = dict_find(iterator, type_key);
+      if (type_t) {
+        // Handle both integer and string-encoded types coming from JS
+        if (type_t->value->cstring) {
+          types[i] = atoi(type_t->value->cstring);
+        } else {
+          types[i] = type_t->value->uint8;
+        }
+      }
     }
-    
+
+    // Favorites received; hand off to callback
     s_favorites_callback(count, names, types);
   }
 }

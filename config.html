@@ -68,21 +68,71 @@
     .favorite-item {
       display: flex;
       align-items: center;
-      padding: 8px;
+      padding: 8px 12px 8px 0;
       background: #f9f9f9;
       border-radius: 4px;
       margin-bottom: 8px;
+      transition: background 0.2s;
+      /* Remove cursor: move from the whole item */
     }
-    .favorite-item span {
+    .favorite-item:hover {
+      background: #e9e9e9;
+    }
+    .favorite-item.dragging {
+      opacity: 0.5;
+    }
+    .drag-handle {
+      margin-left: 10px;
+      margin-right: 15px;
+      color: #999;
+      cursor: grab;
+      font-size: 18px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+    .drag-handle, .favorite-item {
+      -webkit-touch-callout: none; /* prevent long-press menu on iOS */
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .favorite-item .favorite-text {
       flex: 1;
-      margin-right: 10px;
+      margin-right: 6px;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
     }
+    .favorite-item.button-like { display:inline-block; }
     .favorite-item button {
       background: #dc3545;
       padding: 4px 12px;
       margin: 0;
       width: auto;
       font-size: 14px;
+    }
+
+    /* Styles for touch-drag */
+    .drag-clone {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      opacity: 0.95;
+      background: #fff;
+      border-radius: 4px;
+    }
+    .favorite-item.placeholder {
+      background: #fffbe6;
+      border: 2px dashed #ffd54f;
+      box-sizing: border-box;
+      height: 44px; /* default - will be overwritten inline */
+      margin-bottom: 8px;
     }
     .add-favorite {
       display: flex;
@@ -99,8 +149,6 @@
       width: auto;
     }
     .favorites-list {
-      max-height: 200px;
-      overflow-y: auto;
       margin-bottom: 15px;
     }
   </style>
@@ -202,16 +250,40 @@
       favorites[category].forEach(function(item, index) {
         var div = document.createElement('div');
         div.className = 'favorite-item';
-        
+        div.setAttribute('data-index', index);
+        div.setAttribute('data-category', category);
+
+        var handle = document.createElement('span');
+        handle.className = 'drag-handle';
+        handle.textContent = '☰';
+        handle.setAttribute('draggable', 'true');
+
+        // Only the handle is draggable
+        handle.addEventListener('dragstart', function(e) {
+          handleDragStart.call(div, e);
+        });
+        handle.addEventListener('dragend', function(e) {
+          handleDragEnd.call(div, e);
+        });
+
+        // Touch support for mobile drag/reorder
+        handle.addEventListener('touchstart', handleTouchStart, {passive:false});
+
+        div.addEventListener('dragover', handleDragOver);
+        div.addEventListener('drop', handleDrop);
+
         var span = document.createElement('span');
+        span.className = 'favorite-text';
         span.textContent = item;
-        
+
         var btn = document.createElement('button');
         btn.textContent = 'Remove';
         btn.onclick = function() { removeFavorite(category, index); };
-        
+
+        div.appendChild(handle);
         div.appendChild(span);
         div.appendChild(btn);
+
         list.appendChild(div);
       });
     }
@@ -252,6 +324,177 @@
       window.location.href = location;
     }
     
+    // Drag and drop functionality
+    var dragSrcEl = null;
+    
+    function handleDragStart(e) {
+      dragSrcEl = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.innerHTML);
+      this.classList.add('dragging');
+    }
+    
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+    
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      
+      if (dragSrcEl !== this) {
+        var category = this.getAttribute('data-category');
+        var srcIndex = parseInt(dragSrcEl.getAttribute('data-index'));
+        var destIndex = parseInt(this.getAttribute('data-index'));
+        
+        // Reorder the array
+        var item = favorites[category][srcIndex];
+        favorites[category].splice(srcIndex, 1);
+        favorites[category].splice(destIndex, 0, item);
+        
+        saveFavoritesToStorage();
+        renderCategory(category);
+      }
+      
+      return false;
+    }
+    
+    function handleDragEnd(e) {
+      this.classList.remove('dragging');
+    }
+
+    // Touch-based drag handlers for mobile Safari / iOS
+    var touchDrag = {
+      active: false,
+      srcEl: null,
+      category: null,
+      srcIndex: null,
+      placeholder: null,
+      clone: null,
+      startY: 0,
+      currentY: 0
+    };
+
+    function handleTouchStart(e) {
+      if (!e.touches || e.touches.length !== 1) return;
+      e.preventDefault();
+      var touch = e.touches[0];
+      var handle = this; // 'this' is the handle
+      var el = handle.parentElement;
+      touchDrag.srcEl = el;
+      touchDrag.category = el.getAttribute('data-category');
+      touchDrag.srcIndex = parseInt(el.getAttribute('data-index'));
+      touchDrag.startY = touch.clientY;
+      touchDrag.currentY = touch.clientY;
+      touchDrag.active = false; // will activate after move threshold
+
+      document.addEventListener('touchmove', handleTouchMove, {passive:false});
+      document.addEventListener('touchend', handleTouchEnd);
+    }
+
+    function handleTouchMove(e) {
+      if (!e.touches || e.touches.length !== 1) return;
+      var touch = e.touches[0];
+      var dy = Math.abs(touch.clientY - touchDrag.startY);
+
+      if (!touchDrag.active && dy > 8) {
+        // start dragging
+        touchDrag.active = true;
+        var rect = touchDrag.srcEl.getBoundingClientRect();
+
+        // clone element for visual dragging
+        touchDrag.clone = touchDrag.srcEl.cloneNode(true);
+        touchDrag.clone.classList.add('drag-clone');
+        touchDrag.clone.style.width = rect.width + 'px';
+        touchDrag.clone.style.left = (touch.clientX) + 'px';
+        touchDrag.clone.style.top = (touch.clientY) + 'px';
+        touchDrag.clone.style.transform = 'translate(-50%, -50%)';
+        document.body.appendChild(touchDrag.clone);
+
+        // placeholder
+        touchDrag.placeholder = document.createElement('div');
+        touchDrag.placeholder.className = 'favorite-item placeholder';
+        touchDrag.placeholder.style.height = rect.height + 'px';
+
+        touchDrag.srcEl.parentNode.insertBefore(touchDrag.placeholder, touchDrag.srcEl.nextSibling);
+        touchDrag.srcEl.style.display = 'none';
+        touchDrag.srcEl.classList.add('dragging');
+      }
+
+      if (touchDrag.active) {
+        e.preventDefault();
+        touchDrag.currentY = touch.clientY;
+        touchDrag.clone.style.left = (touch.clientX) + 'px';
+        touchDrag.clone.style.top = (touch.clientY) + 'px';
+
+        var list = touchDrag.placeholder.parentNode;
+        var children = Array.from(list.querySelectorAll('.favorite-item'))
+          .filter(function(n){ return !n.classList.contains('placeholder'); });
+
+        var insertBeforeEl = null;
+        for (var i = 0; i < children.length; i++) {
+          var c = children[i];
+          var r = c.getBoundingClientRect();
+          var mid = r.top + r.height / 2;
+          if (touch.clientY < mid) {
+            insertBeforeEl = c;
+            break;
+          }
+        }
+        if (insertBeforeEl) {
+          list.insertBefore(touchDrag.placeholder, insertBeforeEl);
+        } else {
+          list.appendChild(touchDrag.placeholder);
+        }
+      }
+    }
+
+    function handleTouchEnd(e) {
+      document.removeEventListener('touchmove', handleTouchMove, {passive:false});
+      document.removeEventListener('touchend', handleTouchEnd);
+
+      if (!touchDrag.srcEl) return;
+
+      if (touchDrag.active) {
+        var list = touchDrag.placeholder.parentNode;
+        // count non-placeholder children before placeholder to get dest index
+        var destIndex = 0;
+        for (var i = 0; i < list.children.length; i++) {
+          if (list.children[i] === touchDrag.placeholder) break;
+          if (!list.children[i].classList.contains('placeholder')) destIndex++;
+        }
+
+        var cat = touchDrag.category;
+        var srcIdx = touchDrag.srcIndex;
+        var item = favorites[cat][srcIdx];
+        // If moving forward in list, and srcIndex < destIndex, removing first shifts destIndex down by 1
+        if (srcIdx < destIndex) destIndex--;
+        favorites[cat].splice(srcIdx, 1);
+        favorites[cat].splice(destIndex, 0, item);
+
+        saveFavoritesToStorage();
+        renderCategory(cat);
+
+        if (touchDrag.clone && touchDrag.clone.parentNode) touchDrag.clone.parentNode.removeChild(touchDrag.clone);
+        touchDrag.clone = null;
+        if (touchDrag.placeholder && touchDrag.placeholder.parentNode) touchDrag.placeholder.parentNode.removeChild(touchDrag.placeholder);
+        touchDrag.placeholder = null;
+      }
+
+      // cleanup
+      if (touchDrag.srcEl) {
+        touchDrag.srcEl.style.display = '';
+        touchDrag.srcEl.classList.remove('dragging');
+      }
+      touchDrag.srcEl = null;
+      touchDrag.active = false;
+    }
+
     // Load existing settings
     var currentSettings = JSON.parse(getQueryParam('settings', '{}'));
     console.log('Current settings:', currentSettings);

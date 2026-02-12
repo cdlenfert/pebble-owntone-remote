@@ -4,8 +4,6 @@
 #include "../message_keys.h"
 #include "../messaging.h"
 
-#define MAX_FAVORITES 10
-
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 
@@ -194,7 +192,7 @@ void favorites_set_data(int count, char *names[], int types[]) {
     s_names[i][sizeof(s_names[i]) - 1] = '\0';
     s_types[i] = types[i];
   }
-  
+
   if (s_menu_layer) {
     menu_layer_reload_data(s_menu_layer);
   }
