@@ -101,6 +101,9 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
+  // Ensure white background for splash
+  window_set_background_color(window, GColorWhite);
+
   // Try color logo first, fallback to BW
   s_logo = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE);
   if (!s_logo) {
@@ -109,9 +112,11 @@ static void window_load(Window *window) {
 
   if (s_logo) {
     GSize bmp_size = gbitmap_get_bounds(s_logo).size;
+    APP_LOG(APP_LOG_LEVEL_INFO, "Splash bounds: %d x %d, logo: %d x %d", bounds.size.w, bounds.size.h, bmp_size.w, bmp_size.h);
     GRect bmp_frame = GRect((bounds.size.w - bmp_size.w) / 2, (bounds.size.h - bmp_size.h) / 2 - 10, bmp_size.w, bmp_size.h);
     s_logo_layer = bitmap_layer_create(bmp_frame);
     bitmap_layer_set_bitmap(s_logo_layer, s_logo);
+    bitmap_layer_set_compositing_mode(s_logo_layer, GCompOpSet);
     layer_add_child(window_layer, bitmap_layer_get_layer(s_logo_layer));
   }
 
@@ -120,6 +125,8 @@ static void window_load(Window *window) {
   text_layer_set_font(s_status_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   text_layer_set_text_alignment(s_status_layer, GTextAlignmentCenter);
   text_layer_set_text(s_status_layer, "Checking for server...");
+  text_layer_set_background_color(s_status_layer, GColorClear);
+  text_layer_set_text_color(s_status_layer, GColorBlack);
   layer_add_child(window_layer, text_layer_get_layer(s_status_layer));
 
   // Start min timer and first ping
