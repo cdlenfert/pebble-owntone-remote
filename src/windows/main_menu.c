@@ -86,7 +86,19 @@ static void window_load(Window *window) {
   });
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+
+  // Long-press Select navigates to Player from the main menu
+  window_set_click_config_provider(window, main_menu_click_config_provider);
 }
+
+static void main_menu_select_long_click(ClickRecognizerRef recognizer, void *context) {
+  player_window_push();
+}
+
+static void main_menu_click_config_provider(void *context) {
+  window_long_click_subscribe(BUTTON_ID_SELECT, 500, main_menu_select_long_click, NULL);
+}
+
 
 static void window_unload(Window *window) {
   menu_layer_destroy(s_menu_layer);

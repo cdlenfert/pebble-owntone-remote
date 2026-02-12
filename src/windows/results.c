@@ -81,6 +81,14 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
   }
 }
 
+static void results_select_long_click(ClickRecognizerRef recognizer, void *context) {
+  player_window_push();
+}
+
+static void results_click_config_provider(void *context) {
+  window_long_click_subscribe(BUTTON_ID_SELECT, 500, results_select_long_click, NULL);
+}
+
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -93,6 +101,9 @@ static void window_load(Window *window) {
   });
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+  
+  // Long-press Select jumps to Player from results
+  window_set_click_config_provider(window, results_click_config_provider);
   
   message_set_results_callback(results_handler);
 }

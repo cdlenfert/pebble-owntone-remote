@@ -2,6 +2,7 @@
 #include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
+#include "outputs.h"
 
 static Window *s_window;
 static TextLayer *s_track_layer;
@@ -363,10 +364,16 @@ static void down_long_click_release_handler(ClickRecognizerRef recognizer, void 
   update_action_bar();
 }
 
+static void player_select_long_click(ClickRecognizerRef recognizer, void *context) {
+  // Long-press Select on Player -> go to Outputs
+  outputs_window_push();
+}
+
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
   window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_click_handler, up_long_click_release_handler);
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+  window_long_click_subscribe(BUTTON_ID_SELECT, 500, player_select_long_click, NULL);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
   window_long_click_subscribe(BUTTON_ID_DOWN, 500, down_long_click_handler, down_long_click_release_handler);
 }

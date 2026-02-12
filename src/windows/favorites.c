@@ -130,8 +130,13 @@ static void back_handler(ClickRecognizerRef recognizer, void *context) {
   }
 }
 
+static void favorites_select_long_click(ClickRecognizerRef recognizer, void *context) {
+  player_window_push();
+}
+
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+  window_long_click_subscribe(BUTTON_ID_SELECT, 500, favorites_select_long_click, NULL);
   window_single_repeating_click_subscribe(BUTTON_ID_UP, 100, up_click_handler);
   window_single_repeating_click_subscribe(BUTTON_ID_DOWN, 100, down_click_handler);
   window_single_click_subscribe(BUTTON_ID_BACK, back_handler);

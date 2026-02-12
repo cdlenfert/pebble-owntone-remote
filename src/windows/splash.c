@@ -110,8 +110,14 @@ static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
   window_stack_pop_all(true);
 }
 
+static void splash_select_long_click(ClickRecognizerRef recognizer, void *context) {
+  // Jump to player when long-pressing Select on splash
+  player_window_push();
+}
+
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_BACK, back_click_handler);
+  window_long_click_subscribe(BUTTON_ID_SELECT, 500, splash_select_long_click, NULL);
 }
 
 static void window_load(Window *window) {
