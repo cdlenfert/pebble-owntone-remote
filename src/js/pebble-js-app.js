@@ -551,6 +551,9 @@ function playQueueItem(itemId) {
   xhr.onload = function() {
     if (xhr.readyState === 4) {
       console.log('Play queue item ' + itemId + ': ' + xhr.status);
+      if (xhr.status === 200 || xhr.status === 204) {
+        setTimeout(getPlayerState, 500); // Delay to let track change
+      }
     }
   };
   xhr.send(null);
