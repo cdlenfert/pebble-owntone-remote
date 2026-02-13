@@ -8,18 +8,12 @@ static void inbox_dropped_callback(AppMessageResult reason, void *context);
 static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context);
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context);
 
-// Message callbacks - to be implemented by specific handlers
-typedef void (*PlayerStateCallback)(PlayerState state, const char *track, const char *artist, const char *album, int volume);
-typedef void (*SearchResultsCallback)(int count, char *titles[], char *uris[]);
-typedef void (*OutputsCallback)(int count, char *names[], char *ids[], int volumes[], bool enabled[]);
-typedef void (*StatusCallback)(int status);
-typedef void (*FavoritesCallback)(int count, char *names[], int types[]);
-
 static PlayerStateCallback s_player_callback = NULL;
 static SearchResultsCallback s_results_callback = NULL;
 static OutputsCallback s_outputs_callback = NULL;
 static StatusCallback s_status_callback = NULL;
 static FavoritesCallback s_favorites_callback = NULL;
+static QueueCallback s_queue_callback = NULL;
 
 // Cached player state (helps avoid race where JS replies while UI not yet registered)
 static bool s_have_cached_player = false;
@@ -59,6 +53,10 @@ void message_set_status_callback(StatusCallback callback) {
 
 void message_set_favorites_callback(FavoritesCallback callback) {
   s_favorites_callback = callback;
+}
+
+void message_set_queue_callback(QueueCallback callback) {
+  s_queue_callback = callback;
 }
 
 void message_send_command(CommandType cmd) {
@@ -139,6 +137,15 @@ void message_send_get_favorites(void) {
   DictionaryIterator *out;
   if (app_message_outbox_begin(&out) == APP_MSG_OK) {
     dict_write_uint8(out, KEY_CMD, CMD_GET_FAVORITES);
+    app_message_outbox_send();
+  }
+}
+
+void message_send_play_queue_item(int item_id) {
+  DictionaryIterator *out;
+  if (app_message_outbox_begin(&out) == APP_MSG_OK) {
+    dict_write_uint8(out, KEY_CMD, CMD_PLAY_QUEUE_ITEM);
+    dict_write_int32(out, KEY_QUEUE_ITEM_ID, item_id);
     app_message_outbox_send();
   }
 }
@@ -318,6 +325,54 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
     // Favorites received; hand off to callback
     s_favorites_callback(count, names, types);
+  }
+  
+  // Check for queue list
+  t = dict_find(iterator, KEY_QUEUE_COUNT);
+  if (t && s_queue_callback) {
+    int count = t->value->uint8;
+    int selected_index = 0;
+    
+    // Get selected index if available
+    Tuple *selected_t = dict_find(iterator, KEY_QUEUE_SELECTED);
+    if (selected_t) {
+      selected_index = selected_t->value->int8;
+    }
+    
+    static char *titles[MAX_QUEUE_ITEMS];
+    static char *artists[MAX_QUEUE_ITEMS];
+    static int item_ids[MAX_QUEUE_ITEMS];
+    
+    for (int i = 0; i < MAX_QUEUE_ITEMS; i++) {
+      if (titles[i]) {
+        free(titles[i]);
+        titles[i] = NULL;
+      }
+      if (artists[i]) {
+        free(artists[i]);
+        artists[i] = NULL;
+      }
+      item_ids[i] = 0;
+    }
+    
+    for (int i = 0; i < count && i < MAX_QUEUE_ITEMS; i++) {
+      Tuple *title_t = dict_find(iterator, KEY_QUEUE_TITLE_BASE + i);
+      if (title_t) {
+        titles[i] = malloc(strlen(title_t->value->cstring) + 1);
+        if (titles[i]) strcpy(titles[i], title_t->value->cstring);
+      }
+      
+      Tuple *artist_t = dict_find(iterator, KEY_QUEUE_ARTIST_BASE + i);
+      if (artist_t) {
+        artists[i] = malloc(strlen(artist_t->value->cstring) + 1);
+        if (artists[i]) strcpy(artists[i], artist_t->value->cstring);
+      }
+      
+      Tuple *id_t = dict_find(iterator, KEY_QUEUE_ITEM_ID_BASE + i);
+      if (id_t) item_ids[i] = id_t->value->int32;
+    }
+    
+    s_queue_callback(count, titles, artists, item_ids, selected_index);
   }
 }
 

@@ -16,7 +16,9 @@ typedef enum {
   CMD_SET_OUTPUT_VOLUME = 12,
   CMD_GET_FAVORITES = 13,
   CMD_PLAY = 14,
-  CMD_PAUSE = 15
+  CMD_PAUSE = 15,
+  CMD_GET_QUEUE = 16,
+  CMD_PLAY_QUEUE_ITEM = 17
 } CommandType;
 
 // Content types for search/random
@@ -55,7 +57,15 @@ typedef enum {
   
   KEY_FAVORITE_COUNT = 110,
   KEY_FAVORITE_NAME_BASE = 120,
-  KEY_FAVORITE_TYPE_BASE = 130
+  KEY_FAVORITE_TYPE_BASE = 130,
+  
+  KEY_QUEUE_COUNT = 140,
+  KEY_QUEUE_SELECTED = 141,
+  KEY_QUEUE_TITLE_BASE = 150,
+  KEY_QUEUE_ARTIST_BASE = 160,
+  KEY_QUEUE_ITEM_ID_BASE = 170,
+  
+  KEY_QUEUE_ITEM_ID = 180
 } MessageKey;
 
 // Player states
@@ -68,4 +78,5 @@ typedef enum {
 #define MAX_RESULTS 8
 #define MAX_OUTPUTS 8
 #define MAX_FAVORITES 30
+#define MAX_QUEUE_ITEMS 10
 #define MAX_STRING_LENGTH 64

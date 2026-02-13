@@ -12,6 +12,7 @@ typedef void (*SearchResultsCallback)(int count, char *titles[], char *uris[]);
 typedef void (*OutputsCallback)(int count, char *names[], char *ids[], int volumes[], bool enabled[]);
 typedef void (*StatusCallback)(int status);
 typedef void (*FavoritesCallback)(int count, char *names[], int types[]);
+typedef void (*QueueCallback)(int count, char *titles[], char *artists[], int item_ids[], int selected_index);
 
 // Register callbacks
 void message_set_player_callback(PlayerStateCallback callback);
@@ -19,6 +20,7 @@ void message_set_results_callback(SearchResultsCallback callback);
 void message_set_outputs_callback(OutputsCallback callback);
 void message_set_status_callback(StatusCallback callback);
 void message_set_favorites_callback(FavoritesCallback callback);
+void message_set_queue_callback(QueueCallback callback);
 
 // Cached player-state helpers (avoid race where JS responds before UI is ready)
 bool message_has_cached_player_state(void);
@@ -34,3 +36,4 @@ void message_send_set_output_exclusive(const char *output_id);
 void message_send_toggle_output(const char *output_id);
 void message_send_set_output_volume(const char *output_id, int volume);
 void message_send_get_favorites(void);
+void message_send_play_queue_item(int item_id);

@@ -5,28 +5,31 @@
 #include "random.h"
 #include "outputs.h"
 #include "favorites.h"
+#include "queue.h"
 
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 
 #if defined(PBL_PLATFORM_APLITE)
-#define NUM_MENU_ITEMS 4
+#define NUM_MENU_ITEMS 5
 
 static const char *menu_items[] = {
   "Player",
   "Favorites",
   "Random",
-  "Outputs"
+  "Outputs",
+  "Queue"
 };
 #else
-#define NUM_MENU_ITEMS 5
+#define NUM_MENU_ITEMS 6
 
 static const char *menu_items[] = {
   "Player",
   "Favorites",
   "Search",
   "Random",
-  "Outputs"
+  "Outputs",
+  "Queue"
 };
 #endif
 
@@ -53,6 +56,9 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
     case 3:
       outputs_window_push();
       break;
+    case 4:
+      queue_window_push();
+      break;
   }
 #else
   switch (cell_index->row) {
@@ -70,6 +76,9 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
       break;
     case 4:
       outputs_window_push();
+      break;
+    case 5:
+      queue_window_push();
       break;
   }
 #endif

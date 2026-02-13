@@ -32,7 +32,15 @@ var MessageKeys = {
   
   FAVORITE_COUNT: 110,
   FAVORITE_NAME_BASE: 120,
-  FAVORITE_TYPE_BASE: 130
+  FAVORITE_TYPE_BASE: 130,
+  
+  QUEUE_COUNT: 140,
+  QUEUE_SELECTED: 141,
+  QUEUE_TITLE_BASE: 150,
+  QUEUE_ARTIST_BASE: 160,
+  QUEUE_ITEM_ID_BASE: 170,
+  
+  QUEUE_ITEM_ID: 180
 };
 
 // Command types
@@ -51,7 +59,9 @@ var Commands = {
   SET_OUTPUT_VOLUME: 12,
   GET_FAVORITES: 13,
   PLAY: 14,
-  PAUSE: 15
+  PAUSE: 15,
+  GET_QUEUE: 16,
+  PLAY_QUEUE_ITEM: 17
 };
 
 // Content types
@@ -464,6 +474,88 @@ function sendFavorites(favorites) {
   sendToPebble(dict);
 }
 
+function getQueue() {
+  // First get player state to find current item
+  var playerXhr = new XMLHttpRequest();
+  playerXhr.open('GET', Config.OWNTONE_BASE + '/api/player', true);
+  playerXhr.onload = function() {
+    if (playerXhr.readyState === 4 && playerXhr.status === 200) {
+      var playerData = JSON.parse(playerXhr.responseText);
+      var currentItemId = playerData.item_id || 0;
+      
+      // Now get queue
+      var queueXhr = new XMLHttpRequest();
+      queueXhr.open('GET', Config.OWNTONE_BASE + '/api/queue', true);
+      queueXhr.onload = function() {
+        if (queueXhr.readyState === 4 && queueXhr.status === 200) {
+          var response = JSON.parse(queueXhr.responseText);
+          sendQueue(response.items || [], currentItemId);
+        } else {
+          console.log('Queue request failed: ' + queueXhr.status);
+        }
+      };
+      queueXhr.send(null);
+    } else {
+      console.log('Player request failed: ' + playerXhr.status);
+    }
+  };
+  playerXhr.send(null);
+}
+
+function sendQueue(items, currentItemId) {
+  // Find position of currently playing item
+  var currentPos = -1;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].id === currentItemId) {
+      currentPos = i;
+      break;
+    }
+  }
+  
+  // If not found, just show first 10 items
+  if (currentPos === -1) {
+    currentPos = 0;
+  }
+  
+  // Calculate slice: up to 4 before, current, up to 5 after (10 total)
+  var startPos = Math.max(0, currentPos - 4);
+  var endPos = Math.min(items.length, startPos + 10);
+  
+  // Adjust start if we're near the end
+  if (endPos - startPos < 10) {
+    startPos = Math.max(0, endPos - 10);
+  }
+  
+  var slicedItems = items.slice(startPos, endPos);
+  var selectedIndex = currentPos - startPos;
+  
+  var count = slicedItems.length;
+  var dict = {};
+  dict[MessageKeys.QUEUE_COUNT] = count;
+  dict[MessageKeys.QUEUE_SELECTED] = selectedIndex;
+  
+  for (var i = 0; i < count; i++) {
+    var item = slicedItems[i];
+    dict[MessageKeys.QUEUE_TITLE_BASE + i] = item.title || 'Unknown';
+    dict[MessageKeys.QUEUE_ARTIST_BASE + i] = item.artist || '';
+    dict[MessageKeys.QUEUE_ITEM_ID_BASE + i] = item.id;
+  }
+  
+  console.log('Sending ' + count + ' queue items (selected: ' + selectedIndex + ') to watch');
+  sendToPebble(dict);
+}
+
+function playQueueItem(itemId) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('PUT', Config.OWNTONE_BASE + '/api/player/play?item_id=' + itemId, true);
+  xhr.onload = function() {
+    if (xhr.readyState === 4) {
+      console.log('Play queue item ' + itemId + ': ' + xhr.status);
+    }
+  };
+  xhr.send(null);
+}
+
 // Pebble event handlers
 Pebble.addEventListener('ready', function(e) {
   console.log('OwnTone Remote JS ready');
@@ -543,6 +635,14 @@ Pebble.addEventListener('appmessage', function(e) {
       
     case Commands.GET_FAVORITES:
       getFavorites();
+      break;
+      
+    case Commands.GET_QUEUE:
+      getQueue();
+      break;
+      
+    case Commands.PLAY_QUEUE_ITEM:
+      playQueueItem(payload.QUEUE_ITEM_ID || payload[MessageKeys.QUEUE_ITEM_ID]);
       break;
   }
 });
