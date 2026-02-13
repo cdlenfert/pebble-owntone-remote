@@ -23,6 +23,15 @@ static char s_track_text[MAX_STRING_LENGTH];
 static char s_artist_text[MAX_STRING_LENGTH];
 static char s_album_text[MAX_STRING_LENGTH];
 
+// Optimistic UI flag for launching from queue
+static bool s_force_initial_playing = false;
+static bool s_delay_next_appear_retry = false;
+
+// Transient flag to enforce "Playing" state visually during track changes
+// This prevents the icon from flickering to "Play" (Stopped) if the server momentarily reports stopped state
+static bool s_transient_playing_state = false;
+static AppTimer *s_transient_playing_timer = NULL;
+
 // Mode tracking
 typedef enum {
   CONTROL_MODE_TRANSPORT,  // Normal mode: prev/play-pause/next
@@ -161,24 +170,23 @@ static void poll_callback(void *data) {
   }
 }
 
-static void start_polling_if_playing(void) {
+static void defer_polling(int delay_ms) {
   cancel_poll_timer();
-  if (s_player_state == PLAYER_STATE_PLAYING) {
-    s_poll_timer = app_timer_register(3000, poll_callback, NULL);
-  } else {
-    // Even when paused, poll every 10s to detect external changes
-    s_poll_timer = app_timer_register(10000, poll_callback, NULL);
+  s_poll_timer = app_timer_register(delay_ms, poll_callback, NULL);
+}
+
+static void transient_playing_timer_callback(void *data) {
+  s_transient_playing_timer = NULL;
+  s_transient_playing_state = false;
+}
+
+static void set_transient_playing_state(void) {
+  s_transient_playing_state = true;
+  if (s_transient_playing_timer) {
+    app_timer_cancel(s_transient_playing_timer);
   }
-}
-
-static void status_check_callback(void *data) {
-  s_status_check_timer = NULL;
-  message_send_command(CMD_GET_PLAYER_STATE);
-}
-
-static void schedule_status_check(void) {
-  cancel_status_check_timer();
-  s_status_check_timer = app_timer_register(2000, status_check_callback, NULL);
+  // Enforce "Playing" visual state for 8 seconds (allow for slow server response)
+  s_transient_playing_timer = app_timer_register(8000, transient_playing_timer_callback, NULL);
 }
 
 static void start_mode_timer(void) {
@@ -212,7 +220,14 @@ static void player_state_handler(PlayerState state, const char *track, const cha
   // Cancel any outstanding retries once we receive a valid state
   cancel_state_retry();
 
-  s_player_state = state;
+  // If we are in a transient "Forced Playing" state (e.g. just clicked Next),
+  // override the state to Playing to prevent UI flicker if server reports Stopped momentarily.
+  if (s_transient_playing_state) {
+    s_player_state = PLAYER_STATE_PLAYING;
+  } else {
+    s_player_state = state;
+  }
+  
   s_current_volume = volume;
   
   snprintf(s_track_text, sizeof(s_track_text), "%s", track ? track : "No track");
@@ -263,6 +278,8 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     update_action_bar();
     message_send_command(CMD_PREVIOUS);
     light_vibe();
+    defer_polling(1000); // Delay polling to allow server state to update
+    set_transient_playing_state();
   }
 }
 
@@ -279,6 +296,8 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       update_action_bar();
       message_send_command(CMD_PLAY);
       light_vibe();
+      defer_polling(1000); // Delay polling
+      set_transient_playing_state();
     }
   } else {
     // Volume mode: Play/Pause toggle
@@ -290,9 +309,11 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       s_player_state = PLAYER_STATE_PLAYING;
       update_action_bar();
       message_send_command(CMD_PLAY);
+      set_transient_playing_state();
     }
     light_vibe();
     start_mode_timer();
+    defer_polling(1000); // Delay polling
   }
 }
 
@@ -309,6 +330,8 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     update_action_bar();
     message_send_command(CMD_NEXT);
     light_vibe();
+    defer_polling(1000); // Delay polling to allow server state to update
+    set_transient_playing_state();
   }
 }
 
@@ -416,8 +439,26 @@ static void window_load(Window *window) {
   // Set callbacks and request player state. Use any cached state first to
   // avoid the race where JS replies while the player UI isn't registered.
   message_set_player_callback(player_state_handler);
-  message_set_status_callback(player_status_handler);
   
+  // Handle launch from queue (Optimistic UI)
+  if (s_force_initial_playing) {
+    s_player_state = PLAYER_STATE_PLAYING;
+    s_force_initial_playing = false;
+    
+    // Maintain playing state even if server initially reports stopped
+    set_transient_playing_state();
+    
+    // Show "Loading..." to confirm action
+    text_layer_set_text(s_track_layer, "Loading...");
+    text_layer_set_text(s_artist_layer, "");
+    text_layer_set_text(s_album_layer, "");
+    update_action_bar();
+    
+    // Request fresh state immediately, skip cache
+    message_send_command(CMD_GET_PLAYER_STATE);
+    start_state_retry();
+    
+  } else 
   // Always start polling - it will detect state changes
   s_poll_timer = app_timer_register(3000, poll_callback, NULL);
 
@@ -477,13 +518,26 @@ static void window_appear(Window *window) {
   s_control_mode = CONTROL_MODE_TRANSPORT;
   update_action_bar();
   
+  if (s_transient_playing_timer) {
+    app_timer_cancel(s_transient_playing_timer);
+    s_transient_playing_timer = NULL;
+  }
   // Start polling if not already running
   if (!s_poll_timer) {
     s_poll_timer = app_timer_register(3000, poll_callback, NULL);
   }
   
   // Request fresh state with retry mechanism
-  start_state_retry();
+  if (s_delay_next_appear_retry) {
+    // We just launched from queue, delay the check to let server update
+    s_delay_next_appear_retry = false;
+    cancel_state_retry();
+    s_state_retry_attempts = 0;
+    // Delay 1 second before first check
+    s_state_retry_timer = app_timer_register(1000, state_retry_callback, NULL); 
+  } else {
+    start_state_retry();
+  }
 }
 
 static void window_disappear(Window *window) {
@@ -493,6 +547,10 @@ static void window_disappear(Window *window) {
   cancel_mode_timer();
   cancel_volume_repeat_timer();
   cancel_state_retry();
+}
+
+void player_set_launch_state_playing(void) {
+  s_force_initial_playing = true;
 }
 
 void player_window_push(void) {
