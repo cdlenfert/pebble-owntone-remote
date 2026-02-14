@@ -180,13 +180,17 @@ static void transient_playing_timer_callback(void *data) {
   s_transient_playing_state = false;
 }
 
-static void set_transient_playing_state(void) {
+void player_set_transient_playing_state(void) {
   s_transient_playing_state = true;
   if (s_transient_playing_timer) {
     app_timer_cancel(s_transient_playing_timer);
   }
   // Enforce "Playing" visual state for 8 seconds (allow for slow server response)
   s_transient_playing_timer = app_timer_register(8000, transient_playing_timer_callback, NULL);
+}
+
+bool player_is_transient_playing(void) {
+  return s_transient_playing_state;
 }
 
 static void start_mode_timer(void) {
@@ -279,7 +283,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     message_send_command(CMD_PREVIOUS);
     light_vibe();
     defer_polling(1000); // Delay polling to allow server state to update
-    set_transient_playing_state();
+    player_set_transient_playing_state();
   }
 }
 
@@ -297,7 +301,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       message_send_command(CMD_PLAY);
       light_vibe();
       defer_polling(1000); // Delay polling
-      set_transient_playing_state();
+      player_set_transient_playing_state();
     }
   } else {
     // Volume mode: Play/Pause toggle
@@ -309,7 +313,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       s_player_state = PLAYER_STATE_PLAYING;
       update_action_bar();
       message_send_command(CMD_PLAY);
-      set_transient_playing_state();
+      player_set_transient_playing_state();
     }
     light_vibe();
     start_mode_timer();
@@ -331,7 +335,7 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     message_send_command(CMD_NEXT);
     light_vibe();
     defer_polling(1000); // Delay polling to allow server state to update
-    set_transient_playing_state();
+    player_set_transient_playing_state();
   }
 }
 
@@ -446,7 +450,7 @@ static void window_load(Window *window) {
     s_force_initial_playing = false;
     
     // Maintain playing state even if server initially reports stopped
-    set_transient_playing_state();
+    player_set_transient_playing_state();
     
     // Show "Loading..." to confirm action
     text_layer_set_text(s_track_layer, "Loading...");

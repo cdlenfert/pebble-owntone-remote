@@ -183,7 +183,11 @@ static void update_output_play_pause_icon(void) {
 }
 
 static void output_volume_player_state_handler(PlayerState state, const char *track, const char *artist, const char *album, int volume) {
-  s_output_player_state = state;
+  if (player_is_transient_playing()) {
+    s_output_player_state = PLAYER_STATE_PLAYING;
+  } else {
+    s_output_player_state = state;
+  }
   update_output_play_pause_icon();
 }
 
@@ -220,6 +224,7 @@ static void volume_select_click(ClickRecognizerRef recognizer, void *context) {
     s_output_player_state = PLAYER_STATE_PAUSED;
   } else {
     s_output_player_state = PLAYER_STATE_PLAYING;
+    player_set_transient_playing_state();
   }
   update_output_play_pause_icon();
   
