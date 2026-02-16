@@ -125,10 +125,13 @@ static void window_load(Window *window) {
   // Choose resource based on platform: prefer BW on Aplite (classic)
 #if defined(PBL_PLATFORM_APLITE)
   s_logo = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE_BW);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "splash: attempted load RESOURCE_ID_LOGO_OWNTONE_BW -> %p", (void*)s_logo);
 #else
   s_logo = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "splash: attempted load RESOURCE_ID_LOGO_OWNTONE -> %p", (void*)s_logo);
   if (!s_logo) {
     s_logo = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE_BW);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "splash: fallback load RESOURCE_ID_LOGO_OWNTONE_BW -> %p", (void*)s_logo);
   }
 #endif
 
@@ -136,6 +139,8 @@ static void window_load(Window *window) {
     s_logo_layer = layer_create(bounds);
     layer_set_update_proc(s_logo_layer, logo_layer_update);
     layer_add_child(window_layer, s_logo_layer);
+  } else {
+    APP_LOG(APP_LOG_LEVEL_WARNING, "splash: no logo bitmap available (s_logo == NULL)");
   }
 
   // Status text below logo
