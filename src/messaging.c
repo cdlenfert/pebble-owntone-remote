@@ -24,11 +24,13 @@ static char s_cached_album[MAX_STRING_LENGTH] = {0};
 static int s_cached_volume = 50;
 
 void message_init(void) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "messaging: message_init() called");
   app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_register_outbox_failed(outbox_failed_callback);
   app_message_register_outbox_sent(outbox_sent_callback);
   app_message_open(2048, 512);
+  APP_LOG(APP_LOG_LEVEL_INFO, "messaging: app_message_open() done");
 }
 
 void message_deinit(void) {

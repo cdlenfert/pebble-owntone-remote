@@ -115,6 +115,7 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "splash: window_load()");
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
