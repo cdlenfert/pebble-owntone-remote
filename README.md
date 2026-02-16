@@ -37,7 +37,12 @@ A modern, extensible remote control for OwnTone music server on Pebble smartwatc
 
 ## Compatibility
 
-- Supported platforms: Basalt (Pebble Time) and Aplite (Pebble Classic). On Aplite the voice/search UI is hidden because the device lacks a microphone; all other features (player, random, outputs, favorites) remain available.
+- **Basalt (Pebble Time)**: Full feature support with 64 colors
+- **Aplite (Pebble Classic)**: Full functionality with memory-optimized UI
+  - Voice/search hidden (no microphone)
+  - Black & white splash logo (96x96 PNG8)
+  - Memory-efficient icon loading with automatic retry
+  - All core features available: player, random, outputs, favorites
 
 ## Architecture
 

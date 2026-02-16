@@ -83,6 +83,16 @@ static void proceed_to_app(void) {
   message_set_player_callback(NULL);
   message_set_status_callback(NULL);
 
+  // Free splash logo NOW to make room for player icons on Aplite
+  if (s_logo) {
+    gbitmap_destroy(s_logo);
+    s_logo = NULL;
+  }
+  if (s_logo_layer) {
+    layer_destroy(s_logo_layer);
+    s_logo_layer = NULL;
+  }
+
   // Push main menu (so it's underneath) then player window
   main_menu_push();
   player_window_push();
@@ -96,13 +106,20 @@ static void proceed_to_app(void) {
 static void logo_layer_update(Layer *layer, GContext *ctx) {
   if (!s_logo) return;
   GRect bounds = layer_get_bounds(layer);
-  GSize bmp_size = gbitmap_get_bounds(s_logo).size;
-  int target_w = bounds.size.w;
-  int target_h = (bmp_size.h * target_w) / bmp_size.w;
-  int y = (bounds.size.h - target_h) / 2 - 10;
-  GRect draw_rect = GRect(0, y, target_w, target_h);
+  GRect bmp_bounds = gbitmap_get_bounds(s_logo);
+  
+  // Center the bitmap at its actual size (no scaling/tiling)
+  GPoint center = GPoint(
+    bounds.size.w / 2,
+    (bounds.size.h / 2) - 10  // Slight upward offset
+  );
+  
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  graphics_draw_bitmap_in_rect(ctx, s_logo, draw_rect);
+  graphics_draw_bitmap_in_rect(ctx, s_logo, 
+    GRect(center.x - bmp_bounds.size.w / 2,
+          center.y - bmp_bounds.size.h / 2,
+          bmp_bounds.size.w,
+          bmp_bounds.size.h));
 }
 
 static void back_click_handler(ClickRecognizerRef recognizer, void *context) {

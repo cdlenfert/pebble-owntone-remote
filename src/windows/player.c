@@ -183,6 +183,11 @@ static void start_mode_timer(void) {
 }
 
 static void update_action_bar(void) {
+  // Don't update if icons aren't loaded yet
+  if (!s_icon_play || !s_icon_pause || !s_icon_next || !s_icon_prev) {
+    return;
+  }
+  
   if (s_control_mode == CONTROL_MODE_TRANSPORT) {
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_prev);
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_next);
@@ -194,6 +199,9 @@ static void update_action_bar(void) {
     }
   } else {
     // Volume mode
+    if (!s_icon_volume_up || !s_icon_volume_down) {
+      return;
+    }
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_volume_up);
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_volume_down);
     if (s_player_state == PLAYER_STATE_PLAYING) {
@@ -468,10 +476,27 @@ static void window_unload(Window *window) {
   gbitmap_destroy(s_icon_volume_down);
   gbitmap_destroy(s_icon_ellipsis);
   
+  // Set to NULL so window_appear knows to reload them
+  s_icon_play = NULL;
+  s_icon_pause = NULL;
+  s_icon_next = NULL;
+  s_icon_prev = NULL;
+  s_icon_volume_up = NULL;
+  s_icon_volume_down = NULL;
+  s_icon_ellipsis = NULL;
+  
   action_bar_layer_destroy(s_action_bar);
 }
 
 static void window_appear(Window *window) {
+  // Reload any icons that were destroyed or failed to load
+  if (!s_icon_play) s_icon_play = gbitmap_create_with_resource(RESOURCE_ID_ICON_PLAY);
+  if (!s_icon_pause) s_icon_pause = gbitmap_create_with_resource(RESOURCE_ID_ICON_PAUSE);
+  if (!s_icon_next) s_icon_next = gbitmap_create_with_resource(RESOURCE_ID_ICON_NEXT);
+  if (!s_icon_prev) s_icon_prev = gbitmap_create_with_resource(RESOURCE_ID_ICON_PREV);
+  if (!s_icon_volume_up) s_icon_volume_up = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_UP);
+  if (!s_icon_volume_down) s_icon_volume_down = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_DOWN);
+  if (!s_icon_ellipsis) s_icon_ellipsis = gbitmap_create_with_resource(RESOURCE_ID_ICON_ELLIPSIS);
 
   // Refresh player state when window appears
   message_set_player_callback(player_state_handler);
