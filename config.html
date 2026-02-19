@@ -194,15 +194,15 @@
       <h2>Battery Optimization</h2>
       <label for="player-auto-close">When should the player window automatically close?</label>
       <select id="player-auto-close" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-        <option value="30">30 seconds</option>
+        <option value="30" selected>30 seconds</option>
         <option value="60">1 minute</option>
         <option value="120">2 minutes</option>
-        <option value="180" selected>3 minutes</option>
+        <option value="180">3 minutes</option>
         <option value="240">4 minutes</option>
         <option value="300">5 minutes</option>
         <option value="0">Never</option>
       </select>
-      <small style="color: #999; display: block; margin-top: 5px;">To save battery, the player window will automatically close and stop polling for updates after the selected time. Default is 3 minutes.</small>
+      <small style="color: #999; display: block; margin-top: 5px;">To save battery, the player window will automatically close and stop polling for updates after the selected time. Default is 30 seconds.</small>
     </div>
     
     <div class="section" style="opacity: 0.5; pointer-events: none;">
