@@ -72,6 +72,9 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
     // Jump to this queue item
     message_send_play_queue_item(s_item_ids[cell_index->row]);
     
+    // Set optimistic UI state before pushing window
+    player_set_launch_state_playing();
+    
     // Open player window
     player_window_push();
   }

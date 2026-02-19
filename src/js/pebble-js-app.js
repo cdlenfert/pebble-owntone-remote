@@ -180,12 +180,20 @@ function getCurrentTrack(callback) {
 function play() {
   httpPut(Config.OWNTONE_BASE + '/api/player/play', function(status, response) {
     console.log('Play: ' + status);
+    if (status === 200 || status === 204) {
+      // Delay to allow server to transition to playing state
+      setTimeout(getPlayerState, 200);
+    }
   });
 }
 
 function pause() {
   httpPut(Config.OWNTONE_BASE + '/api/player/pause', function(status, response) {
     console.log('Pause: ' + status);
+    if (status === 200 || status === 204) {
+      // Delay to allow server to transition to paused state
+      setTimeout(getPlayerState, 200);
+    }
   });
 }
 
@@ -193,10 +201,11 @@ function playPause() {
   httpPut(Config.OWNTONE_BASE + '/api/player/toggle', function(status, response) {
     console.log('OwnTone Remote: Play/Pause: ' + status);
     if (status === 200 || status === 204) {
-      // Notify watch that toggle succeeded
+      // Notify watch that toggle succeeded, then sync state after delay
       var dict = {};
       dict[MessageKeys.STATUS] = 1; // Success
       sendToPebble(dict);
+      setTimeout(getPlayerState, 200);
     }
   });
 }
@@ -204,14 +213,20 @@ function playPause() {
 function next() {
   httpPut(Config.OWNTONE_BASE + '/api/player/next', function(status, response) {
     console.log('Next: ' + status);
-    setTimeout(getPlayerState, 500); // Delay to let track change
+    if (status === 200 || status === 204) {
+      // Longer delay to allow server to load and start playing next track
+      setTimeout(getPlayerState, 500);
+    }
   });
 }
 
 function previous() {
   httpPut(Config.OWNTONE_BASE + '/api/player/previous', function(status, response) {
     console.log('Previous: ' + status);
-    setTimeout(getPlayerState, 500);
+    if (status === 200 || status === 204) {
+      // Longer delay to allow server to load and start playing previous track
+      setTimeout(getPlayerState, 500);
+    }
   });
 }
 
@@ -320,6 +335,7 @@ function addToQueue(uri, type) {
   httpPost(url, function(status, response) {
     console.log('Add to queue: ' + status);
     if (status === 200 || status === 204) {
+      // Longer delay to allow server to load and start playing queued items
       setTimeout(getPlayerState, 500);
     }
   });
@@ -552,7 +568,8 @@ function playQueueItem(itemId) {
     if (xhr.readyState === 4) {
       console.log('Play queue item ' + itemId + ': ' + xhr.status);
       if (xhr.status === 200 || xhr.status === 204) {
-        setTimeout(getPlayerState, 500); // Delay to let track change
+        // Longer delay to allow server to load and start playing queue item
+        setTimeout(getPlayerState, 500);
       }
     }
   };

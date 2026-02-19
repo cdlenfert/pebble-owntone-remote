@@ -76,6 +76,10 @@ static void send_ping(void) {
   s_retry_timer = app_timer_register(SPLASH_RETRY_MS, (AppTimerCallback)send_ping, NULL);
 }
 
+static void transition_to_player(void *data) {
+  player_window_push();
+}
+
 static void proceed_to_app(void) {
   // Clean up timers and callbacks
   cancel_retry_timer();
@@ -93,14 +97,17 @@ static void proceed_to_app(void) {
     s_logo_layer = NULL;
   }
 
-  // Push main menu (so it's underneath) then player window
+  // Push main menu (so it's underneath)
   main_menu_push();
-  player_window_push();
 
   // Remove splash window from stack
   if (s_window) {
     window_stack_remove(s_window, false);
   }
+  
+  // Schedule player window push slightly later to avoid stack manipulation races
+  // and ensure callbacks registered in player window_load aren't cleared by splash
+  app_timer_register(100, transition_to_player, NULL);
 }
 
 static void logo_layer_update(Layer *layer, GContext *ctx) {
@@ -179,8 +186,12 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
-  message_set_player_callback(NULL);
-  message_set_status_callback(NULL);
+  // Do NOT clear callbacks here because they are shared globals.
+  // When proceeding to the player window, we've already set new callbacks 
+  // on the player window, and clearing them here would overwrite the player's handlers.
+  // message_set_player_callback(NULL);
+  // message_set_status_callback(NULL);
+  
   cancel_retry_timer();
   cancel_min_timer();
 
