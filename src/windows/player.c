@@ -236,10 +236,13 @@ static void auto_close_timer_callback(void *data) {
 }
 
 static void start_auto_close_timer(void) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "start_auto_close_timer called, timeout=%d", s_auto_close_timeout_seconds);
   if (s_auto_close_timeout_seconds > 0) {
     cancel_auto_close_timer();
     s_auto_close_timer = app_timer_register(s_auto_close_timeout_seconds * 1000, auto_close_timer_callback, NULL);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Started auto-close timer for %d seconds", s_auto_close_timeout_seconds);
+    APP_LOG(APP_LOG_LEVEL_INFO, "Auto-close timer started for %d seconds", s_auto_close_timeout_seconds);
+  } else {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Auto-close timer NOT started (timeout=0)");
   }
 }
 
@@ -582,6 +585,7 @@ static void window_unload(Window *window) {
 }
 
 static void window_appear(Window *window) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Player window appearing, timeout=%d", s_auto_close_timeout_seconds);
   // Reload any icons that were destroyed or failed to load
   if (!s_icon_play) s_icon_play = gbitmap_create_with_resource(RESOURCE_ID_ICON_PLAY);
   if (!s_icon_pause) s_icon_pause = gbitmap_create_with_resource(RESOURCE_ID_ICON_PAUSE);
@@ -644,9 +648,16 @@ void player_set_auto_close_timeout(int timeout_seconds) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Player auto-close timeout set to %d seconds", timeout_seconds);
   
   // If player window is currently visible, restart timer with new timeout
-  if (s_window && window_stack_get_top_window() == s_window) {
+  bool window_exists = (s_window != NULL);
+  bool is_top = window_exists && (window_stack_get_top_window() == s_window);
+  APP_LOG(APP_LOG_LEVEL_INFO, "Window state: exists=%d, is_top=%d", window_exists, is_top);
+  
+  if (is_top) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Player window is visible, restarting timer");
     cancel_auto_close_timer();
     start_auto_close_timer();
+  } else {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Player window not visible yet, timer will start on appear");
   }
 }
 
