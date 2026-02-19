@@ -65,7 +65,8 @@ typedef enum {
   KEY_QUEUE_ARTIST_BASE = 160,
   KEY_QUEUE_ITEM_ID_BASE = 170,
   
-  KEY_QUEUE_ITEM_ID = 180
+  KEY_QUEUE_ITEM_ID = 180,
+  KEY_PLAYER_AUTO_CLOSE_TIMEOUT = 190
 } MessageKey;
 
 // Player states
