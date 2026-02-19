@@ -135,7 +135,9 @@
     "FAVORITE_TYPE_26": 176,
     "FAVORITE_TYPE_27": 177,
     "FAVORITE_TYPE_28": 178,
-    "FAVORITE_TYPE_29": 179
+    "FAVORITE_TYPE_29": 179,
+    "QUEUE_ITEM_ID": 180,
+    "PLAYER_AUTO_CLOSE_TIMEOUT": 190
   },
   "resources": {
     "media": [

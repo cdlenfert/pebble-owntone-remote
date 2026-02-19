@@ -48,6 +48,10 @@ static AppTimer *s_volume_repeat_timer = NULL;
 static bool s_volume_up_held = false;
 static bool s_volume_down_held = false;
 
+// Auto-close configuration for battery optimization
+static int s_auto_close_timeout_seconds = 0; // 0 = never auto-close
+static AppTimer *s_auto_close_timer = NULL;
+
 // Custom light vibration pattern (20ms pulse)
 static void light_vibe(void) {
   uint32_t segments[] = { 20 };
@@ -114,6 +118,23 @@ static void cancel_poll_timer(void) {
   if (s_poll_timer) {
     app_timer_cancel(s_poll_timer);
     s_poll_timer = NULL;
+  }
+}
+
+static void cancel_auto_close_timer(void) {
+  if (s_auto_close_timer) {
+    app_timer_cancel(s_auto_close_timer);
+    s_auto_close_timer = NULL;
+  }
+}
+
+static void start_auto_close_timer(void);
+
+static void reset_auto_close_timer(void) {
+  // User interaction detected, restart the timer
+  if (s_auto_close_timeout_seconds > 0) {
+    cancel_auto_close_timer();
+    start_auto_close_timer();
   }
 }
 
@@ -198,6 +219,30 @@ static void start_mode_timer(void) {
   s_mode_timer = app_timer_register(2000, revert_to_transport_mode, NULL);
 }
 
+static void auto_close_timer_callback(void *data) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Auto-close timeout reached, closing player window");
+  s_auto_close_timer = NULL;
+  
+  // Stop all polling before closing window
+  cancel_poll_timer();
+  cancel_status_check_timer();
+  cancel_mode_timer();
+  cancel_state_retry();
+  
+  // Pop the window to return to main menu
+  if (s_window) {
+    window_stack_pop(true);
+  }
+}
+
+static void start_auto_close_timer(void) {
+  if (s_auto_close_timeout_seconds > 0) {
+    cancel_auto_close_timer();
+    s_auto_close_timer = app_timer_register(s_auto_close_timeout_seconds * 1000, auto_close_timer_callback, NULL);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Started auto-close timer for %d seconds", s_auto_close_timeout_seconds);
+  }
+}
+
 static void update_action_bar(void) {
   // Don't update if icons aren't loaded yet
   if (!s_icon_play || !s_icon_pause || !s_icon_next || !s_icon_prev) {
@@ -278,6 +323,7 @@ static void player_status_handler(int status) {
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+  reset_auto_close_timer();
   if (s_control_mode == CONTROL_MODE_VOLUME) {
     // Volume up
     s_current_volume = (s_current_volume >= 95) ? 100 : s_current_volume + 5;
@@ -296,6 +342,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+  reset_auto_close_timer();
   if (s_control_mode == CONTROL_MODE_TRANSPORT) {
     if (s_player_state == PLAYER_STATE_PLAYING) {
       // Playing - switch to volume mode (no vibration for ellipsis)
@@ -330,6 +377,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  reset_auto_close_timer();
   if (s_control_mode == CONTROL_MODE_VOLUME) {
     // Volume down
     s_current_volume = (s_current_volume <= 5) ? 0 : s_current_volume - 5;
@@ -348,6 +396,7 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
+  reset_auto_close_timer();
   // Show volume icons during long press
   action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_volume_up);
   action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_volume_down);
@@ -369,6 +418,7 @@ static void up_long_click_release_handler(ClickRecognizerRef recognizer, void *c
 }
 
 static void down_long_click_handler(ClickRecognizerRef recognizer, void *context) {
+  reset_auto_close_timer();
   // Show volume icons during long press
   action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_volume_up);
   action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_volume_down);
@@ -390,6 +440,7 @@ static void down_long_click_release_handler(ClickRecognizerRef recognizer, void 
 }
 
 static void player_select_long_click(ClickRecognizerRef recognizer, void *context) {
+  reset_auto_close_timer();
   // Long-press Select on Player -> go to Outputs
   outputs_window_push();
 }
@@ -558,6 +609,9 @@ static void window_appear(Window *window) {
     s_poll_timer = app_timer_register(3000, poll_callback, NULL);
   }
   
+  // Start auto-close timer for battery optimization
+  start_auto_close_timer();
+  
   // Request fresh state with retry mechanism
   if (s_delay_next_appear_retry) {
     // We just launched from queue, delay the check to let server update
@@ -578,10 +632,22 @@ static void window_disappear(Window *window) {
   cancel_mode_timer();
   cancel_volume_repeat_timer();
   cancel_state_retry();
+  cancel_auto_close_timer();
 }
 
 void player_set_launch_state_playing(void) {
   s_force_initial_playing = true;
+}
+
+void player_set_auto_close_timeout(int timeout_seconds) {
+  s_auto_close_timeout_seconds = timeout_seconds;
+  APP_LOG(APP_LOG_LEVEL_INFO, "Player auto-close timeout set to %d seconds", timeout_seconds);
+  
+  // If player window is currently visible, restart timer with new timeout
+  if (s_window && window_stack_get_top_window() == s_window) {
+    cancel_auto_close_timer();
+    start_auto_close_timer();
+  }
 }
 
 void player_window_push(void) {

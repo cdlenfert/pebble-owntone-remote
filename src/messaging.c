@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "message_keys.h"
 #include "messaging.h"
+#include "windows/player.h"
 
 // Forward declarations
 static void inbox_received_callback(DictionaryIterator *iterator, void *context);
@@ -375,6 +376,14 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     
     s_queue_callback(count, titles, artists, item_ids, selected_index);
+  }
+  
+  // Check for player auto-close timeout setting
+  t = dict_find(iterator, KEY_PLAYER_AUTO_CLOSE_TIMEOUT);
+  if (t) {
+    int timeout_seconds = t->value->int32;
+    APP_LOG(APP_LOG_LEVEL_INFO, "Received player auto-close timeout: %d seconds", timeout_seconds);
+    player_set_auto_close_timeout(timeout_seconds);
   }
 }
 
