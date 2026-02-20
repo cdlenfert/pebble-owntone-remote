@@ -589,8 +589,9 @@ Pebble.addEventListener('ready', function(e) {
   console.log('OwnTone Remote JS ready');
   console.log('Server: ' + Config.OWNTONE_BASE);
   
-  // Send player auto-close timeout after a short delay to ensure watch is ready
-  // Use saved value or default to 30 seconds
+  // Send player auto-close timeout after a delay to ensure watch is ready.
+  // Use 2 seconds to be reliable on Aplite which no longer has a splash screen
+  // acting as a warmup buffer.
   setTimeout(function() {
     var timeout = localStorage.getItem('owntone_player_auto_close_timeout');
     if (timeout !== null) {
@@ -599,7 +600,7 @@ Pebble.addEventListener('ready', function(e) {
       // Send default on first launch (matches default in config.html)
       sendPlayerAutoCloseTimeout(30);
     }
-  }, 1000);  // 1 second delay
+  }, 2000);
 });
 
 Pebble.addEventListener('appmessage', function(e) {

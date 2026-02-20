@@ -7,8 +7,6 @@
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 
-#define MAX_QUEUE_ITEMS 10
-
 static char *s_titles[MAX_QUEUE_ITEMS];
 static char *s_artists[MAX_QUEUE_ITEMS];
 static int s_item_ids[MAX_QUEUE_ITEMS];

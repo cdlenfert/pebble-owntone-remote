@@ -76,8 +76,15 @@ typedef enum {
   PLAYER_STATE_PAUSED = 2
 } PlayerState;
 
-#define MAX_RESULTS 8
 #define MAX_OUTPUTS 8
 #define MAX_FAVORITES 30
-#define MAX_QUEUE_ITEMS 10
 #define MAX_STRING_LENGTH 64
+
+// Aplite has ~24KB RAM; cap list sizes to reduce peak heap usage.
+#if defined(PBL_PLATFORM_APLITE)
+#define MAX_RESULTS 4
+#define MAX_QUEUE_ITEMS 5
+#else
+#define MAX_RESULTS 8
+#define MAX_QUEUE_ITEMS 10
+#endif
