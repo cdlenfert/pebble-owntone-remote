@@ -1,4 +1,9 @@
+Version 1.1.1 (2026-02-23)
+
+- Fix crash on Aplite when scrolling the Random results list
+
 Version 1.1 (2026-02-23)
 
-- RAM optimizations for Aplite devices
-- Bug fixes and minor UI tweaks
+- RAM optimizations for Aplite (Classic/Pebble Steel) to reduce memory usage
+- Skip splash screen on Aplite to free additional heap
+- Reduce max result and queue list sizes on Aplite to stay within memory limits
