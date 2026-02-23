@@ -9,7 +9,9 @@ static Window *s_window;
 static MenuLayer *s_menu_layer;
 
 static int s_count = 0;
-static char s_names[MAX_FAVORITES][32];
+// Heap-allocated on demand so the ~960 byte name buffer is only resident
+// while the favorites window is open (important on Aplite's limited RAM).
+static char *s_names[MAX_FAVORITES];
 static int s_types[MAX_FAVORITES];
 
 // Custom light vibration pattern (20ms pulse)
@@ -65,7 +67,7 @@ static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cel
     for (int i = 0; i < s_count; i++) {
       if (s_types[i] == s_selected_category) {
         if (current_row == cell_index->row) {
-          menu_cell_basic_draw(ctx, cell_layer, s_names[i], NULL, NULL);
+          menu_cell_basic_draw(ctx, cell_layer, s_names[i] ? s_names[i] : "?", NULL, NULL);
           return;
         }
         current_row++;
@@ -176,8 +178,20 @@ static void window_appear(Window *window) {
   }
 }
 
+static void cleanup_favorites_data(void) {
+  for (int i = 0; i < MAX_FAVORITES; i++) {
+    if (s_names[i]) {
+      free(s_names[i]);
+      s_names[i] = NULL;
+    }
+  }
+  s_count = 0;
+}
+
 static void window_unload(Window *window) {
+  message_set_favorites_callback(NULL);
   menu_layer_destroy(s_menu_layer);
+  cleanup_favorites_data();
   window_destroy(window);
   s_window = NULL;
 }
@@ -195,11 +209,14 @@ void favorites_window_push(void) {
 }
 
 void favorites_set_data(int count, char *names[], int types[]) {
+  cleanup_favorites_data();
   s_count = count > MAX_FAVORITES ? MAX_FAVORITES : count;
   
   for (int i = 0; i < s_count; i++) {
-    strncpy(s_names[i], names[i], sizeof(s_names[i]) - 1);
-    s_names[i][sizeof(s_names[i]) - 1] = '\0';
+    if (names[i]) {
+      s_names[i] = malloc(strlen(names[i]) + 1);
+      if (s_names[i]) strcpy(s_names[i], names[i]);
+    }
     s_types[i] = types[i];
   }
 
