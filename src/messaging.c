@@ -235,7 +235,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       }
     }
     
-    s_results_callback(count, titles, uris);
+    s_results_callback(count < MAX_RESULTS ? count : MAX_RESULTS, titles, uris);
   }
   
   // Check for outputs list
@@ -318,7 +318,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       Tuple *type_t = dict_find(iterator, type_key);
       if (type_t) {
         // Handle both integer and string-encoded types coming from JS
-        if (type_t->value->cstring) {
+        if (type_t->type == TUPLE_CSTRING) {
           types[i] = atoi(type_t->value->cstring);
         } else {
           types[i] = type_t->value->uint8;
