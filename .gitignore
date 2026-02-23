@@ -1,6 +1,6 @@
-<<<<<<< HEAD
-# Ignore build artifacts and generated files
+# Build artifacts
 /build/
+build/**
 *.pbw
 *.elf
 *.bin
@@ -9,17 +9,9 @@
 *.o
 *.wafpickle*
 .lock-waf*
-build/
-build/**
-/pebble.pbw
+.waf*
 /.wafpickle-*
 node_modules/
-.DS_Store
-=======
-# Build artifacts
-build/
-.lock-waf*
-.waf*
 
 # OS files
 .DS_Store
@@ -29,24 +21,5 @@ build/
 # Temporary files
 *.tmp
 menu_icon_color.png
->>>>>>> ff2b15389b81225377af5c14f35ad1df6ff2971d
-
-# Combined ignores
-/build/
-build/**
-*.pbw
-*.elf
-*.bin
-*.raw.bin
-*.map
-*.o
-*.wafpickle*
-.lock-waf*
-/.wafpickle-*
-node_modules/
-.DS_Store
-*.swp
-*~
-*.tmp
-menu_icon_color.png
+TEMP_WIKI*.md
 

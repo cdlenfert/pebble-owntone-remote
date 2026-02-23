@@ -1,0 +1,4 @@
+Version 1.1 (2026-02-23)
+
+- RAM optimizations for Aplite devices
+- Bug fixes and minor UI tweaks
