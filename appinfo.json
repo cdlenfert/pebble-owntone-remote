@@ -4,7 +4,7 @@
   "longName": "OwnTone Remote",
   "companyName": "Personal",
   "versionCode": 3,
-  "versionLabel": "1.1.1",
+  "versionLabel": "1.2",
   "sdkVersion": "3",
   "watchapp": {
     "watchface": false
