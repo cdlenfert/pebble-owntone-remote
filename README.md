@@ -24,7 +24,8 @@ A modern, extensible remote control for OwnTone music server on Pebble smartwatc
 
 ### Audio Output Management
 - View all available outputs
-- Single press: Enable output exclusively + start playback
+- Single press on **active** output: Open volume controls directly (no state change)
+- Single press on **inactive** output: Enable exclusively + open volume controls
 - Long press: Toggle output on/off (no playback change)
 - Per-output volume control (±5% increments)
 - Pause playback from volume screen
@@ -112,9 +113,10 @@ This provides fast access to the player from anywhere in the app.
 
 ### Outputs
 1. View list of outputs (shows ON/OFF status and volume)
-2. Single press: Exclusive mode + play
-3. Long press: Toggle output
-4. Volume screen: UP/DOWN to adjust, SELECT to pause, BACK to return
+2. Single press on **active** output: Open volume controls directly
+3. Single press on **inactive** output: Enable exclusively + open volume controls
+4. Long press: Toggle output on/off
+5. Volume screen: UP/DOWN to adjust, SELECT to pause, BACK to return
 
 ## Phase 2 Roadmap
 
@@ -128,7 +130,7 @@ This provides fast access to the player from anywhere in the app.
 
 ### Default Behaviors
 - **Add to Queue**: Clears queue, starts playback, enables shuffle (except albums)
-- **Exclusive Output**: Disables all others, enables selected, starts playback
+- **Exclusive Output**: Disables all others, enables selected, starts playback (only triggered when tapping an inactive output)
 - **Toggle Output**: Changes state without affecting playback
 - **Volume Steps**: 5% increments (0-100%)
 

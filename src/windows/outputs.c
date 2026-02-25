@@ -81,12 +81,16 @@ static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cel
 
 static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   if (s_output_count > 0 && cell_index->row < s_output_count && s_ids[cell_index->row]) {
-    // Single press: set exclusive output (enable this output, disable all others)
-    message_send_set_output_exclusive(s_ids[cell_index->row]);
-    light_vibe();
-    
-    // Show volume control window
-    output_volume_window_push(s_names[cell_index->row], s_ids[cell_index->row], s_volumes[cell_index->row]);
+    if (s_enabled[cell_index->row]) {
+      // Output is already ON: just open volume controls, no state change
+      light_vibe();
+      output_volume_window_push(s_names[cell_index->row], s_ids[cell_index->row], s_volumes[cell_index->row]);
+    } else {
+      // Output is OFF: set as exclusive output and open volume controls
+      message_send_set_output_exclusive(s_ids[cell_index->row]);
+      light_vibe();
+      output_volume_window_push(s_names[cell_index->row], s_ids[cell_index->row], s_volumes[cell_index->row]);
+    }
   }
 }
 
