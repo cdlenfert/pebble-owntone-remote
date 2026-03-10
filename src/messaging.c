@@ -327,10 +327,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       
       Tuple *type_t = dict_find(iterator, type_key);
       if (type_t) {
-        // Handle both integer and string-encoded types coming from JS.
-        // Some JS implementations may send a string-encoded number; prefer explicit
-        // tuple-type check but also accept a non-NULL cstring pointer for safety.
-        if (type_t->type == TUPLE_CSTRING || type_t->value->cstring) {
+        // Handle both integer and string-encoded types coming from JS
+        if (type_t->type == TUPLE_CSTRING) {
           types[i] = atoi(type_t->value->cstring);
         } else {
           types[i] = type_t->value->uint8;
