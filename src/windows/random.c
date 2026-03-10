@@ -54,9 +54,11 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
   light_vibe();
 }
 
+#ifndef PBL_PLATFORM_APLITE
 static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   player_window_push();
 }
+#endif
 
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
@@ -67,7 +69,11 @@ static void window_load(Window *window) {
     .get_num_rows = menu_get_num_rows,
     .draw_row = menu_draw_row,
     .select_click = menu_select,
+#ifndef PBL_PLATFORM_APLITE
     .select_long_click = menu_select_long
+#else
+    .select_long_click = NULL
+#endif
   });
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));

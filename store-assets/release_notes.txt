@@ -1,3 +1,8 @@
+Version 1.4 (2026-03-10)
+
+- Raise max search/random results on Aplite from 4 to 8 (matching other platforms)
+- Remove long-press shortcut to player window on Aplite (icons displayed incorrectly when accessed this way)
+
 Version 1.3 (2026-02-24)
 
 - Outputs: single-pressing an active speaker now opens volume controls directly, without changing its state

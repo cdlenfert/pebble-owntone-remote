@@ -236,6 +236,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     
     s_results_callback(count < MAX_RESULTS ? count : MAX_RESULTS, titles, uris);
+    // Free our copies; the callback already duplicated what it needs
+    for (int i = 0; i < MAX_RESULTS; i++) {
+      if (titles[i]) { free(titles[i]); titles[i] = NULL; }
+      if (uris[i])   { free(uris[i]);   uris[i]   = NULL; }
+    }
   }
   
   // Check for outputs list
@@ -281,6 +286,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     
     s_outputs_callback(count, names, ids, volumes, enabled);
+    // Free our copies; the callback already duplicated what it needs
+    for (int i = 0; i < MAX_OUTPUTS; i++) {
+      if (names[i]) { free(names[i]); names[i] = NULL; }
+      if (ids[i])   { free(ids[i]);   ids[i]   = NULL; }
+    }
   }
   
   // Check for favorites list
@@ -328,6 +338,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
     // Favorites received; hand off to callback
     s_favorites_callback(count, names, types);
+    // Free our copies; the callback already duplicated what it needs
+    for (int i = 0; i < MAX_FAVORITES; i++) {
+      if (names[i]) { free(names[i]); names[i] = NULL; }
+    }
   }
   
   // Check for queue list
@@ -376,6 +390,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     
     s_queue_callback(count, titles, artists, item_ids, selected_index);
+    // Free our copies; the callback already duplicated what it needs
+    for (int i = 0; i < MAX_QUEUE_ITEMS; i++) {
+      if (titles[i])  { free(titles[i]);  titles[i]  = NULL; }
+      if (artists[i]) { free(artists[i]); artists[i] = NULL; }
+    }
   }
   
   // Check for player auto-close timeout setting
