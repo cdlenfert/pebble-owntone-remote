@@ -582,16 +582,19 @@ static void window_load(Window *window) {
   text_layer_set_font(s_track_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_overflow_mode(s_track_layer, GTextOverflowModeTrailingEllipsis);
   text_layer_set_text(s_track_layer, "No track");
+  layer_set_clips(text_layer_get_layer(s_track_layer), false);
   layer_add_child(window_layer, text_layer_get_layer(s_track_layer));
 
   s_artist_layer = text_layer_create(GRect(4, LAYOUT_MARGIN_PX, bounds.size.w - 8, ARTIST_MAX_LINES * ARTIST_LINE_H));
   text_layer_set_font(s_artist_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_overflow_mode(s_artist_layer, GTextOverflowModeTrailingEllipsis);
+  layer_set_clips(text_layer_get_layer(s_artist_layer), false);
   layer_add_child(window_layer, text_layer_get_layer(s_artist_layer));
 
   s_album_layer = text_layer_create(GRect(4, LAYOUT_MARGIN_PX, bounds.size.w - 8, ALBUM_MAX_LINES * ALBUM_LINE_H));
   text_layer_set_font(s_album_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_overflow_mode(s_album_layer, GTextOverflowModeTrailingEllipsis);
+  layer_set_clips(text_layer_get_layer(s_album_layer), false);
   layer_add_child(window_layer, text_layer_get_layer(s_album_layer));
 
   // Initial layout with default text

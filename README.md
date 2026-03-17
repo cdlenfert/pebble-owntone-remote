@@ -120,6 +120,9 @@ This provides fast access to the player from anywhere in the app.
 
 ## Changelog
 
+### v1.6 (2026-03-17)
+- Fix descender clipping on track/artist text (G, g, p, y no longer cut off) using `layer_set_clips(false)`
+
 ### v1.5 (2026-03-17)
 - **Player layout redesign**: Dynamic text measurement using `text_layer_get_content_size()` for accurate sizing
 - Text containers now sized exactly to rendered content height — no extra padding inside boxes
