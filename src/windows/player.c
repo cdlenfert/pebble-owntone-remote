@@ -52,6 +52,22 @@ static bool s_volume_down_held = false;
 static int s_auto_close_timeout_seconds = 0; // 0 = never auto-close
 static AppTimer *s_auto_close_timer = NULL;
 
+// Dynamic layout constants
+#define LAYOUT_MARGIN_PX      4
+#define DIVIDER_TOP_PAD       10
+#define DIVIDER_BOT_PAD       0
+#define DIVIDER_STRIP_H       (DIVIDER_TOP_PAD + 1 + DIVIDER_BOT_PAD)  // 11px total
+#define TRACK_LINE_H          32
+#define ARTIST_LINE_H         28
+#define ALBUM_LINE_H          22
+#define TRACK_MAX_LINES       3
+#define ARTIST_MAX_LINES      2
+#define ALBUM_MAX_LINES       2
+
+static Layer *s_divider_layer;
+static int s_divider1_y = -1;
+static int s_divider2_y = -1;
+
 // Custom light vibration pattern (20ms pulse)
 static void light_vibe(void) {
   uint32_t segments[] = { 20 };
@@ -129,6 +145,7 @@ static void cancel_auto_close_timer(void) {
 }
 
 static void start_auto_close_timer(void);
+static void reflow_layout(void);
 
 static void reset_auto_close_timer(void) {
   // User interaction detected, restart the timer
@@ -297,7 +314,8 @@ static void player_state_handler(PlayerState state, const char *track, const cha
   text_layer_set_text(s_track_layer, s_track_text);
   text_layer_set_text(s_artist_layer, s_artist_text);
   text_layer_set_text(s_album_layer, s_album_text);
-  
+  reflow_layout();
+
   // Update UI immediately on state change
   update_action_bar();
   
@@ -457,6 +475,75 @@ static void click_config_provider(void *context) {
   window_long_click_subscribe(BUTTON_ID_DOWN, 500, down_long_click_handler, down_long_click_release_handler);
 }
 
+static void divider_layer_update(Layer *layer, GContext *ctx) {
+  if (s_divider1_y < 0 || s_divider2_y < 0) return;
+  GRect bounds = layer_get_bounds(layer);
+  int text_w = (bounds.size.w - ACTION_BAR_WIDTH) - 8;
+  graphics_context_set_stroke_color(ctx, GColorBlack);
+  // Line is drawn at top_pad offset within each divider strip
+  graphics_draw_line(ctx, GPoint(4, s_divider1_y + DIVIDER_TOP_PAD), GPoint(4 + text_w - 1, s_divider1_y + DIVIDER_TOP_PAD));
+  graphics_draw_line(ctx, GPoint(4, s_divider2_y + DIVIDER_TOP_PAD), GPoint(4 + text_w - 1, s_divider2_y + DIVIDER_TOP_PAD));
+}
+
+static void reflow_layout(void) {
+  if (!s_window || !s_track_layer || !s_artist_layer || !s_album_layer) return;
+  Layer *window_layer = window_get_root_layer(s_window);
+  GRect wbounds = layer_get_bounds(window_layer);
+  int content_w = wbounds.size.w - ACTION_BAR_WIDTH;
+  int text_x = 4;
+  int text_w = content_w - 8;
+
+  // Size layers to their maximum before measuring so all lines are visible
+  text_layer_set_size(s_track_layer,  GSize(text_w, TRACK_MAX_LINES  * TRACK_LINE_H));
+  text_layer_set_size(s_artist_layer, GSize(text_w, ARTIST_MAX_LINES * ARTIST_LINE_H));
+  text_layer_set_size(s_album_layer,  GSize(text_w, ALBUM_MAX_LINES  * ALBUM_LINE_H));
+
+  // Measure using each layer's own font/text/overflow — guaranteed to match rendering
+  GSize ts = text_layer_get_content_size(s_track_layer);
+  GSize as = text_layer_get_content_size(s_artist_layer);
+  GSize ls = text_layer_get_content_size(s_album_layer);
+
+  // Container height = exactly the measured content size, minimum 1 line
+  int track_fh  = (ts.h >= TRACK_LINE_H  ? ts.h : TRACK_LINE_H);
+  int artist_fh = (as.h >= ARTIST_LINE_H ? as.h : ARTIST_LINE_H);
+  int album_fh  = (ls.h >= ALBUM_LINE_H  ? ls.h : ALBUM_LINE_H);
+
+  // Total stack: text frames + divider strips between them
+  int total_h = track_fh + DIVIDER_STRIP_H + artist_fh + DIVIDER_STRIP_H + album_fh;
+
+  // Overflow: shrink album to 1 line, then artist, then track
+  int budget = wbounds.size.h - 2 * LAYOUT_MARGIN_PX;
+  if (total_h > budget) {
+    album_fh = ALBUM_LINE_H;
+    total_h  = track_fh + DIVIDER_STRIP_H + artist_fh + DIVIDER_STRIP_H + album_fh;
+  }
+  if (total_h > budget) {
+    artist_fh = ARTIST_LINE_H;
+    total_h   = track_fh + DIVIDER_STRIP_H + artist_fh + DIVIDER_STRIP_H + album_fh;
+  }
+  if (total_h > budget) {
+    track_fh = budget - DIVIDER_STRIP_H - artist_fh - DIVIDER_STRIP_H - album_fh;
+    if (track_fh < TRACK_LINE_H) track_fh = TRACK_LINE_H;
+    total_h  = track_fh + DIVIDER_STRIP_H + artist_fh + DIVIDER_STRIP_H + album_fh;
+  }
+
+  // Center block vertically
+  int track_y = (wbounds.size.h - total_h) / 2;
+  if (track_y < LAYOUT_MARGIN_PX) track_y = LAYOUT_MARGIN_PX;
+
+  // Divider strips sit immediately after each text frame
+  s_divider1_y   = track_y   + track_fh;
+  int artist_y   = s_divider1_y + DIVIDER_STRIP_H;
+  s_divider2_y   = artist_y  + artist_fh;
+  int album_y    = s_divider2_y + DIVIDER_STRIP_H;
+
+  layer_set_frame(text_layer_get_layer(s_track_layer),  GRect(text_x, track_y,  text_w, track_fh));
+  layer_set_frame(text_layer_get_layer(s_artist_layer), GRect(text_x, artist_y, text_w, artist_fh));
+  layer_set_frame(text_layer_get_layer(s_album_layer),  GRect(text_x, album_y,  text_w, album_fh));
+
+  if (s_divider_layer) layer_mark_dirty(s_divider_layer);
+}
+
 static void window_load(Window *window) {
 
   Layer *window_layer = window_get_root_layer(window);
@@ -484,40 +571,49 @@ static void window_load(Window *window) {
   
   // Adjust bounds for action bar
   bounds.size.w -= ACTION_BAR_WIDTH;
-  
-  // Create text layers
-  s_track_layer = text_layer_create(GRect(4, 15, bounds.size.w - 8, 50));
-  text_layer_set_font(s_track_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+
+  // Create divider layer first (draws behind text layers)
+  s_divider_layer = layer_create(layer_get_bounds(window_layer));
+  layer_set_update_proc(s_divider_layer, divider_layer_update);
+  layer_add_child(window_layer, s_divider_layer);
+
+  // Create text layers (added after divider so they render on top)
+  s_track_layer = text_layer_create(GRect(4, LAYOUT_MARGIN_PX, bounds.size.w - 8, TRACK_MAX_LINES * TRACK_LINE_H));
+  text_layer_set_font(s_track_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_overflow_mode(s_track_layer, GTextOverflowModeTrailingEllipsis);
   text_layer_set_text(s_track_layer, "No track");
   layer_add_child(window_layer, text_layer_get_layer(s_track_layer));
-  
-  s_artist_layer = text_layer_create(GRect(4, 70, bounds.size.w - 8, 40));
+
+  s_artist_layer = text_layer_create(GRect(4, LAYOUT_MARGIN_PX, bounds.size.w - 8, ARTIST_MAX_LINES * ARTIST_LINE_H));
   text_layer_set_font(s_artist_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_overflow_mode(s_artist_layer, GTextOverflowModeTrailingEllipsis);
   layer_add_child(window_layer, text_layer_get_layer(s_artist_layer));
-  
-  s_album_layer = text_layer_create(GRect(4, 115, bounds.size.w - 8, 40));
-  text_layer_set_font(s_album_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+
+  s_album_layer = text_layer_create(GRect(4, LAYOUT_MARGIN_PX, bounds.size.w - 8, ALBUM_MAX_LINES * ALBUM_LINE_H));
+  text_layer_set_font(s_album_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_overflow_mode(s_album_layer, GTextOverflowModeTrailingEllipsis);
   layer_add_child(window_layer, text_layer_get_layer(s_album_layer));
-  
+
+  // Initial layout with default text
+  reflow_layout();
+
   // Set callbacks and request player state. Use any cached state first to
   // avoid the race where JS replies while the player UI isn't registered.
   message_set_player_callback(player_state_handler);
-  
+
   // Handle launch from queue (Optimistic UI)
   if (s_force_initial_playing) {
     s_player_state = PLAYER_STATE_PLAYING;
     s_force_initial_playing = false;
-    
+
     // Maintain playing state even if server initially reports stopped
     player_set_transient_playing_state();
-    
+
     // Show "Loading..." to confirm action
     text_layer_set_text(s_track_layer, "Loading...");
     text_layer_set_text(s_artist_layer, "");
     text_layer_set_text(s_album_layer, "");
+    reflow_layout();
     update_action_bar();
     
     // Request fresh state immediately, skip cache
@@ -582,6 +678,10 @@ static void window_unload(Window *window) {
   s_icon_ellipsis = NULL;
   
   action_bar_layer_destroy(s_action_bar);
+  layer_destroy(s_divider_layer);
+  s_divider_layer = NULL;
+  s_divider1_y = -1;
+  s_divider2_y = -1;
 }
 
 static void window_appear(Window *window) {

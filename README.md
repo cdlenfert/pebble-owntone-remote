@@ -118,6 +118,19 @@ This provides fast access to the player from anywhere in the app.
 4. Long press: Toggle output on/off
 5. Volume screen: UP/DOWN to adjust, SELECT to pause, BACK to return
 
+## Changelog
+
+### v1.5 (2026-03-17)
+- **Player layout redesign**: Dynamic text measurement using `text_layer_get_content_size()` for accurate sizing
+- Text containers now sized exactly to rendered content height — no extra padding inside boxes
+- Divider lines between track/artist/album 
+- Entire text block vertically centered on screen
+- Overflow handling: album truncates first, then artist, then track
+- Splash screen minimum display time halved (2000ms → 1000ms)
+
+### v1.4 and earlier
+- Initial release with player controls, search, random, outputs management
+
 ## Phase 2 Roadmap
 
 - **Favorites Management**: Configure favorite playlists/artists/albums via web interface

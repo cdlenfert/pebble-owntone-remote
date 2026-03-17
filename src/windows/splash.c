@@ -6,7 +6,7 @@
 #include "player.h"
 
 // Timers and retry configuration
-#define SPLASH_MIN_MS 2000
+#define SPLASH_MIN_MS 1000
 #define SPLASH_RETRY_MS 2000
 #define SPLASH_MAX_ATTEMPTS 5
 
