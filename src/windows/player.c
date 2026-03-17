@@ -493,15 +493,19 @@ static void reflow_layout(void) {
   int text_x = 4;
   int text_w = content_w - 8;
 
-  // Size layers to their maximum before measuring so all lines are visible
-  text_layer_set_size(s_track_layer,  GSize(text_w, TRACK_MAX_LINES  * TRACK_LINE_H));
-  text_layer_set_size(s_artist_layer, GSize(text_w, ARTIST_MAX_LINES * ARTIST_LINE_H));
-  text_layer_set_size(s_album_layer,  GSize(text_w, ALBUM_MAX_LINES  * ALBUM_LINE_H));
-
-  // Measure using each layer's own font/text/overflow — guaranteed to match rendering
-  GSize ts = text_layer_get_content_size(s_track_layer);
-  GSize as = text_layer_get_content_size(s_artist_layer);
-  GSize ls = text_layer_get_content_size(s_album_layer);
+  // Measure text directly — bypasses any layer render cache so updates are always accurate
+  GSize ts = graphics_text_layout_get_content_size(
+      s_track_text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD),
+      GRect(0, 0, text_w, TRACK_MAX_LINES * TRACK_LINE_H),
+      GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+  GSize as = graphics_text_layout_get_content_size(
+      s_artist_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
+      GRect(0, 0, text_w, ARTIST_MAX_LINES * ARTIST_LINE_H),
+      GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+  GSize ls = graphics_text_layout_get_content_size(
+      s_album_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+      GRect(0, 0, text_w, ALBUM_MAX_LINES * ALBUM_LINE_H),
+      GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
 
   // Container height = exactly the measured content size, minimum 1 line
   int track_fh  = (ts.h >= TRACK_LINE_H  ? ts.h : TRACK_LINE_H);

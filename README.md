@@ -120,6 +120,9 @@ This provides fast access to the player from anywhere in the app.
 
 ## Changelog
 
+### v1.7 (2026-03-17)
+- Fix player layout not reflowing correctly when track changes mid-playback (switch to `graphics_text_layout_get_content_size()` to avoid stale layer render cache)
+
 ### v1.6 (2026-03-17)
 - Fix descender clipping on track/artist text (G, g, p, y no longer cut off) using `layer_set_clips(false)`
 
