@@ -667,22 +667,13 @@ static void window_unload(Window *window) {
   text_layer_destroy(s_artist_layer);
   text_layer_destroy(s_album_layer);
   
-  gbitmap_destroy(s_icon_play);
-  gbitmap_destroy(s_icon_pause);
-  gbitmap_destroy(s_icon_next);
-  gbitmap_destroy(s_icon_prev);
-  gbitmap_destroy(s_icon_volume_up);
-  gbitmap_destroy(s_icon_volume_down);
-  gbitmap_destroy(s_icon_ellipsis);
-  
-  // Set to NULL so window_appear knows to reload them
-  s_icon_play = NULL;
-  s_icon_pause = NULL;
-  s_icon_next = NULL;
-  s_icon_prev = NULL;
-  s_icon_volume_up = NULL;
-  s_icon_volume_down = NULL;
-  s_icon_ellipsis = NULL;
+  if (s_icon_play)        { gbitmap_destroy(s_icon_play);        s_icon_play = NULL; }
+  if (s_icon_pause)       { gbitmap_destroy(s_icon_pause);       s_icon_pause = NULL; }
+  if (s_icon_next)        { gbitmap_destroy(s_icon_next);        s_icon_next = NULL; }
+  if (s_icon_prev)        { gbitmap_destroy(s_icon_prev);        s_icon_prev = NULL; }
+  if (s_icon_volume_up)   { gbitmap_destroy(s_icon_volume_up);   s_icon_volume_up = NULL; }
+  if (s_icon_volume_down) { gbitmap_destroy(s_icon_volume_down); s_icon_volume_down = NULL; }
+  if (s_icon_ellipsis)    { gbitmap_destroy(s_icon_ellipsis);    s_icon_ellipsis = NULL; }
   
   action_bar_layer_destroy(s_action_bar);
   layer_destroy(s_divider_layer);
@@ -744,6 +735,19 @@ static void window_disappear(Window *window) {
   cancel_volume_repeat_timer();
   cancel_state_retry();
   cancel_auto_close_timer();
+
+  // Free bitmaps when this window is hidden — a hidden window has no reason to
+  // hold decoded pixel data. window_appear reloads them when the window returns.
+  // This is beneficial on all platforms: Aplite avoids OOM when the output
+  // volume window allocates its own icons; on color platforms the 8-bit bitmaps
+  // are 8× larger, so the absolute savings are even greater.
+  if (s_icon_play)        { gbitmap_destroy(s_icon_play);        s_icon_play = NULL; }
+  if (s_icon_pause)       { gbitmap_destroy(s_icon_pause);       s_icon_pause = NULL; }
+  if (s_icon_next)        { gbitmap_destroy(s_icon_next);        s_icon_next = NULL; }
+  if (s_icon_prev)        { gbitmap_destroy(s_icon_prev);        s_icon_prev = NULL; }
+  if (s_icon_volume_up)   { gbitmap_destroy(s_icon_volume_up);   s_icon_volume_up = NULL; }
+  if (s_icon_volume_down) { gbitmap_destroy(s_icon_volume_down); s_icon_volume_down = NULL; }
+  if (s_icon_ellipsis)    { gbitmap_destroy(s_icon_ellipsis);    s_icon_ellipsis = NULL; }
 }
 
 void player_set_launch_state_playing(void) {

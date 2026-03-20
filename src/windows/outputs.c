@@ -128,19 +128,40 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
   message_set_outputs_callback(NULL);
-  menu_layer_destroy(s_menu_layer);
-  s_menu_layer = NULL;
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
   cleanup_outputs();
 }
 
 static void window_appear(Window *window) {
-  // Refresh outputs when window appears
+  // Recreate the menu layer if it was freed while hidden (e.g. volume window on top)
+  if (!s_menu_layer) {
+    Layer *window_layer = window_get_root_layer(window);
+    GRect bounds = layer_get_bounds(window_layer);
+    s_menu_layer = menu_layer_create(bounds);
+    menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
+      .get_num_rows = menu_get_num_rows,
+      .draw_row = menu_draw_row,
+      .select_click = menu_select,
+      .select_long_click = menu_select_long
+    });
+    menu_layer_set_click_config_onto_window(s_menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+  }
+  // Refresh outputs data
   message_set_outputs_callback(outputs_handler);
   message_send_command(CMD_GET_OUTPUTS);
 }
 
 static void window_disappear(Window *window) {
-  // Don't destroy - window may just be hidden while volume window is showing
+  // Free the MenuLayer so the volume window can allocate its bitmaps without
+  // heap pressure. window_appear recreates it when this window returns.
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
 }
 
 void outputs_window_push(void) {

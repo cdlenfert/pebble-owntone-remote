@@ -1,3 +1,21 @@
+Version 1.8 (2026-03-20)
+
+- Fix output volume window icons missing on Aplite: free outputs MenuLayer before volume window loads to stay within 24KB heap
+- Free player window bitmaps when hidden on all platforms, reducing peak heap usage
+
+Version 1.7 (2026-03-20)
+
+- Fix player layout reflow on track change
+
+Version 1.6 (2026-03-20)
+
+- Fix descender clipping on player text layers
+
+Version 1.5 (2026-03-20)
+
+- Player layout redesign for better readability
+- Faster splash screen
+
 Version 1.4 (2026-03-10)
 
 - Raise max search/random results on Aplite from 4 to 8 (matching other platforms)
