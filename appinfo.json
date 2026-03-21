@@ -3,8 +3,8 @@
   "shortName": "OwnTone",
   "longName": "OwnTone Remote",
   "companyName": "Personal",
-  "versionCode": 9,
-  "versionLabel": "1.8",
+  "versionCode": 10,
+  "versionLabel": "1.9",
   "sdkVersion": "3",
   "watchapp": {
     "watchface": false

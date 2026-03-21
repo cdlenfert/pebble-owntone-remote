@@ -155,9 +155,18 @@ function getCurrentTrack(callback) {
         var data = JSON.parse(response);
         if (data.items && data.items.length > 0) {
           var track = data.items[0];
-          dict[MessageKeys.PLAYER_TRACK] = track.title || 'Unknown';
+          var isStream = track.data_kind === 'url';
+
+          if (isStream) {
+            // OwnTone maps radio streams as station name in title and the current song in album.
+            dict[MessageKeys.PLAYER_TRACK] = track.album || track.title || 'Unknown';
+            dict[MessageKeys.PLAYER_ALBUM] = track.title || track.album || 'Unknown';
+          } else {
+            dict[MessageKeys.PLAYER_TRACK] = track.title || 'Unknown';
+            dict[MessageKeys.PLAYER_ALBUM] = track.album || 'Unknown';
+          }
+
           dict[MessageKeys.PLAYER_ARTIST] = track.artist || 'Unknown';
-          dict[MessageKeys.PLAYER_ALBUM] = track.album || 'Unknown';
         } else {
           dict[MessageKeys.PLAYER_TRACK] = 'No track';
           dict[MessageKeys.PLAYER_ARTIST] = '';

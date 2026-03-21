@@ -1,3 +1,7 @@
+Version 1.9 (2026-03-21)
+
+- Fix radio streams in player window: show track title at the top and station name at the bottom
+
 Version 1.8 (2026-03-20)
 
 - Fix output volume window icons missing on Aplite: free outputs MenuLayer before volume window loads to stay within 24KB heap
