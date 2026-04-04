@@ -1,0 +1,44 @@
+[settings]
+experimental = true
+lockfile = true
+
+[tools]
+# https://developer.rebble.io/sdk/
+# https://github.com/coredevices/pebble-tool
+# https://mise.jdx.dev/dev-tools/backends/pipx.html
+"pipx:pebble-tool" = "5.0.28"
+
+[env]
+_.file = ".env"
+
+[tasks.clean]
+description = "Clean build artifacts"
+run = "pebble clean"
+
+[tasks.build]
+description = "Build PBW"
+run = "scripts/build.sh"
+
+[tasks.rebuild]
+description = "Clean and rebuild PBW"
+run = "pebble clean && scripts/build.sh"
+
+[tasks.install-phone]
+description = "Build and install on phone"
+alias = "install"
+run = "scripts/install-phone.sh"
+
+[tasks.install-emulator]
+description = "Build and install on emulator (default: basalt)"
+alias = "emu"
+run = "pebble wipe && scripts/install-emulator.sh"
+
+[tasks.screenshot-phone]
+description = "Take a screenshot from phone"
+alias = "screenshot"
+run = "scripts/screenshot-phone.sh"
+
+[tasks.screenshot-emulator]
+description = "Take a screenshot from emulator (default: basalt)"
+alias = "screenshot-emu"
+run = "scripts/screenshot-emulator.sh"

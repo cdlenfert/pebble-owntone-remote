@@ -13,6 +13,12 @@ build/**
 /.wafpickle-*
 node_modules/
 
+# Environment variables
+.env
+
+# Local OwnTone server clone (for reference only)
+owntone-server/
+
 # OS files
 .DS_Store
 *.swp
