@@ -1,3 +1,9 @@
+Version 1.10 (2026-04-04)
+
+- App auto-close: after the player window closes, the app exits to the watchface if no buttons are pressed within a configurable timeout (default: 5 minutes)
+- Resets on any button press in the main menu or outputs windows
+- Configurable via the Battery Optimization section in settings
+
 Version 1.9 (2026-03-21)
 
 - Fix radio streams in player window: show track title at the top and station name at the bottom
