@@ -3,6 +3,7 @@
 #include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
+#include "../app_auto_close.h"
 
 static Window *s_window;
 static MenuLayer *s_menu_layer;
@@ -80,6 +81,7 @@ static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cel
 }
 
 static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  app_auto_close_reset();
   if (s_output_count > 0 && cell_index->row < s_output_count && s_ids[cell_index->row]) {
     if (s_enabled[cell_index->row]) {
       // Output is already ON: just open volume controls, no state change
@@ -95,6 +97,7 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
 }
 
 static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  app_auto_close_reset();
   if (s_output_count > 0 && cell_index->row < s_output_count && s_ids[cell_index->row]) {
     // Long press: toggle output
     bool was_enabled = s_enabled[cell_index->row];
@@ -108,6 +111,11 @@ static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void 
   }
 }
 
+static void outputs_selection_changed(MenuLayer *menu_layer, MenuIndex new_index, MenuIndex old_index, void *data) {
+  (void)menu_layer; (void)new_index; (void)old_index; (void)data;
+  app_auto_close_reset();
+}
+
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -117,6 +125,7 @@ static void window_load(Window *window) {
     .get_num_rows = menu_get_num_rows,
     .draw_row = menu_draw_row,
     .select_click = menu_select,
+    .selection_changed = outputs_selection_changed,
     .select_long_click = menu_select_long
   });
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
@@ -145,6 +154,7 @@ static void window_appear(Window *window) {
       .get_num_rows = menu_get_num_rows,
       .draw_row = menu_draw_row,
       .select_click = menu_select,
+      .selection_changed = outputs_selection_changed,
       .select_long_click = menu_select_long
     });
     menu_layer_set_click_config_onto_window(s_menu_layer, window);
@@ -230,6 +240,7 @@ static void output_volume_status_handler(int status) {
 }
 
 static void volume_up_click(ClickRecognizerRef recognizer, void *context) {
+  app_auto_close_reset();
   s_current_output_volume = (s_current_output_volume >= 95) ? 100 : s_current_output_volume + 5;
   message_send_set_output_volume(s_current_output_id, s_current_output_volume);
   update_volume_display();
@@ -237,6 +248,7 @@ static void volume_up_click(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void volume_down_click(ClickRecognizerRef recognizer, void *context) {
+  app_auto_close_reset();
   s_current_output_volume = (s_current_output_volume <= 5) ? 0 : s_current_output_volume - 5;
   message_send_set_output_volume(s_current_output_id, s_current_output_volume);
   update_volume_display();
@@ -244,6 +256,7 @@ static void volume_down_click(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void volume_select_click(ClickRecognizerRef recognizer, void *context) {
+  app_auto_close_reset();
   // Toggle playback - update icon immediately for responsive UI
   if (s_output_player_state == PLAYER_STATE_PLAYING) {
     s_output_player_state = PLAYER_STATE_PAUSED;

@@ -6,6 +6,7 @@
 #include "outputs.h"
 #include "favorites.h"
 #include "queue.h"
+#include "../app_auto_close.h"
 
 static Window *s_window;
 static MenuLayer *s_menu_layer;
@@ -42,6 +43,7 @@ static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cel
 }
 
 static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  app_auto_close_reset();
 #if defined(PBL_PLATFORM_APLITE)
   switch (cell_index->row) {
     case 0:
@@ -90,6 +92,11 @@ static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void 
 }
 #endif
 
+static void menu_selection_changed(MenuLayer *menu_layer, MenuIndex new_index, MenuIndex old_index, void *data) {
+  (void)menu_layer; (void)new_index; (void)old_index; (void)data;
+  app_auto_close_reset();
+}
+
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -99,6 +106,7 @@ static void window_load(Window *window) {
     .get_num_rows = menu_get_num_rows,
     .draw_row = menu_draw_row,
     .select_click = menu_select,
+    .selection_changed = menu_selection_changed,
 #ifndef PBL_PLATFORM_APLITE
     .select_long_click = menu_select_long
 #else

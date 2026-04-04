@@ -2,6 +2,7 @@
 #include "message_keys.h"
 #include "messaging.h"
 #include "windows/player.h"
+#include "app_auto_close.h"
 
 // Forward declarations
 static void inbox_received_callback(DictionaryIterator *iterator, void *context);
@@ -403,6 +404,14 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     int timeout_seconds = t->value->int32;
     APP_LOG(APP_LOG_LEVEL_INFO, "Received player auto-close timeout: %d seconds", timeout_seconds);
     player_set_auto_close_timeout(timeout_seconds);
+  }
+
+  // Check for app auto-close timeout setting
+  t = dict_find(iterator, KEY_APP_AUTO_CLOSE_TIMEOUT);
+  if (t) {
+    int timeout_seconds = t->value->int32;
+    APP_LOG(APP_LOG_LEVEL_INFO, "Received app auto-close timeout: %d seconds", timeout_seconds);
+    app_auto_close_set_timeout(timeout_seconds);
   }
 }
 

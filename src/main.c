@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "message_keys.h"
 #include "messaging.h"
+#include "app_auto_close.h"
 #include "windows/splash.h"
 #include "windows/main_menu.h"
 #include "windows/player.h"
@@ -13,6 +14,7 @@ static void aplite_push_player(void *data) {
 
 static void init(void) {
   APP_LOG(APP_LOG_LEVEL_INFO, "main: init() start");
+  app_auto_close_init();
   message_init();
   APP_LOG(APP_LOG_LEVEL_INFO, "main: message_init() returned");
 #if defined(PBL_PLATFORM_APLITE)
@@ -28,6 +30,7 @@ static void init(void) {
 }
 
 static void deinit(void) {
+  app_auto_close_deinit();
   message_deinit();
 }
 

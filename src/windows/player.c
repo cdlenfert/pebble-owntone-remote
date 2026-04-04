@@ -2,6 +2,7 @@
 #include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
+#include "../app_auto_close.h"
 #include "outputs.h"
 
 static Window *s_window;
@@ -684,6 +685,7 @@ static void window_unload(Window *window) {
 
 static void window_appear(Window *window) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Player window appearing, timeout=%d", s_auto_close_timeout_seconds);
+  app_auto_close_cancel();
   // Reload any icons that were destroyed or failed to load
   if (!s_icon_play) s_icon_play = gbitmap_create_with_resource(RESOURCE_ID_ICON_PLAY);
   if (!s_icon_pause) s_icon_pause = gbitmap_create_with_resource(RESOURCE_ID_ICON_PAUSE);
@@ -729,6 +731,7 @@ static void window_appear(Window *window) {
 
 static void window_disappear(Window *window) {
   // Stop polling when window is not visible
+  app_auto_close_start();
   cancel_poll_timer();
   cancel_status_check_timer();
   cancel_mode_timer();

@@ -41,7 +41,8 @@ var MessageKeys = {
   QUEUE_ITEM_ID_BASE: 170,
   
   QUEUE_ITEM_ID: 180,
-  PLAYER_AUTO_CLOSE_TIMEOUT: 190
+  PLAYER_AUTO_CLOSE_TIMEOUT: 190,
+  APP_AUTO_CLOSE_TIMEOUT: 191
 };
 
 // Command types
@@ -593,6 +594,13 @@ function sendPlayerAutoCloseTimeout(timeoutSeconds) {
   console.log('Sent player auto-close timeout: ' + timeoutSeconds + 's');
 }
 
+function sendAppAutoCloseTimeout(timeoutSeconds) {
+  var dict = {};
+  dict[MessageKeys.APP_AUTO_CLOSE_TIMEOUT] = timeoutSeconds;
+  sendToPebble(dict);
+  console.log('Sent app auto-close timeout: ' + timeoutSeconds + 's');
+}
+
 // Pebble event handlers
 Pebble.addEventListener('ready', function(e) {
   console.log('OwnTone Remote JS ready');
@@ -608,6 +616,14 @@ Pebble.addEventListener('ready', function(e) {
     } else {
       // Send default on first launch (matches default in config.html)
       sendPlayerAutoCloseTimeout(30);
+    }
+
+    var appTimeout = localStorage.getItem('owntone_app_auto_close_timeout');
+    if (appTimeout !== null) {
+      sendAppAutoCloseTimeout(parseInt(appTimeout));
+    } else {
+      // Default to 5 minutes (300s) on first launch
+      sendAppAutoCloseTimeout(300);
     }
   }, 2000);
 });
@@ -715,6 +731,11 @@ Pebble.addEventListener('webviewclosed', function(e) {
       if (settings.playerAutoCloseTimeout !== undefined) {
         localStorage.setItem('owntone_player_auto_close_timeout', settings.playerAutoCloseTimeout.toString());
         sendPlayerAutoCloseTimeout(settings.playerAutoCloseTimeout);
+      }
+
+      if (settings.appAutoCloseTimeout !== undefined) {
+        localStorage.setItem('owntone_app_auto_close_timeout', settings.appAutoCloseTimeout.toString());
+        sendAppAutoCloseTimeout(settings.appAutoCloseTimeout);
       }
     } catch (err) {
       console.log('Error parsing config response: ' + err);

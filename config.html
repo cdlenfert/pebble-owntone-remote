@@ -203,6 +203,18 @@
         <option value="0">Never</option>
       </select>
       <small style="color: #999; display: block; margin-top: 5px;">To save battery, the player window will automatically close and stop polling for updates after the selected time. Default is 30 seconds.</small>
+
+      <label for="app-auto-close" style="margin-top: 12px; display: block;">When should the app close after returning to the main menu?</label>
+      <select id="app-auto-close" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <option value="0">Never</option>
+        <option value="30">30 seconds</option>
+        <option value="60">1 minute</option>
+        <option value="120">2 minutes</option>
+        <option value="180">3 minutes</option>
+        <option value="240">4 minutes</option>
+        <option value="300" selected>5 minutes</option>
+      </select>
+      <small style="color: #999; display: block; margin-top: 5px;">After the player closes, the app will exit to the watchface if no buttons are pressed within the selected time. Default is 5 minutes.</small>
     </div>
     
     <div class="section" style="opacity: 0.5; pointer-events: none;">
@@ -333,6 +345,7 @@
         serverUrl: document.getElementById('server-url').value,
         favorites: favorites,
         playerAutoCloseTimeout: parseInt(document.getElementById('player-auto-close').value),
+        appAutoCloseTimeout: parseInt(document.getElementById('app-auto-close').value),
         outputDefaults: {}
       };
       
@@ -522,6 +535,12 @@
     var storedTimeout = localStorage.getItem('owntone_player_auto_close_timeout');
     if (storedTimeout) {
       document.getElementById('player-auto-close').value = storedTimeout;
+    }
+
+    // Load app auto-close timeout (default Never = 0)
+    var storedAppTimeout = localStorage.getItem('owntone_app_auto_close_timeout');
+    if (storedAppTimeout) {
+      document.getElementById('app-auto-close').value = storedAppTimeout;
     }
   </script>
 </body>

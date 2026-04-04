@@ -11,6 +11,8 @@ A modern, extensible remote control for OwnTone music server on Pebble smartwatc
 - Volume control (±5% increments)
 - Action bar with standard Pebble music controls
 - Quick navigation with long-press shortcuts
+- Configurable player window auto-close (battery optimization)
+- Configurable app auto-close after returning to main menu
 
 ### Search
 - Voice search for playlists, artists, and albums
@@ -119,6 +121,18 @@ This provides fast access to the player from anywhere in the app.
 5. Volume screen: UP/DOWN to adjust, SELECT to pause, BACK to return
 
 ## Changelog
+
+### v1.10 (2026-04-04)
+- **App auto-close**: New configurable setting — after the player window closes, the app exits to the watchface if no buttons are pressed within the selected time (default: 5 minutes). Resets on any button press in the main menu or outputs windows. Configurable via the Battery Optimization section of the settings page.
+- Add mise dev environment: `mise.toml`, `scripts/`, `.env.example`, `AGENTS.md`
+- Modernize `wscript`: replace deprecated `pbl_program()` with `pbl_build(bin_type='app')`
+
+### v1.9 (2026-03-21)
+- Fix radio streams in player window: show track title at the top and station name at the bottom
+
+### v1.8 (2026-03-20)
+- Fix output volume window icons missing on Aplite: free outputs MenuLayer before volume window loads to stay within 24KB heap
+- Free player window bitmaps when hidden on all platforms, reducing peak heap usage
 
 ### v1.7 (2026-03-17)
 - Fix player layout not reflowing correctly when track changes mid-playback (switch to `graphics_text_layout_get_content_size()` to avoid stale layer render cache)
