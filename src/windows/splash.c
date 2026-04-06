@@ -168,7 +168,9 @@ static void window_load(Window *window) {
   }
 
   // Status text below logo
-  s_status_layer = text_layer_create(GRect(4, bounds.size.h - 40, bounds.size.w - 8, 36));
+  s_status_layer = text_layer_create(PBL_IF_ROUND_ELSE(
+    GRect(20, bounds.size.h - 40, bounds.size.w - 40, 36),
+    GRect(4,  bounds.size.h - 40, bounds.size.w - 8,  36)));
   text_layer_set_font(s_status_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   text_layer_set_text_alignment(s_status_layer, GTextAlignmentCenter);
   text_layer_set_text(s_status_layer, "Checking for server...");

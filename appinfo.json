@@ -10,7 +10,7 @@
     "watchface": false
   },
   "enableMultiJS": false,
-  "targetPlatforms": ["basalt", "aplite"],
+  "targetPlatforms": ["basalt", "aplite", "chalk", "gabbro"],
   "capabilities": ["configurable"],
   "appKeys": {
     "CMD": 0,

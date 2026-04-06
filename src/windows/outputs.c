@@ -150,6 +150,9 @@ static void window_appear(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
     s_menu_layer = menu_layer_create(bounds);
+#ifdef PBL_ROUND
+    menu_layer_set_center_focused(s_menu_layer, true);
+#endif
     menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
       .get_num_rows = menu_get_num_rows,
       .draw_row = menu_draw_row,
@@ -307,7 +310,9 @@ static void volume_window_load(Window *window) {
   // Adjust bounds for action bar
   bounds.size.w -= ACTION_BAR_WIDTH;
   
-  s_name_layer = text_layer_create(GRect(4, 30, bounds.size.w - 8, 40));
+  s_name_layer = text_layer_create(PBL_IF_ROUND_ELSE(
+    GRect(20, 30, bounds.size.w - 40, 40),
+    GRect(4,  30, bounds.size.w - 8,  40)));
   text_layer_set_font(s_name_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_text_alignment(s_name_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(s_name_layer, GTextOverflowModeTrailingEllipsis);

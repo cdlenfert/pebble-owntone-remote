@@ -53,17 +53,56 @@ static bool s_volume_down_held = false;
 static int s_auto_close_timeout_seconds = 0; // 0 = never auto-close
 static AppTimer *s_auto_close_timer = NULL;
 
-// Dynamic layout constants
-#define LAYOUT_MARGIN_PX      4
-#define DIVIDER_TOP_PAD       10
-#define DIVIDER_BOT_PAD       0
-#define DIVIDER_STRIP_H       (DIVIDER_TOP_PAD + 1 + DIVIDER_BOT_PAD)  // 11px total
-#define TRACK_LINE_H          32
-#define ARTIST_LINE_H         28
-#define ALBUM_LINE_H          22
-#define TRACK_MAX_LINES       3
-#define ARTIST_MAX_LINES      2
-#define ALBUM_MAX_LINES       2
+// Per-platform fixed layout constants.
+// Line counts are MAXIMUMS used to cap layer height; dynamic measurement shrinks
+// heights for short content. Round platforms use 1 line each for artist/album
+// since text won't flow past the equator zone without arc truncation.
+#if defined(PBL_PLATFORM_CHALK)
+  #define P_TRACK_FONT    FONT_KEY_GOTHIC_24_BOLD
+  #define P_ARTIST_FONT   FONT_KEY_GOTHIC_24
+  #define P_ALBUM_FONT    FONT_KEY_GOTHIC_18
+  #define P_TRACK_LINE_H  28
+  #define P_ARTIST_LINE_H 28
+  #define P_ALBUM_LINE_H  22
+  #define P_TRACK_LINES   3
+  #define P_ARTIST_LINES  1
+  #define P_ALBUM_LINES   1
+  #define P_ROUND_INSET   10  // track + artist inset (both sides)
+  // Album sits near the bottom of the circle; at y~160 the arc runs x=40..130.
+  #define P_ALBUM_X       42
+  #define P_ALBUM_W       88  // right edge = 130, safe for arc + action bar
+#elif defined(PBL_PLATFORM_GABBRO)
+  #define P_TRACK_FONT    FONT_KEY_GOTHIC_28_BOLD
+  #define P_ARTIST_FONT   FONT_KEY_GOTHIC_28
+  #define P_ALBUM_FONT    FONT_KEY_GOTHIC_24_BOLD
+  #define P_TRACK_LINE_H  36
+  #define P_ARTIST_LINE_H 36
+  #define P_ALBUM_LINE_H  28
+  #define P_TRACK_LINES   3
+  #define P_ARTIST_LINES  1
+  #define P_ALBUM_LINES   1
+  #define P_ROUND_INSET   10
+  // Gabbro 260px wide; at album y~200 the arc gives plenty of room.
+  #define P_ALBUM_X       20
+  #define P_ALBUM_W      190  // right edge = 210, safe for arc + action bar
+#else  // basalt, aplite
+  #define P_TRACK_FONT    FONT_KEY_GOTHIC_28_BOLD
+  #define P_ARTIST_FONT   FONT_KEY_GOTHIC_24_BOLD
+  #define P_ALBUM_FONT    FONT_KEY_GOTHIC_18_BOLD
+  #define P_TRACK_LINE_H  32
+  #define P_ARTIST_LINE_H 28
+  #define P_ALBUM_LINE_H  22
+  #define P_TRACK_LINES   3
+  #define P_ARTIST_LINES  2
+  #define P_ALBUM_LINES   1
+#endif
+
+#define DIVIDER_TOP_PAD  10
+#define DIVIDER_H        11   // DIVIDER_TOP_PAD + 1px line + 0 bottom
+#define TRACK_H          (P_TRACK_LINES  * P_TRACK_LINE_H)
+#define ARTIST_H         (P_ARTIST_LINES * P_ARTIST_LINE_H)
+#define ALBUM_H          (P_ALBUM_LINES  * P_ALBUM_LINE_H)
+#define TOTAL_CONTENT_H  (TRACK_H + DIVIDER_H + ARTIST_H + DIVIDER_H + ALBUM_H)
 
 static Layer *s_divider_layer;
 static int s_divider1_y = -1;
@@ -479,74 +518,84 @@ static void click_config_provider(void *context) {
 static void divider_layer_update(Layer *layer, GContext *ctx) {
   if (s_divider1_y < 0 || s_divider2_y < 0) return;
   GRect bounds = layer_get_bounds(layer);
-  int text_w = (bounds.size.w - ACTION_BAR_WIDTH) - 8;
+  int lx = PBL_IF_ROUND_ELSE(0, 4);
+  int rx = bounds.size.w - ACTION_BAR_WIDTH - PBL_IF_ROUND_ELSE(0, 4);
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  // Line is drawn at top_pad offset within each divider strip
-  graphics_draw_line(ctx, GPoint(4, s_divider1_y + DIVIDER_TOP_PAD), GPoint(4 + text_w - 1, s_divider1_y + DIVIDER_TOP_PAD));
-  graphics_draw_line(ctx, GPoint(4, s_divider2_y + DIVIDER_TOP_PAD), GPoint(4 + text_w - 1, s_divider2_y + DIVIDER_TOP_PAD));
+  graphics_draw_line(ctx, GPoint(lx, s_divider1_y + DIVIDER_TOP_PAD), GPoint(rx, s_divider1_y + DIVIDER_TOP_PAD));
+  graphics_draw_line(ctx, GPoint(lx, s_divider2_y + DIVIDER_TOP_PAD), GPoint(rx, s_divider2_y + DIVIDER_TOP_PAD));
 }
 
 static void reflow_layout(void) {
   if (!s_window || !s_track_layer || !s_artist_layer || !s_album_layer) return;
+
   Layer *window_layer = window_get_root_layer(s_window);
   GRect wbounds = layer_get_bounds(window_layer);
   int content_w = wbounds.size.w - ACTION_BAR_WIDTH;
-  int text_x = 4;
-  int text_w = content_w - 8;
 
-  // Measure text directly — bypasses any layer render cache so updates are always accurate
+  // On round: inset layers so text stays within the visible arc at all y positions.
+  // GTextAlignmentCenter is set in window_load for round; no text flow API used.
+  // On rect: small padding from sides.
+#ifdef PBL_ROUND
+  int lx  = P_ROUND_INSET;
+  int lw  = content_w - P_ROUND_INSET * 2;
+  int alx = P_ALBUM_X;
+  int alw = P_ALBUM_W;
+#else
+  int lx  = 4;
+  int lw  = content_w - 8;
+  int alx = lx;
+  int alw = lw;
+#endif
+
+  GFont track_font  = fonts_get_system_font(P_TRACK_FONT);
+  GFont artist_font = fonts_get_system_font(P_ARTIST_FONT);
+  GFont album_font  = fonts_get_system_font(P_ALBUM_FONT);
+
   GSize ts = graphics_text_layout_get_content_size(
-      s_track_text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD),
-      GRect(0, 0, text_w, TRACK_MAX_LINES * TRACK_LINE_H),
+      s_track_text,  track_font,  GRect(0, 0, lw, TRACK_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
   GSize as = graphics_text_layout_get_content_size(
-      s_artist_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
-      GRect(0, 0, text_w, ARTIST_MAX_LINES * ARTIST_LINE_H),
+      s_artist_text, artist_font, GRect(0, 0, lw, ARTIST_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
   GSize ls = graphics_text_layout_get_content_size(
-      s_album_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
-      GRect(0, 0, text_w, ALBUM_MAX_LINES * ALBUM_LINE_H),
+      s_album_text,  album_font,  GRect(0, 0, alw, ALBUM_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
 
-  // Container height = exactly the measured content size, minimum 1 line
-  int track_fh  = (ts.h >= TRACK_LINE_H  ? ts.h : TRACK_LINE_H);
-  int artist_fh = (as.h >= ARTIST_LINE_H ? as.h : ARTIST_LINE_H);
-  int album_fh  = (ls.h >= ALBUM_LINE_H  ? ls.h : ALBUM_LINE_H);
+  // Clamp: at least one line, at most the configured max.
+  // Add descender pad so the last line's descenders (y, g, p...) aren't clipped.
+#ifdef PBL_ROUND
+  const int desc_pad = 6;
+#else
+  const int desc_pad = 0;
+#endif
+  int track_h  = ts.h < P_TRACK_LINE_H  ? P_TRACK_LINE_H  : (ts.h > TRACK_H  ? TRACK_H  : ts.h);
+  int artist_h = as.h < P_ARTIST_LINE_H ? P_ARTIST_LINE_H : (as.h > ARTIST_H ? ARTIST_H : as.h);
+  int album_h  = ls.h < P_ALBUM_LINE_H  ? P_ALBUM_LINE_H  : (ls.h > ALBUM_H  ? ALBUM_H  : ls.h);
+  track_h  += desc_pad;
+  artist_h += desc_pad;
+  album_h  += desc_pad;
 
-  // Total stack: text frames + divider strips between them
-  int total_h = track_fh + DIVIDER_STRIP_H + artist_fh + DIVIDER_STRIP_H + album_fh;
+  int total_h = track_h + DIVIDER_H + artist_h + DIVIDER_H + album_h;
+  int margin  = (wbounds.size.h - total_h) / 2;
+  if (margin < 2) margin = 2;
 
-  // Overflow: shrink album to 1 line, then artist, then track
-  int budget = wbounds.size.h - 2 * LAYOUT_MARGIN_PX;
-  if (total_h > budget) {
-    album_fh = ALBUM_LINE_H;
-    total_h  = track_fh + DIVIDER_STRIP_H + artist_fh + DIVIDER_STRIP_H + album_fh;
-  }
-  if (total_h > budget) {
-    artist_fh = ARTIST_LINE_H;
-    total_h   = track_fh + DIVIDER_STRIP_H + artist_fh + DIVIDER_STRIP_H + album_fh;
-  }
-  if (total_h > budget) {
-    track_fh = budget - DIVIDER_STRIP_H - artist_fh - DIVIDER_STRIP_H - album_fh;
-    if (track_fh < TRACK_LINE_H) track_fh = TRACK_LINE_H;
-    total_h  = track_fh + DIVIDER_STRIP_H + artist_fh + DIVIDER_STRIP_H + album_fh;
-  }
+  int track_y  = margin;
+  s_divider1_y = track_y  + track_h;
+  int artist_y = s_divider1_y + DIVIDER_H;
+  s_divider2_y = artist_y + artist_h;
+  int album_y  = s_divider2_y + DIVIDER_H;
 
-  // Center block vertically
-  int track_y = (wbounds.size.h - total_h) / 2;
-  if (track_y < LAYOUT_MARGIN_PX) track_y = LAYOUT_MARGIN_PX;
-
-  // Divider strips sit immediately after each text frame
-  s_divider1_y   = track_y   + track_fh;
-  int artist_y   = s_divider1_y + DIVIDER_STRIP_H;
-  s_divider2_y   = artist_y  + artist_fh;
-  int album_y    = s_divider2_y + DIVIDER_STRIP_H;
-
-  layer_set_frame(text_layer_get_layer(s_track_layer),  GRect(text_x, track_y,  text_w, track_fh));
-  layer_set_frame(text_layer_get_layer(s_artist_layer), GRect(text_x, artist_y, text_w, artist_fh));
-  layer_set_frame(text_layer_get_layer(s_album_layer),  GRect(text_x, album_y,  text_w, album_fh));
+  layer_set_frame(text_layer_get_layer(s_track_layer),  GRect(lx,  track_y,  lw,  track_h));
+  layer_set_frame(text_layer_get_layer(s_artist_layer), GRect(lx,  artist_y, lw,  artist_h));
+  layer_set_frame(text_layer_get_layer(s_album_layer),  GRect(alx, album_y,  alw, album_h));
 
   if (s_divider_layer) layer_mark_dirty(s_divider_layer);
+}
+
+static void layout_init(Window *window) {
+  (void)window;
+  // No text flow API: arc clipping at non-equatorial y positions causes severe
+  // truncation. Instead we use GTextAlignmentCenter + P_ROUND_INSET on round.
 }
 
 static void window_load(Window *window) {
@@ -582,25 +631,37 @@ static void window_load(Window *window) {
   layer_set_update_proc(s_divider_layer, divider_layer_update);
   layer_add_child(window_layer, s_divider_layer);
 
-  // Create text layers (added after divider so they render on top)
-  s_track_layer = text_layer_create(GRect(4, LAYOUT_MARGIN_PX, bounds.size.w - 8, TRACK_MAX_LINES * TRACK_LINE_H));
-  text_layer_set_font(s_track_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+  // Platform-specific fonts
+  GFont track_font  = fonts_get_system_font(P_TRACK_FONT);
+  GFont artist_font = fonts_get_system_font(P_ARTIST_FONT);
+  GFont album_font  = fonts_get_system_font(P_ALBUM_FONT);
+
+  // On round, center-align text so it stays within the visible arc at all
+  // y positions. On rect, left-align as usual.
+  GTextAlignment text_align = PBL_IF_ROUND_ELSE(GTextAlignmentRight, GTextAlignmentLeft);
+
+  // Create text layers at placeholder bounds — layout_init will set final frames
+  s_track_layer = text_layer_create(GRect(0, 0, bounds.size.w, TRACK_H));
+  text_layer_set_font(s_track_layer, track_font);
+  text_layer_set_text_alignment(s_track_layer, text_align);
   text_layer_set_overflow_mode(s_track_layer, GTextOverflowModeTrailingEllipsis);
   text_layer_set_text(s_track_layer, "No track");
-  layer_set_clips(text_layer_get_layer(s_track_layer), false);
   layer_add_child(window_layer, text_layer_get_layer(s_track_layer));
 
-  s_artist_layer = text_layer_create(GRect(4, LAYOUT_MARGIN_PX, bounds.size.w - 8, ARTIST_MAX_LINES * ARTIST_LINE_H));
-  text_layer_set_font(s_artist_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  s_artist_layer = text_layer_create(GRect(0, 0, bounds.size.w, ARTIST_H));
+  text_layer_set_font(s_artist_layer, artist_font);
+  text_layer_set_text_alignment(s_artist_layer, text_align);
   text_layer_set_overflow_mode(s_artist_layer, GTextOverflowModeTrailingEllipsis);
-  layer_set_clips(text_layer_get_layer(s_artist_layer), false);
   layer_add_child(window_layer, text_layer_get_layer(s_artist_layer));
 
-  s_album_layer = text_layer_create(GRect(4, LAYOUT_MARGIN_PX, bounds.size.w - 8, ALBUM_MAX_LINES * ALBUM_LINE_H));
-  text_layer_set_font(s_album_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  s_album_layer = text_layer_create(GRect(0, 0, bounds.size.w, ALBUM_H));
+  text_layer_set_font(s_album_layer, album_font);
+  text_layer_set_text_alignment(s_album_layer, text_align);
   text_layer_set_overflow_mode(s_album_layer, GTextOverflowModeTrailingEllipsis);
-  layer_set_clips(text_layer_get_layer(s_album_layer), false);
   layer_add_child(window_layer, text_layer_get_layer(s_album_layer));
+
+  // Set fixed positions (enables text flow after layer_add_child on round)
+  layout_init(window);
 
   // Initial layout with default text
   reflow_layout();
@@ -776,7 +837,6 @@ void player_set_auto_close_timeout(int timeout_seconds) {
 }
 
 void player_window_push(void) {
-
   if (!s_window) {
     s_window = window_create();
     window_set_window_handlers(s_window, (WindowHandlers){

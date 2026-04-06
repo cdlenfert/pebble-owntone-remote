@@ -100,7 +100,7 @@ static void menu_selection_changed(MenuLayer *menu_layer, MenuIndex new_index, M
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
-  
+
   s_menu_layer = menu_layer_create(bounds);
   menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
     .get_num_rows = menu_get_num_rows,
@@ -114,6 +114,10 @@ static void window_load(Window *window) {
 #endif
   });
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
+#ifdef PBL_ROUND
+  menu_layer_set_center_focused(s_menu_layer, true);
+  window_set_background_color(window, GColorBlack);
+#endif
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
 }
 
