@@ -551,6 +551,16 @@ static void reflow_layout(void) {
   GFont artist_font = fonts_get_system_font(P_ARTIST_FONT);
   GFont album_font  = fonts_get_system_font(P_ALBUM_FONT);
 
+  int track_h, artist_h, album_h;
+
+#if defined(PBL_PLATFORM_APLITE)
+  // Aplite has only 24KB heap. Skip runtime text measurement entirely and use
+  // fixed max heights — dynamic measurement allocates temporary buffers that
+  // exhaust the heap and crash the app during player state updates.
+  track_h  = TRACK_H;
+  artist_h = ARTIST_H;
+  album_h  = ALBUM_H;
+#else
   GSize ts = graphics_text_layout_get_content_size(
       s_track_text,  track_font,  GRect(0, 0, lw, TRACK_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
@@ -562,18 +572,17 @@ static void reflow_layout(void) {
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
 
   // Clamp: at least one line, at most the configured max.
-  // Add descender pad so the last line's descenders (y, g, p...) aren't clipped.
-#ifdef PBL_ROUND
-  const int desc_pad = 6;
-#else
-  const int desc_pad = 0;
+  track_h  = ts.h < P_TRACK_LINE_H  ? P_TRACK_LINE_H  : (ts.h > TRACK_H  ? TRACK_H  : ts.h);
+  artist_h = as.h < P_ARTIST_LINE_H ? P_ARTIST_LINE_H : (as.h > ARTIST_H ? ARTIST_H : as.h);
+  album_h  = ls.h < P_ALBUM_LINE_H  ? P_ALBUM_LINE_H  : (ls.h > ALBUM_H  ? ALBUM_H  : ls.h);
 #endif
-  int track_h  = ts.h < P_TRACK_LINE_H  ? P_TRACK_LINE_H  : (ts.h > TRACK_H  ? TRACK_H  : ts.h);
-  int artist_h = as.h < P_ARTIST_LINE_H ? P_ARTIST_LINE_H : (as.h > ARTIST_H ? ARTIST_H : as.h);
-  int album_h  = ls.h < P_ALBUM_LINE_H  ? P_ALBUM_LINE_H  : (ls.h > ALBUM_H  ? ALBUM_H  : ls.h);
-  track_h  += desc_pad;
-  artist_h += desc_pad;
-  album_h  += desc_pad;
+
+  // Add descender pad on round so descenders (y, g, p...) aren't clipped on last line.
+#ifdef PBL_ROUND
+  track_h  += 6;
+  artist_h += 6;
+  album_h  += 6;
+#endif
 
   int total_h = track_h + DIVIDER_H + artist_h + DIVIDER_H + album_h;
   int margin  = (wbounds.size.h - total_h) / 2;
