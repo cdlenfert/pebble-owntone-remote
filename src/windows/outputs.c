@@ -349,10 +349,23 @@ static void request_player_state_timer_callback(void *data) {
 }
 
 static void volume_window_appear(Window *window) {
+  // Retry any icon loads that failed in window_load due to heap pressure.
+  // This fires after outputs window_disappear (which frees the MenuLayer),
+  // so more heap is available here than during window_load.
+  if (!s_icon_vol_up)  s_icon_vol_up  = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_UP);
+  if (!s_icon_vol_down) s_icon_vol_down = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_DOWN);
+  if (!s_icon_play)    s_icon_play    = gbitmap_create_with_resource(RESOURCE_ID_ICON_PLAY);
+  if (!s_icon_pause)   s_icon_pause   = gbitmap_create_with_resource(RESOURCE_ID_ICON_PAUSE);
+
+  // Re-apply action bar icons in case any were missing on window_load
+  if (s_icon_vol_up)  action_bar_layer_set_icon(s_volume_action_bar, BUTTON_ID_UP, s_icon_vol_up);
+  if (s_icon_vol_down) action_bar_layer_set_icon(s_volume_action_bar, BUTTON_ID_DOWN, s_icon_vol_down);
+  update_output_play_pause_icon();
+
   // Register callbacks and get current state when window becomes visible
   message_set_player_callback(output_volume_player_state_handler);
   message_set_status_callback(output_volume_status_handler);
-  
+
   // Delay the player state request to avoid outbox collision with SET_OUTPUT_EXCLUSIVE
   if (s_state_request_timer) {
     app_timer_cancel(s_state_request_timer);

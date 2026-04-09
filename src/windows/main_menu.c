@@ -119,9 +119,44 @@ static void window_load(Window *window) {
 
 
 static void window_unload(Window *window) {
-  menu_layer_destroy(s_menu_layer);
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
   window_destroy(window);
   s_window = NULL;
+}
+
+static void window_disappear(Window *window) {
+  // Free the MenuLayer so child windows (player, outputs, etc.) have more heap
+  // available for their bitmaps. window_appear recreates it when we return.
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
+}
+
+static void window_appear(Window *window) {
+  // Recreate the MenuLayer if it was freed while another window was on top.
+  if (!s_menu_layer) {
+    Layer *window_layer = window_get_root_layer(window);
+    GRect bounds = layer_get_bounds(window_layer);
+    s_menu_layer = menu_layer_create(bounds);
+    menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
+      .get_num_rows = menu_get_num_rows,
+      .draw_row = menu_draw_row,
+      .select_click = menu_select,
+      .selection_changed = menu_selection_changed,
+#ifndef PBL_PLATFORM_APLITE
+      .select_long_click = menu_select_long
+#else
+      .select_long_click = NULL
+#endif
+    });
+    menu_layer_set_click_config_onto_window(s_menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+  }
+  app_auto_close_start();
 }
 
 void main_menu_push(void) {
@@ -129,8 +164,23 @@ void main_menu_push(void) {
     s_window = window_create();
     window_set_window_handlers(s_window, (WindowHandlers){
       .load = window_load,
-      .unload = window_unload
+      .unload = window_unload,
+      .appear = window_appear,
+      .disappear = window_disappear
     });
   }
   window_stack_push(s_window, true);
+}
+
+void main_menu_push_silent(void) {
+  if (!s_window) {
+    s_window = window_create();
+    window_set_window_handlers(s_window, (WindowHandlers){
+      .load = window_load,
+      .unload = window_unload,
+      .appear = window_appear,
+      .disappear = window_disappear
+    });
+  }
+  window_stack_push(s_window, false);
 }

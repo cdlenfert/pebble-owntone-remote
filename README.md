@@ -122,6 +122,13 @@ This provides fast access to the player from anywhere in the app.
 
 ## Changelog
 
+### v1.11 (2026-04-09)
+- **Fix all player action bar icons missing on Aplite**: Aplite's PNG decoder only handles 1-bit images; the 7 action bar icons were stored as 8-bit RGBA PNGs, causing `gbitmap_create_with_resource` to return NULL for every icon at runtime. Fixed by changing all action bar icon resources from `"type": "png"` to `"type": "bitmap"` in `appinfo.json` — the SDK now pre-converts them to Pebble binary format at build time, bypassing the runtime decoder entirely.
+- **Fix action bar icon colors on Aplite**: All 7 icons had incorrect black/white polarity for `ActionBarLayer` rendering (which uses `GCompOpAssignInverted`). Corrected all icons to the expected format.
+- **Fix MenuLayer heap leaks across all list windows on Aplite**: Added `window_disappear` (free `MenuLayer`) and `window_appear` (recreate `MenuLayer`) to `main_menu`, `favorites`, `queue`, `random`, and `results` windows. On Aplite, Pebble's lifecycle order (B.`window_load` → A.`window_disappear` → B.`window_appear`) meant parent MenuLayers stayed allocated while child windows loaded, exhausting the 24KB heap. The disappear/appear pattern ensures the heap is free before child window allocations.
+- **Fix Basalt startup flash**: On Basalt, the main menu no longer briefly appears before the player window. `splash.c` now calls `main_menu_push_silent()` (no animation) followed immediately by `player_window_push()`.
+- Tune Aplite `AppMessage` buffers to 1536/256 bytes, recovering heap vs. the previous 2048/512 allocation.
+
 ### v1.10 (2026-04-04)
 - **App auto-close**: New configurable setting — after the player window closes, the app exits to the watchface if no buttons are pressed within the selected time (default: 5 minutes). Resets on any button press in the main menu or outputs windows. Configurable via the Battery Optimization section of the settings page.
 - Add mise dev environment: `mise.toml`, `scripts/`, `.env.example`, `AGENTS.md`

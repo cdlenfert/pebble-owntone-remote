@@ -31,7 +31,13 @@ void message_init(void) {
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_register_outbox_failed(outbox_failed_callback);
   app_message_register_outbox_sent(outbox_sent_callback);
+  // Aplite has only ~6KB heap after static footprint; use smaller buffers to
+  // leave more room for window structures and bitmaps.
+#if defined(PBL_PLATFORM_APLITE)
+  app_message_open(1536, 256);
+#else
   app_message_open(2048, 512);
+#endif
   APP_LOG(APP_LOG_LEVEL_INFO, "messaging: app_message_open() done");
 }
 

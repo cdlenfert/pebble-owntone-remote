@@ -82,9 +82,39 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
   // Clear any pending results callback
   message_set_results_callback(NULL);
-  menu_layer_destroy(s_menu_layer);
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
   window_destroy(window);
   s_window = NULL;
+}
+
+static void window_disappear(Window *window) {
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
+}
+
+static void window_appear(Window *window) {
+  if (!s_menu_layer) {
+    Layer *window_layer = window_get_root_layer(window);
+    GRect bounds = layer_get_bounds(window_layer);
+    s_menu_layer = menu_layer_create(bounds);
+    menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
+      .get_num_rows = menu_get_num_rows,
+      .draw_row = menu_draw_row,
+      .select_click = menu_select,
+#ifndef PBL_PLATFORM_APLITE
+      .select_long_click = menu_select_long
+#else
+      .select_long_click = NULL
+#endif
+    });
+    menu_layer_set_click_config_onto_window(s_menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+  }
 }
 
 void random_window_push(void) {
@@ -92,6 +122,8 @@ void random_window_push(void) {
     s_window = window_create();
     window_set_window_handlers(s_window, (WindowHandlers){
       .load = window_load,
+      .appear = window_appear,
+      .disappear = window_disappear,
       .unload = window_unload
     });
   }

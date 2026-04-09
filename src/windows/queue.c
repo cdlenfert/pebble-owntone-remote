@@ -82,7 +82,27 @@ static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void 
   player_window_push();
 }
 
+static void window_disappear(Window *window) {
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
+}
+
 static void window_appear(Window *window) {
+  if (!s_menu_layer) {
+    Layer *window_layer = window_get_root_layer(window);
+    GRect bounds = layer_get_bounds(window_layer);
+    s_menu_layer = menu_layer_create(bounds);
+    menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
+      .get_num_rows = menu_get_num_rows,
+      .draw_row = menu_draw_row,
+      .select_click = menu_select,
+      .select_long_click = menu_select_long
+    });
+    menu_layer_set_click_config_onto_window(s_menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+  }
   // Refresh queue data when returning from player
   message_send_command(CMD_GET_QUEUE);
 }
@@ -108,10 +128,12 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
   message_set_queue_callback(NULL);
-  menu_layer_destroy(s_menu_layer);
-  s_menu_layer = NULL;
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
   cleanup_queue();
-  
+
   window_destroy(window);
   s_window = NULL;
 }
@@ -122,6 +144,7 @@ void queue_window_push(void) {
     window_set_window_handlers(s_window, (WindowHandlers){
       .load = window_load,
       .appear = window_appear,
+      .disappear = window_disappear,
       .unload = window_unload
     });
   }

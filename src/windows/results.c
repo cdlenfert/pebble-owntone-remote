@@ -111,13 +111,46 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
   message_set_results_callback(NULL);
-  menu_layer_destroy(s_menu_layer);
-  s_menu_layer = NULL;
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
   cleanup_results();
   
   // Destroy window when actually unloaded from stack
   window_destroy(window);
   s_window = NULL;
+}
+
+static void window_appear(Window *window) {
+  // Recreate MenuLayer if window_disappear freed it (e.g. returning from player).
+  if (!s_menu_layer) {
+    Layer *window_layer = window_get_root_layer(window);
+    GRect bounds = layer_get_bounds(window_layer);
+    s_menu_layer = menu_layer_create(bounds);
+    menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
+      .get_num_rows = menu_get_num_rows,
+      .draw_row = menu_draw_row,
+      .select_click = menu_select,
+#ifndef PBL_PLATFORM_APLITE
+      .select_long_click = menu_select_long
+#else
+      .select_long_click = NULL
+#endif
+    });
+    menu_layer_set_click_config_onto_window(s_menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+    menu_layer_reload_data(s_menu_layer);
+  }
+}
+
+static void window_disappear(Window *window) {
+  // On Basalt, long-press from results navigates to the player. Free the
+  // MenuLayer so the player window_load has more heap for bitmaps.
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
 }
 
 void results_window_push(int count, char *titles[], char *uris[], ContentType type) {
@@ -142,6 +175,8 @@ void results_window_push(int count, char *titles[], char *uris[], ContentType ty
     s_window = window_create();
     window_set_window_handlers(s_window, (WindowHandlers){
       .load = window_load,
+      .appear = window_appear,
+      .disappear = window_disappear,
       .unload = window_unload
     });
   }

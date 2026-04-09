@@ -102,19 +102,13 @@ static void volume_repeat_callback(void *data) {
   }
 }
 
+// Forward declaration: defined after click handlers below.
+static void update_action_bar(void);
+
 static void revert_to_transport_mode(void *data) {
   s_mode_timer = NULL;
   s_control_mode = CONTROL_MODE_TRANSPORT;
-  
-  // Restore transport controls
-  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_prev);
-  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_next);
-  // Show play icon when paused, ellipsis when playing
-  if (s_player_state == PLAYER_STATE_PLAYING) {
-    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_ellipsis);
-  } else {
-    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
-  }
+  update_action_bar();
 }
 
 static void cancel_mode_timer(void) {
@@ -265,7 +259,7 @@ static void start_auto_close_timer(void) {
 }
 
 static void update_action_bar(void) {
-  // Don't update if icons aren't loaded yet
+  // Don't update if core transport icons aren't loaded yet
   if (!s_icon_play || !s_icon_pause || !s_icon_next || !s_icon_prev) {
     return;
   }
@@ -273,18 +267,16 @@ static void update_action_bar(void) {
   if (s_control_mode == CONTROL_MODE_TRANSPORT) {
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_prev);
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_next);
-    // Show play icon when paused, ellipsis when playing
     if (s_player_state == PLAYER_STATE_PLAYING) {
-      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_ellipsis);
+      GBitmap *sel = s_icon_ellipsis ? s_icon_ellipsis : s_icon_pause;
+      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, sel);
     } else {
       action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
     }
   } else {
-    // Volume mode
-    if (!s_icon_volume_up || !s_icon_volume_down) {
-      return;
-    }
-    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_volume_up);
+    if (!s_icon_volume_up)   s_icon_volume_up   = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_UP);
+    if (!s_icon_volume_down) s_icon_volume_down = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_DOWN);
+    action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP,   s_icon_volume_up);
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_volume_down);
     if (s_player_state == PLAYER_STATE_PLAYING) {
       action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_pause);
@@ -367,7 +359,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   reset_auto_close_timer();
   if (s_control_mode == CONTROL_MODE_TRANSPORT) {
     if (s_player_state == PLAYER_STATE_PLAYING) {
-      // Playing - switch to volume mode (no vibration for ellipsis)
+      // Playing - switch to volume mode
       s_control_mode = CONTROL_MODE_VOLUME;
       update_action_bar();
       start_mode_timer();
@@ -559,21 +551,11 @@ static void window_load(Window *window) {
   action_bar_layer_add_to_window(s_action_bar, window);
   action_bar_layer_set_click_config_provider(s_action_bar, click_config_provider);
   
-  // Load icons
-  s_icon_play = gbitmap_create_with_resource(RESOURCE_ID_ICON_PLAY);
-  s_icon_pause = gbitmap_create_with_resource(RESOURCE_ID_ICON_PAUSE);
-  s_icon_next = gbitmap_create_with_resource(RESOURCE_ID_ICON_NEXT);
-  s_icon_prev = gbitmap_create_with_resource(RESOURCE_ID_ICON_PREV);
-  s_icon_volume_up = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_UP);
-  s_icon_volume_down = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_DOWN);
-  s_icon_ellipsis = gbitmap_create_with_resource(RESOURCE_ID_ICON_ELLIPSIS);
-  
-  // Start in transport mode with play icon (default assumes paused)
+  // Icons are loaded in window_appear (after the behind-window's window_disappear
+  // frees its MenuLayer), not here. window_load runs while the caller's MenuLayer
+  // is still in heap; loading bitmaps here would compete for the same memory.
   s_control_mode = CONTROL_MODE_TRANSPORT;
-  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_prev);
-  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_next);
-  action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
-  
+
   // Adjust bounds for action bar
   bounds.size.w -= ACTION_BAR_WIDTH;
 
@@ -684,16 +666,15 @@ static void window_unload(Window *window) {
 }
 
 static void window_appear(Window *window) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Player window appearing, timeout=%d", s_auto_close_timeout_seconds);
   app_auto_close_cancel();
   // Reload any icons that were destroyed or failed to load
-  if (!s_icon_play) s_icon_play = gbitmap_create_with_resource(RESOURCE_ID_ICON_PLAY);
-  if (!s_icon_pause) s_icon_pause = gbitmap_create_with_resource(RESOURCE_ID_ICON_PAUSE);
-  if (!s_icon_next) s_icon_next = gbitmap_create_with_resource(RESOURCE_ID_ICON_NEXT);
-  if (!s_icon_prev) s_icon_prev = gbitmap_create_with_resource(RESOURCE_ID_ICON_PREV);
-  if (!s_icon_volume_up) s_icon_volume_up = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_UP);
+  if (!s_icon_play)        s_icon_play        = gbitmap_create_with_resource(RESOURCE_ID_ICON_PLAY);
+  if (!s_icon_pause)       s_icon_pause       = gbitmap_create_with_resource(RESOURCE_ID_ICON_PAUSE);
+  if (!s_icon_next)        s_icon_next        = gbitmap_create_with_resource(RESOURCE_ID_ICON_NEXT);
+  if (!s_icon_prev)        s_icon_prev        = gbitmap_create_with_resource(RESOURCE_ID_ICON_PREV);
+  if (!s_icon_volume_up)   s_icon_volume_up   = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_UP);
   if (!s_icon_volume_down) s_icon_volume_down = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_DOWN);
-  if (!s_icon_ellipsis) s_icon_ellipsis = gbitmap_create_with_resource(RESOURCE_ID_ICON_ELLIPSIS);
+  if (!s_icon_ellipsis)    s_icon_ellipsis    = gbitmap_create_with_resource(RESOURCE_ID_ICON_ELLIPSIS);
 
   // Callbacks already set in window_load, just ensure they're still set
   message_set_player_callback(player_state_handler);

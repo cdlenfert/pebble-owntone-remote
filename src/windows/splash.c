@@ -76,10 +76,6 @@ static void send_ping(void) {
   s_retry_timer = app_timer_register(SPLASH_RETRY_MS, (AppTimerCallback)send_ping, NULL);
 }
 
-static void transition_to_player(void *data) {
-  player_window_push();
-}
-
 static void proceed_to_app(void) {
   // Clean up timers and callbacks
   cancel_retry_timer();
@@ -97,17 +93,21 @@ static void proceed_to_app(void) {
     s_logo_layer = NULL;
   }
 
-  // Push main menu (so it's underneath)
-  main_menu_push();
-
-  // Remove splash window from stack
+  // Remove splash window from stack first (clean up before pushing new windows)
   if (s_window) {
     window_stack_remove(s_window, false);
   }
-  
-  // Schedule player window push slightly later to avoid stack manipulation races
-  // and ensure callbacks registered in player window_load aren't cleared by splash
-  app_timer_register(100, transition_to_player, NULL);
+
+#if defined(PBL_PLATFORM_APLITE)
+  // Aplite: limited heap — open main menu only, user taps Player manually.
+  main_menu_push();
+#else
+  // Basalt: push main_menu without animation (invisible) then player on top with
+  // animation. The user sees only the player slide in; main_menu is quietly
+  // beneath it as the back-stack destination.
+  main_menu_push_silent();
+  player_window_push();
+#endif
 }
 
 static void logo_layer_update(Layer *layer, GContext *ctx) {

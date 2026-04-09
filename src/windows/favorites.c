@@ -98,17 +98,6 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
   }
 }
 
-static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!s_showing_categories) {
-    // Go back to categories
-    s_showing_categories = true;
-    menu_layer_reload_data(s_menu_layer);
-  } else {
-    // Exit window
-    window_stack_pop(true);
-  }
-}
-
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   MenuIndex index = menu_layer_get_selected_index(s_menu_layer);
   menu_select(s_menu_layer, &index, NULL);
@@ -171,10 +160,32 @@ static void window_load(Window *window) {
 }
 
 static void window_appear(Window *window) {
+  // Recreate MenuLayer if it was freed while another window was on top.
+  if (!s_menu_layer) {
+    Layer *window_layer = window_get_root_layer(window);
+    GRect bounds = layer_get_bounds(window_layer);
+    s_menu_layer = menu_layer_create(bounds);
+    menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
+      .get_num_rows = menu_get_num_rows,
+      .draw_row = menu_draw_row,
+      .select_click = menu_select
+    });
+    window_set_click_config_provider(window, click_config_provider);
+    layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+  }
   // Reset to categories view when window appears
   s_showing_categories = true;
   if (s_menu_layer) {
     menu_layer_reload_data(s_menu_layer);
+  }
+}
+
+static void window_disappear(Window *window) {
+  // Free MenuLayer so child windows (player, etc.) have more heap for bitmaps.
+  // window_appear recreates it when this window returns to the top.
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
   }
 }
 
@@ -190,7 +201,10 @@ static void cleanup_favorites_data(void) {
 
 static void window_unload(Window *window) {
   message_set_favorites_callback(NULL);
-  menu_layer_destroy(s_menu_layer);
+  if (s_menu_layer) {
+    menu_layer_destroy(s_menu_layer);
+    s_menu_layer = NULL;
+  }
   cleanup_favorites_data();
   window_destroy(window);
   s_window = NULL;
@@ -202,6 +216,7 @@ void favorites_window_push(void) {
     window_set_window_handlers(s_window, (WindowHandlers){
       .load = window_load,
       .appear = window_appear,
+      .disappear = window_disappear,
       .unload = window_unload
     });
   }
