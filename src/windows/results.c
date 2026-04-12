@@ -1,16 +1,10 @@
 #include <pebble.h>
-#include "search.h"
+#include "list_window.h"
 #include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
 
-// Forward declarations
-static void results_handler(int count, char *titles[], char *uris[]);
-
-static Window *s_window;
-static MenuLayer *s_menu_layer;
 static ContentType s_current_type;
-
 static char *s_titles[MAX_RESULTS];
 static char *s_uris[MAX_RESULTS];
 static int s_result_count = 0;
@@ -18,55 +12,28 @@ static int s_result_count = 0;
 // Custom light vibration pattern (20ms pulse)
 static void light_vibe(void) {
   uint32_t segments[] = { 20 };
-  VibePattern pat = {
-    .durations = segments,
-    .num_segments = 1,
-  };
+  VibePattern pat = { .durations = segments, .num_segments = 1 };
   vibes_enqueue_custom_pattern(pat);
 }
 
 static void cleanup_results(void) {
   for (int i = 0; i < MAX_RESULTS; i++) {
-    if (s_titles[i]) {
-      free(s_titles[i]);
-      s_titles[i] = NULL;
-    }
-    if (s_uris[i]) {
-      free(s_uris[i]);
-      s_uris[i] = NULL;
-    }
+    if (s_titles[i]) { free(s_titles[i]); s_titles[i] = NULL; }
+    if (s_uris[i])   { free(s_uris[i]);   s_uris[i]   = NULL; }
   }
   s_result_count = 0;
 }
 
-static void results_handler(int count, char *titles[], char *uris[]) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "results_handler: received %d results", count);
-  cleanup_results();
-  s_result_count = count;
-  
-  for (int i = 0; i < count && i < MAX_RESULTS; i++) {
-    if (titles[i]) {
-      s_titles[i] = malloc(strlen(titles[i]) + 1);
-      if (s_titles[i]) strcpy(s_titles[i], titles[i]);
-    }
-    if (uris[i]) {
-      s_uris[i] = malloc(strlen(uris[i]) + 1);
-      if (s_uris[i]) strcpy(s_uris[i], uris[i]);
-    }
-  }
-  
-  if (s_menu_layer && window_stack_contains_window(s_window)) {
-    menu_layer_reload_data(s_menu_layer);
-  } else {
-    results_window_push(count, titles, uris, s_current_type);
-  }
-}
+// ── ListWindowConfig callbacks ───────────────────────────────────────────────
 
-static uint16_t menu_get_num_rows(MenuLayer *menu_layer, uint16_t section_index, void *data) {
+static uint16_t results_get_num_rows(void *ctx) {
+  (void)ctx;
   return s_result_count > 0 ? s_result_count : 1;
 }
 
-static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
+static void results_draw_row(GContext *ctx, const Layer *cell_layer,
+                              MenuIndex *cell_index, void *_ctx) {
+  (void)_ctx;
   if (s_result_count > 0 && cell_index->row < s_result_count) {
     menu_cell_basic_draw(ctx, cell_layer, s_titles[cell_index->row], NULL, NULL);
   } else {
@@ -74,8 +41,10 @@ static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cel
   }
 }
 
-static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  if (s_result_count > 0 && cell_index->row < s_result_count && s_uris[cell_index->row]) {
+static void results_on_select(MenuIndex *cell_index, void *_ctx) {
+  (void)_ctx;
+  if (s_result_count > 0 && cell_index->row < s_result_count &&
+      s_uris[cell_index->row]) {
     message_send_add_to_queue(s_uris[cell_index->row], s_current_type);
     light_vibe();
     window_stack_pop(true);
@@ -83,84 +52,30 @@ static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data
 }
 
 #ifndef PBL_PLATFORM_APLITE
-static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+static void results_on_select_long(MenuIndex *cell_index, void *_ctx) {
+  (void)cell_index; (void)_ctx;
   player_window_push();
 }
 #endif
 
-static void window_load(Window *window) {
-  Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
-  
-  s_menu_layer = menu_layer_create(bounds);
-  menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
-    .get_num_rows = menu_get_num_rows,
-    .draw_row = menu_draw_row,
-    .select_click = menu_select,
-#ifndef PBL_PLATFORM_APLITE
-    .select_long_click = menu_select_long
-#else
-    .select_long_click = NULL
-#endif
-  });
-  menu_layer_set_click_config_onto_window(s_menu_layer, window);
-  layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
-  
-  message_set_results_callback(results_handler);
+static void results_data_handler(int count, char *titles[], char *uris[]);
+
+static void results_on_appear(void *_ctx) {
+  (void)_ctx;
+  message_set_results_callback(results_data_handler);
 }
 
-static void window_unload(Window *window) {
+static void results_on_unload(void *_ctx) {
+  (void)_ctx;
   message_set_results_callback(NULL);
-  if (s_menu_layer) {
-    menu_layer_destroy(s_menu_layer);
-    s_menu_layer = NULL;
-  }
   cleanup_results();
-  
-  // Destroy window when actually unloaded from stack
-  window_destroy(window);
-  s_window = NULL;
 }
 
-static void window_appear(Window *window) {
-  // Recreate MenuLayer if window_disappear freed it (e.g. returning from player).
-  if (!s_menu_layer) {
-    Layer *window_layer = window_get_root_layer(window);
-    GRect bounds = layer_get_bounds(window_layer);
-    s_menu_layer = menu_layer_create(bounds);
-    menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
-      .get_num_rows = menu_get_num_rows,
-      .draw_row = menu_draw_row,
-      .select_click = menu_select,
-#ifndef PBL_PLATFORM_APLITE
-      .select_long_click = menu_select_long
-#else
-      .select_long_click = NULL
-#endif
-    });
-    menu_layer_set_click_config_onto_window(s_menu_layer, window);
-    layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
-    menu_layer_reload_data(s_menu_layer);
-  }
-}
-
-static void window_disappear(Window *window) {
-  // On Basalt, long-press from results navigates to the player. Free the
-  // MenuLayer so the player window_load has more heap for bitmaps.
-  if (s_menu_layer) {
-    menu_layer_destroy(s_menu_layer);
-    s_menu_layer = NULL;
-  }
-}
-
-void results_window_push(int count, char *titles[], char *uris[], ContentType type) {
-  s_current_type = type;
-  
-  // Copy the results data
+// Called when the phone sends updated results while the window is open.
+static void results_data_handler(int count, char *titles[], char *uris[]) {
   cleanup_results();
-  s_result_count = count;
-  
-  for (int i = 0; i < count && i < MAX_RESULTS; i++) {
+  s_result_count = count < MAX_RESULTS ? count : MAX_RESULTS;
+  for (int i = 0; i < s_result_count; i++) {
     if (titles[i]) {
       s_titles[i] = malloc(strlen(titles[i]) + 1);
       if (s_titles[i]) strcpy(s_titles[i], titles[i]);
@@ -170,16 +85,36 @@ void results_window_push(int count, char *titles[], char *uris[], ContentType ty
       if (s_uris[i]) strcpy(s_uris[i], uris[i]);
     }
   }
-  
-  if (!s_window) {
-    s_window = window_create();
-    window_set_window_handlers(s_window, (WindowHandlers){
-      .load = window_load,
-      .appear = window_appear,
-      .disappear = window_disappear,
-      .unload = window_unload
-    });
-  }
-  
-  window_stack_push(s_window, true);
+  list_window_reload();
 }
+
+// ── Public API ───────────────────────────────────────────────────────────────
+
+void results_window_push(int count, char *titles[], char *uris[],
+                          ContentType type) {
+  s_current_type = type;
+  cleanup_results();
+  s_result_count = count < MAX_RESULTS ? count : MAX_RESULTS;
+  for (int i = 0; i < s_result_count; i++) {
+    if (titles[i]) {
+      s_titles[i] = malloc(strlen(titles[i]) + 1);
+      if (s_titles[i]) strcpy(s_titles[i], titles[i]);
+    }
+    if (uris[i]) {
+      s_uris[i] = malloc(strlen(uris[i]) + 1);
+      if (s_uris[i]) strcpy(s_uris[i], uris[i]);
+    }
+  }
+
+  list_window_push(&(ListWindowConfig){
+    .get_num_rows      = results_get_num_rows,
+    .draw_row          = results_draw_row,
+    .on_select         = results_on_select,
+#ifndef PBL_PLATFORM_APLITE
+    .on_select_long    = results_on_select_long,
+#endif
+    .on_appear         = results_on_appear,
+    .on_unload         = results_on_unload,
+  });
+}
+

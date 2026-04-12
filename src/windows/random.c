@@ -1,131 +1,74 @@
 #include <pebble.h>
-#include "random.h"
-#include "search.h"
+#include "list_window.h"
+#include "results.h"
 #include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
 
-static Window *s_window;
-static MenuLayer *s_menu_layer;
+static const char *s_content_types[] = { "Playlist", "Artist", "Album" };
 
-static const char *s_content_types[] = {"Playlist", "Artist", "Album"};
+// Stores the type selected by the user so the results handler can use it
+// when the async response arrives from the phone.
+static ContentType s_pending_type = CONTENT_TYPE_PLAYLIST;
 
 // Custom light vibration pattern (20ms pulse)
 static void light_vibe(void) {
   uint32_t segments[] = { 20 };
-  VibePattern pat = {
-    .durations = segments,
-    .num_segments = 1,
-  };
+  VibePattern pat = { .durations = segments, .num_segments = 1 };
   vibes_enqueue_custom_pattern(pat);
 }
 
-// Forward declaration
-static void random_results_handler(int count, char *titles[], char *uris[]);
+static void random_results_handler(int count, char *titles[], char *uris[]) {
+  message_set_results_callback(NULL);
+  results_window_push(count, titles, uris, s_pending_type);
+}
 
-static uint16_t menu_get_num_rows(MenuLayer *menu_layer, uint16_t section_index, void *data) {
+// ── ListWindowConfig callbacks ───────────────────────────────────────────────
+
+static uint16_t random_get_num_rows(void *ctx) {
+  (void)ctx;
   return 3;
 }
 
-static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
-  menu_cell_basic_draw(ctx, cell_layer, s_content_types[cell_index->row], NULL, NULL);
+static void random_draw_row(GContext *ctx, const Layer *cell_layer,
+                             MenuIndex *cell_index, void *_ctx) {
+  (void)_ctx;
+  menu_cell_basic_draw(ctx, cell_layer, s_content_types[cell_index->row],
+                       NULL, NULL);
 }
 
-static void random_results_handler(int count, char *titles[], char *uris[]) {
-  // Unregister our callback
-  message_set_results_callback(NULL);
-  
-  // Get the type from the currently selected menu item
-  MenuIndex index = menu_layer_get_selected_index(s_menu_layer);
-  ContentType type = (ContentType)index.row;
-  
-  // Push results window with the data
-  results_window_push(count, titles, uris, type);
-}
-
-static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  ContentType type = (ContentType)cell_index->row;
-  
-  // Register callback to receive results
+static void random_on_select(MenuIndex *cell_index, void *_ctx) {
+  (void)_ctx;
+  s_pending_type = (ContentType)cell_index->row;
   message_set_results_callback(random_results_handler);
-  
-  // Send random request
-  message_send_random(type);
+  message_send_random(s_pending_type);
   light_vibe();
 }
 
 #ifndef PBL_PLATFORM_APLITE
-static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+static void random_on_select_long(MenuIndex *cell_index, void *_ctx) {
+  (void)cell_index; (void)_ctx;
   player_window_push();
 }
 #endif
 
-static void window_load(Window *window) {
-  Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
-  
-  s_menu_layer = menu_layer_create(bounds);
-  menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
-    .get_num_rows = menu_get_num_rows,
-    .draw_row = menu_draw_row,
-    .select_click = menu_select,
-#ifndef PBL_PLATFORM_APLITE
-    .select_long_click = menu_select_long
-#else
-    .select_long_click = NULL
-#endif
-  });
-  menu_layer_set_click_config_onto_window(s_menu_layer, window);
-  layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
-}
-
-static void window_unload(Window *window) {
-  // Clear any pending results callback
+static void random_on_unload(void *_ctx) {
+  (void)_ctx;
+  // Discard a pending results callback if the window closes before data arrives.
   message_set_results_callback(NULL);
-  if (s_menu_layer) {
-    menu_layer_destroy(s_menu_layer);
-    s_menu_layer = NULL;
-  }
-  window_destroy(window);
-  s_window = NULL;
 }
 
-static void window_disappear(Window *window) {
-  if (s_menu_layer) {
-    menu_layer_destroy(s_menu_layer);
-    s_menu_layer = NULL;
-  }
-}
-
-static void window_appear(Window *window) {
-  if (!s_menu_layer) {
-    Layer *window_layer = window_get_root_layer(window);
-    GRect bounds = layer_get_bounds(window_layer);
-    s_menu_layer = menu_layer_create(bounds);
-    menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
-      .get_num_rows = menu_get_num_rows,
-      .draw_row = menu_draw_row,
-      .select_click = menu_select,
-#ifndef PBL_PLATFORM_APLITE
-      .select_long_click = menu_select_long
-#else
-      .select_long_click = NULL
-#endif
-    });
-    menu_layer_set_click_config_onto_window(s_menu_layer, window);
-    layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
-  }
-}
+// ── Public API ───────────────────────────────────────────────────────────────
 
 void random_window_push(void) {
-  if (!s_window) {
-    s_window = window_create();
-    window_set_window_handlers(s_window, (WindowHandlers){
-      .load = window_load,
-      .appear = window_appear,
-      .disappear = window_disappear,
-      .unload = window_unload
-    });
-  }
-  window_stack_push(s_window, true);
+  list_window_push(&(ListWindowConfig){
+    .get_num_rows   = random_get_num_rows,
+    .draw_row       = random_draw_row,
+    .on_select      = random_on_select,
+#ifndef PBL_PLATFORM_APLITE
+    .on_select_long = random_on_select_long,
+#endif
+    .on_unload      = random_on_unload,
+  });
 }
+

@@ -20,9 +20,40 @@ static GBitmap *s_icon_ellipsis;
 
 static PlayerState s_player_state = PLAYER_STATE_STOPPED;
 static int s_current_volume = 50;
-static char s_track_text[MAX_STRING_LENGTH];
-static char s_artist_text[MAX_STRING_LENGTH];
-static char s_album_text[MAX_STRING_LENGTH];
+
+#if !defined(PBL_PLATFORM_APLITE)
+static Layer    *s_logo_overlay = NULL;
+static GBitmap  *s_logo_bmp = NULL;
+static AppTimer *s_logo_timer = NULL;
+
+static void logo_overlay_update(Layer *layer, GContext *ctx) {
+  if (!s_logo_bmp) return;
+  GRect bounds = layer_get_bounds(layer);
+  GRect bmp_bounds = gbitmap_get_bounds(s_logo_bmp);
+  GPoint origin = GPoint(
+    bounds.size.w / 2 - bmp_bounds.size.w / 2,
+    bounds.size.h / 2 - bmp_bounds.size.h / 2 - 10
+  );
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+  graphics_context_set_compositing_mode(ctx, GCompOpSet);
+  graphics_draw_bitmap_in_rect(ctx, s_logo_bmp,
+    GRect(origin.x, origin.y, bmp_bounds.size.w, bmp_bounds.size.h));
+}
+
+static void logo_overlay_dismiss(void *data) {
+  s_logo_timer = NULL;
+  if (s_logo_overlay) {
+    layer_remove_from_parent(s_logo_overlay);
+    layer_destroy(s_logo_overlay);
+    s_logo_overlay = NULL;
+  }
+  if (s_logo_bmp) {
+    gbitmap_destroy(s_logo_bmp);
+    s_logo_bmp = NULL;
+  }
+}
+#endif
 
 // Optimistic UI flag for launching from queue
 static bool s_force_initial_playing = false;
@@ -41,7 +72,6 @@ typedef enum {
 
 static ControlMode s_control_mode = CONTROL_MODE_TRANSPORT;
 static AppTimer *s_mode_timer = NULL;
-static AppTimer *s_status_check_timer = NULL;
 static AppTimer *s_poll_timer = NULL;
 static AppTimer *s_state_retry_timer = NULL;
 static int s_state_retry_attempts = 0;
@@ -128,13 +158,6 @@ static void cancel_mode_timer(void) {
   if (s_mode_timer) {
     app_timer_cancel(s_mode_timer);
     s_mode_timer = NULL;
-  }
-}
-
-static void cancel_status_check_timer(void) {
-  if (s_status_check_timer) {
-    app_timer_cancel(s_status_check_timer);
-    s_status_check_timer = NULL;
   }
 }
 
@@ -250,7 +273,6 @@ static void auto_close_timer_callback(void *data) {
   
   // Stop all polling before closing window
   cancel_poll_timer();
-  cancel_status_check_timer();
   cancel_mode_timer();
   cancel_state_retry();
   
@@ -317,13 +339,9 @@ static void player_state_handler(PlayerState state, const char *track, const cha
   
   s_current_volume = volume;
   
-  snprintf(s_track_text, sizeof(s_track_text), "%s", track ? track : "No track");
-  snprintf(s_artist_text, sizeof(s_artist_text), "%s", artist ? artist : "");
-  snprintf(s_album_text, sizeof(s_album_text), "%s", album ? album : "");
-  
-  text_layer_set_text(s_track_layer, s_track_text);
-  text_layer_set_text(s_artist_layer, s_artist_text);
-  text_layer_set_text(s_album_layer, s_album_text);
+  text_layer_set_text(s_track_layer, track && track[0] ? track : "No track");
+  text_layer_set_text(s_artist_layer, artist ? artist : "");
+  text_layer_set_text(s_album_layer, album ? album : "");
   reflow_layout();
 
   // Update UI immediately on state change
@@ -507,17 +525,24 @@ static void reflow_layout(void) {
   int text_x = 4;
   int text_w = content_w - 8;
 
+  const char *track_str  = text_layer_get_text(s_track_layer);
+  const char *artist_str = text_layer_get_text(s_artist_layer);
+  const char *album_str  = text_layer_get_text(s_album_layer);
+  if (!track_str)  track_str  = "";
+  if (!artist_str) artist_str = "";
+  if (!album_str)  album_str  = "";
+
   // Measure text directly — bypasses any layer render cache so updates are always accurate
   GSize ts = graphics_text_layout_get_content_size(
-      s_track_text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD),
+      track_str, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD),
       GRect(0, 0, text_w, TRACK_MAX_LINES * TRACK_LINE_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
   GSize as = graphics_text_layout_get_content_size(
-      s_artist_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
+      artist_str, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
       GRect(0, 0, text_w, ARTIST_MAX_LINES * ARTIST_LINE_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
   GSize ls = graphics_text_layout_get_content_size(
-      s_album_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+      album_str, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
       GRect(0, 0, text_w, ALBUM_MAX_LINES * ALBUM_LINE_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
 
@@ -639,13 +664,10 @@ static void window_load(Window *window) {
 
   if (message_has_cached_player_state()) {
     PlayerState cs = PLAYER_STATE_STOPPED;
-    char track[MAX_STRING_LENGTH] = {0};
-    char artist[MAX_STRING_LENGTH] = {0};
-    char album[MAX_STRING_LENGTH] = {0};
     int vol = 50;
-    message_get_cached_player_state(&cs, track, artist, album, &vol);
+    message_get_cached_player_state(&cs, NULL, NULL, NULL, &vol);
     APP_LOG(APP_LOG_LEVEL_INFO, "player: using cached player state on load");
-    player_state_handler(cs, track, artist, album, vol);
+    player_state_handler(cs, message_get_cached_track(), message_get_cached_artist(), message_get_cached_album(), vol);
     // Request fresh state since cache might be stale
     message_send_command(CMD_GET_PLAYER_STATE);
   } else {
@@ -660,9 +682,14 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
   message_set_player_callback(NULL);
   message_set_status_callback(NULL);
-  
+
+#if !defined(PBL_PLATFORM_APLITE)
+  if (s_logo_timer) { app_timer_cancel(s_logo_timer); s_logo_timer = NULL; }
+  if (s_logo_overlay) { layer_destroy(s_logo_overlay); s_logo_overlay = NULL; }
+  if (s_logo_bmp)    { gbitmap_destroy(s_logo_bmp);   s_logo_bmp = NULL; }
+#endif
+
   cancel_mode_timer();
-  cancel_status_check_timer();
   cancel_state_retry();
   cancel_poll_timer();
   cancel_volume_repeat_timer();
@@ -695,6 +722,23 @@ static void window_appear(Window *window) {
   if (!s_icon_next) s_icon_next = gbitmap_create_with_resource(RESOURCE_ID_ICON_NEXT);
   if (!s_icon_prev) s_icon_prev = gbitmap_create_with_resource(RESOURCE_ID_ICON_PREV);
   if (!s_icon_ellipsis) s_icon_ellipsis = gbitmap_create_with_resource(RESOURCE_ID_ICON_ELLIPSIS);
+
+#if !defined(PBL_PLATFORM_APLITE)
+  // Show logo overlay on first appear only (s_logo_overlay is NULL until created).
+  // window_appear runs after the caller's MenuLayer is freed, so heap is clear.
+  if (!s_logo_overlay && !s_logo_bmp) {
+    s_logo_bmp = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE);
+    if (!s_logo_bmp)
+      s_logo_bmp = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE_BW);
+    if (s_logo_bmp) {
+      Layer *root = window_get_root_layer(window);
+      s_logo_overlay = layer_create(layer_get_bounds(root));
+      layer_set_update_proc(s_logo_overlay, logo_overlay_update);
+      layer_add_child(root, s_logo_overlay);
+      s_logo_timer = app_timer_register(1000, logo_overlay_dismiss, NULL);
+    }
+  }
+#endif
 
   // Callbacks already set in window_load, just ensure they're still set
   message_set_player_callback(player_state_handler);
@@ -734,7 +778,6 @@ static void window_disappear(Window *window) {
   // Stop polling when window is not visible
   app_auto_close_start();
   cancel_poll_timer();
-  cancel_status_check_timer();
   cancel_mode_timer();
   cancel_volume_repeat_timer();
   cancel_state_retry();

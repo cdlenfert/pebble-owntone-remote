@@ -159,19 +159,6 @@ static void window_appear(Window *window) {
   app_auto_close_start();
 }
 
-void main_menu_push(void) {
-  if (!s_window) {
-    s_window = window_create();
-    window_set_window_handlers(s_window, (WindowHandlers){
-      .load = window_load,
-      .unload = window_unload,
-      .appear = window_appear,
-      .disappear = window_disappear
-    });
-  }
-  window_stack_push(s_window, true);
-}
-
 void main_menu_push_silent(void) {
   if (!s_window) {
     s_window = window_create();
