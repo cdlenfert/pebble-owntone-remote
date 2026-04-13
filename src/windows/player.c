@@ -25,6 +25,7 @@ static int s_current_volume = 50;
 static Layer    *s_logo_overlay = NULL;
 static GBitmap  *s_logo_bmp = NULL;
 static AppTimer *s_logo_timer = NULL;
+static bool      s_logo_shown = false;
 
 static void logo_overlay_update(Layer *layer, GContext *ctx) {
   if (!s_logo_bmp) return;
@@ -32,7 +33,7 @@ static void logo_overlay_update(Layer *layer, GContext *ctx) {
   GRect bmp_bounds = gbitmap_get_bounds(s_logo_bmp);
   GPoint origin = GPoint(
     bounds.size.w / 2 - bmp_bounds.size.w / 2,
-    bounds.size.h / 2 - bmp_bounds.size.h / 2 - 10
+    bounds.size.h / 2 - bmp_bounds.size.h / 2
   );
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
@@ -724,9 +725,9 @@ static void window_appear(Window *window) {
   if (!s_icon_ellipsis) s_icon_ellipsis = gbitmap_create_with_resource(RESOURCE_ID_ICON_ELLIPSIS);
 
 #if !defined(PBL_PLATFORM_APLITE)
-  // Show logo overlay on first appear only (s_logo_overlay is NULL until created).
-  // window_appear runs after the caller's MenuLayer is freed, so heap is clear.
-  if (!s_logo_overlay && !s_logo_bmp) {
+  // Show logo overlay on first app launch only.
+  if (!s_logo_shown) {
+    s_logo_shown = true;
     s_logo_bmp = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE);
     if (!s_logo_bmp)
       s_logo_bmp = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE_BW);
