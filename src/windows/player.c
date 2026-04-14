@@ -31,15 +31,17 @@ static void logo_overlay_update(Layer *layer, GContext *ctx) {
   if (!s_logo_bmp) return;
   GRect bounds = layer_get_bounds(layer);
   GRect bmp_bounds = gbitmap_get_bounds(s_logo_bmp);
-  GPoint origin = GPoint(
-    bounds.size.w / 2 - bmp_bounds.size.w / 2,
-    bounds.size.h / 2 - bmp_bounds.size.h / 2
-  );
+  int logo_y = (bounds.size.h - bmp_bounds.size.h - 22) / 2;
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
   graphics_draw_bitmap_in_rect(ctx, s_logo_bmp,
-    GRect(origin.x, origin.y, bmp_bounds.size.w, bmp_bounds.size.h));
+    GRect(bounds.size.w / 2 - bmp_bounds.size.w / 2, logo_y, bmp_bounds.size.w, bmp_bounds.size.h));
+  graphics_context_set_text_color(ctx, GColorBlack);
+  graphics_draw_text(ctx, "OwnTone Remote",
+    fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+    GRect(0, logo_y + bmp_bounds.size.h + 2, bounds.size.w, 20),
+    GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 }
 
 static void logo_overlay_dismiss(void *data) {
