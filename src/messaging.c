@@ -31,13 +31,7 @@ void message_init(void) {
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_register_outbox_failed(outbox_failed_callback);
   app_message_register_outbox_sent(outbox_sent_callback);
-  // Aplite has only ~6KB heap after static footprint; use smaller buffers to
-  // leave more room for window structures and bitmaps.
-#if defined(PBL_PLATFORM_APLITE)
-  app_message_open(1536, 256);
-#else
-  app_message_open(2048, 512);
-#endif
+  app_message_open(PLATFORM_INBOX_SIZE, PLATFORM_OUTBOX_SIZE);
   APP_LOG(APP_LOG_LEVEL_INFO, "messaging: app_message_open() done");
 }
 
@@ -316,23 +310,13 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     
     for (int i = 0; i < count && i < MAX_FAVORITES; i++) {
-      // Compute the expected keys based on appinfo layout
-      int name_key, type_key;
-      if (i < 10) {
-        name_key = KEY_FAVORITE_NAME_BASE + i;      // 120..129
-        type_key = KEY_FAVORITE_TYPE_BASE + i;      // 130..139
-      } else {
-        name_key = KEY_FAVORITE_NAME_BASE + 20 + (i - 10); // 140..159 for i=10..29
-        type_key = KEY_FAVORITE_TYPE_BASE + 30 + (i - 10); // 160..179 for i=10..29
-      }
-
-      Tuple *name_t = dict_find(iterator, name_key);
+      Tuple *name_t = dict_find(iterator, favorite_name_key(i));
       if (name_t) {
         names[i] = malloc(strlen(name_t->value->cstring) + 1);
         if (names[i]) strcpy(names[i], name_t->value->cstring);
       }
       
-      Tuple *type_t = dict_find(iterator, type_key);
+      Tuple *type_t = dict_find(iterator, favorite_type_key(i));
       if (type_t) {
         // Handle both integer and string-encoded types coming from JS
         if (type_t->type == TUPLE_CSTRING) {
@@ -446,3 +430,7 @@ void message_get_cached_player_state(PlayerState *state, char *track, char *arti
   if (album) strncpy(album, s_cached_album, MAX_STRING_LENGTH-1);
   if (volume) *volume = s_cached_volume;
 }
+
+const char *message_get_cached_track(void)  { return s_cached_track; }
+const char *message_get_cached_artist(void) { return s_cached_artist; }
+const char *message_get_cached_album(void)  { return s_cached_album; }

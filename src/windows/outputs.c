@@ -1,13 +1,10 @@
 #include <pebble.h>
+#include "list_window.h"
 #include "outputs.h"
 #include "player.h"
 #include "../message_keys.h"
 #include "../messaging.h"
 #include "../app_auto_close.h"
-
-static Window *s_window;
-static MenuLayer *s_menu_layer;
-static Window *s_volume_window = NULL;
 
 static char *s_names[MAX_OUTPUTS];
 static char *s_ids[MAX_OUTPUTS];
@@ -18,36 +15,28 @@ static int s_output_count = 0;
 // Custom light vibration pattern (20ms pulse)
 static void light_vibe(void) {
   uint32_t segments[] = { 20 };
-  VibePattern pat = {
-    .durations = segments,
-    .num_segments = 1,
-  };
+  VibePattern pat = { .durations = segments, .num_segments = 1 };
   vibes_enqueue_custom_pattern(pat);
 }
 
 // Forward declare volume window
-static void output_volume_window_push(const char *name, const char *id, int volume);
+static void output_volume_window_push(const char *name, const char *id,
+                                       int volume);
 
 static void cleanup_outputs(void) {
   for (int i = 0; i < MAX_OUTPUTS; i++) {
-    if (s_names[i]) {
-      free(s_names[i]);
-      s_names[i] = NULL;
-    }
-    if (s_ids[i]) {
-      free(s_ids[i]);
-      s_ids[i] = NULL;
-    }
+    if (s_names[i]) { free(s_names[i]); s_names[i] = NULL; }
+    if (s_ids[i])   { free(s_ids[i]);   s_ids[i]   = NULL; }
     s_volumes[i] = 0;
     s_enabled[i] = false;
   }
   s_output_count = 0;
 }
 
-static void outputs_handler(int count, char *names[], char *ids[], int volumes[], bool enabled[]) {
+static void outputs_data_handler(int count, char *names[], char *ids[],
+                                  int volumes[], bool enabled[]) {
   cleanup_outputs();
   s_output_count = count;
-  
   for (int i = 0; i < count && i < MAX_OUTPUTS; i++) {
     if (names[i]) {
       s_names[i] = malloc(strlen(names[i]) + 1);
@@ -60,134 +49,96 @@ static void outputs_handler(int count, char *names[], char *ids[], int volumes[]
     s_volumes[i] = volumes[i];
     s_enabled[i] = enabled[i];
   }
-  
-  if (s_menu_layer) {
-    menu_layer_reload_data(s_menu_layer);
-  }
+  list_window_reload();
 }
 
-static uint16_t menu_get_num_rows(MenuLayer *menu_layer, uint16_t section_index, void *data) {
+// ── ListWindowConfig callbacks ───────────────────────────────────────────────
+
+static uint16_t outputs_get_num_rows(void *ctx) {
+  (void)ctx;
   return s_output_count > 0 ? s_output_count : 1;
 }
 
-static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
+static void outputs_draw_row(GContext *ctx, const Layer *cell_layer,
+                              MenuIndex *cell_index, void *_ctx) {
+  (void)_ctx;
   if (s_output_count > 0 && cell_index->row < s_output_count) {
     char subtitle[16];
-    snprintf(subtitle, sizeof(subtitle), "%s %d%%", s_enabled[cell_index->row] ? "ON" : "OFF", s_volumes[cell_index->row]);
-    menu_cell_basic_draw(ctx, cell_layer, s_names[cell_index->row], subtitle, NULL);
+    snprintf(subtitle, sizeof(subtitle), "%s %d%%",
+             s_enabled[cell_index->row] ? "ON" : "OFF",
+             s_volumes[cell_index->row]);
+    menu_cell_basic_draw(ctx, cell_layer, s_names[cell_index->row], subtitle,
+                         NULL);
   } else {
     menu_cell_basic_draw(ctx, cell_layer, "Loading...", NULL, NULL);
   }
 }
 
-static void menu_select(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+static void outputs_on_select(MenuIndex *cell_index, void *_ctx) {
+  (void)_ctx;
   app_auto_close_reset();
-  if (s_output_count > 0 && cell_index->row < s_output_count && s_ids[cell_index->row]) {
-    if (s_enabled[cell_index->row]) {
-      // Output is already ON: just open volume controls, no state change
-      light_vibe();
-      output_volume_window_push(s_names[cell_index->row], s_ids[cell_index->row], s_volumes[cell_index->row]);
-    } else {
-      // Output is OFF: set as exclusive output and open volume controls
+  if (s_output_count > 0 && cell_index->row < s_output_count &&
+      s_ids[cell_index->row]) {
+    if (!s_enabled[cell_index->row]) {
       message_send_set_output_exclusive(s_ids[cell_index->row]);
-      light_vibe();
-      output_volume_window_push(s_names[cell_index->row], s_ids[cell_index->row], s_volumes[cell_index->row]);
     }
+    light_vibe();
+    output_volume_window_push(s_names[cell_index->row],
+                               s_ids[cell_index->row],
+                               s_volumes[cell_index->row]);
   }
 }
 
-static void menu_select_long(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+static void outputs_on_select_long(MenuIndex *cell_index, void *_ctx) {
+  (void)_ctx;
   app_auto_close_reset();
-  if (s_output_count > 0 && cell_index->row < s_output_count && s_ids[cell_index->row]) {
-    // Long press: toggle output
+  if (s_output_count > 0 && cell_index->row < s_output_count &&
+      s_ids[cell_index->row]) {
     bool was_enabled = s_enabled[cell_index->row];
     message_send_toggle_output(s_ids[cell_index->row]);
     light_vibe();
-    
-    // Only show volume control if we're turning the output ON (was off, will be on)
     if (!was_enabled) {
-      output_volume_window_push(s_names[cell_index->row], s_ids[cell_index->row], s_volumes[cell_index->row]);
+      output_volume_window_push(s_names[cell_index->row],
+                                 s_ids[cell_index->row],
+                                 s_volumes[cell_index->row]);
     }
   }
 }
 
-static void outputs_selection_changed(MenuLayer *menu_layer, MenuIndex new_index, MenuIndex old_index, void *data) {
-  (void)menu_layer; (void)new_index; (void)old_index; (void)data;
+static void outputs_on_selection_changed(MenuIndex new_idx, MenuIndex old_idx,
+                                          void *_ctx) {
+  (void)new_idx; (void)old_idx; (void)_ctx;
   app_auto_close_reset();
 }
 
-static void window_load(Window *window) {
-  Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
-  
-  s_menu_layer = menu_layer_create(bounds);
-  menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
-    .get_num_rows = menu_get_num_rows,
-    .draw_row = menu_draw_row,
-    .select_click = menu_select,
-    .selection_changed = outputs_selection_changed,
-    .select_long_click = menu_select_long
-  });
-  menu_layer_set_click_config_onto_window(s_menu_layer, window);
-  layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
-  
-  message_set_outputs_callback(outputs_handler);
+static void outputs_on_appear(void *_ctx) {
+  (void)_ctx;
+  message_set_outputs_callback(outputs_data_handler);
   message_send_command(CMD_GET_OUTPUTS);
 }
 
-static void window_unload(Window *window) {
+static void outputs_on_unload(void *_ctx) {
+  (void)_ctx;
   message_set_outputs_callback(NULL);
-  if (s_menu_layer) {
-    menu_layer_destroy(s_menu_layer);
-    s_menu_layer = NULL;
-  }
   cleanup_outputs();
 }
 
-static void window_appear(Window *window) {
-  // Recreate the menu layer if it was freed while hidden (e.g. volume window on top)
-  if (!s_menu_layer) {
-    Layer *window_layer = window_get_root_layer(window);
-    GRect bounds = layer_get_bounds(window_layer);
-    s_menu_layer = menu_layer_create(bounds);
-    menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
-      .get_num_rows = menu_get_num_rows,
-      .draw_row = menu_draw_row,
-      .select_click = menu_select,
-      .selection_changed = outputs_selection_changed,
-      .select_long_click = menu_select_long
-    });
-    menu_layer_set_click_config_onto_window(s_menu_layer, window);
-    layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
-  }
-  // Refresh outputs data
-  message_set_outputs_callback(outputs_handler);
-  message_send_command(CMD_GET_OUTPUTS);
-}
-
-static void window_disappear(Window *window) {
-  // Free the MenuLayer so the volume window can allocate its bitmaps without
-  // heap pressure. window_appear recreates it when this window returns.
-  if (s_menu_layer) {
-    menu_layer_destroy(s_menu_layer);
-    s_menu_layer = NULL;
-  }
-}
+// ── Public API ───────────────────────────────────────────────────────────────
 
 void outputs_window_push(void) {
-  if (!s_window) {
-    s_window = window_create();
-    window_set_window_handlers(s_window, (WindowHandlers){
-      .load = window_load,
-      .unload = window_unload,
-      .appear = window_appear,
-      .disappear = window_disappear
-    });
-  }
-  window_stack_push(s_window, true);
+  list_window_push(&(ListWindowConfig){
+    .get_num_rows         = outputs_get_num_rows,
+    .draw_row             = outputs_draw_row,
+    .on_select            = outputs_on_select,
+    .on_select_long       = outputs_on_select_long,
+    .on_selection_changed = outputs_on_selection_changed,
+    .on_appear            = outputs_on_appear,
+    .on_unload            = outputs_on_unload,
+  });
 }
 
-// Output Volume Control Window
+// ── Output Volume Control Window ─────────────────────────────────────────────
+static Window *s_volume_window = NULL;
 static TextLayer *s_name_layer;
 static TextLayer *s_volume_layer;
 static ActionBarLayer *s_volume_action_bar;

@@ -1,4 +1,5 @@
 #pragma once
+#include "platform_config.h"
 
 // Command types (CMD key)
 typedef enum {
@@ -77,14 +78,17 @@ typedef enum {
   PLAYER_STATE_PAUSED = 2
 } PlayerState;
 
-#define MAX_OUTPUTS 8
-#define MAX_FAVORITES 30
-#define MAX_STRING_LENGTH 64
-
-// Aplite has ~24KB RAM; cap queue size to reduce peak heap usage.
-#if defined(PBL_PLATFORM_APLITE)
-#define MAX_QUEUE_ITEMS 5
-#else
-#define MAX_QUEUE_ITEMS 10
-#endif
-#define MAX_RESULTS 8
+// Favorites key layout helpers.
+// Wire values intentionally kept as-is to avoid breaking the JS bridge.
+// Names 0-9  : KEY_FAVORITE_NAME_BASE + i          (120-129)
+// Types 0-9  : KEY_FAVORITE_TYPE_BASE + i          (130-139)
+// Names 10-29: KEY_FAVORITE_NAME_BASE + 20 + (i-10) (140-159)
+// Types 10-29: KEY_FAVORITE_TYPE_BASE + 30 + (i-10) (160-179)
+static inline int favorite_name_key(int i) {
+  return (i < 10) ? (KEY_FAVORITE_NAME_BASE + i)
+                  : (KEY_FAVORITE_NAME_BASE + 20 + (i - 10));
+}
+static inline int favorite_type_key(int i) {
+  return (i < 10) ? (KEY_FAVORITE_TYPE_BASE + i)
+                  : (KEY_FAVORITE_TYPE_BASE + 30 + (i - 10));
+}

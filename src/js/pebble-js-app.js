@@ -539,15 +539,15 @@ function sendQueue(items, currentItemId) {
     }
   }
   
-  // If not found, just show first 10 items
+  // If not found, start from the beginning
   if (currentPos === -1) {
     currentPos = 0;
   }
   
-  // Calculate slice: up to 4 before, current, up to 5 after (10 total)
+  // Show up to 4 before current, current, up to 5 after (10 total)
   var startPos = Math.max(0, currentPos - 4);
   var endPos = Math.min(items.length, startPos + 10);
-  
+
   // Adjust start if we're near the end
   if (endPos - startPos < 10) {
     startPos = Math.max(0, endPos - 10);

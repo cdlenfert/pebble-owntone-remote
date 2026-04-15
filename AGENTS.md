@@ -2,7 +2,7 @@
 
 After you've added a feature run `mise build` to verify it builds.
 
-To install to a phone: `mise install` (uses `IP` from `.env`).
+To install to a phone/watch: `mise run install` (uses `IP` from `.env`). Note: `mise install` installs mise tools, not the app.
 
 If you need runtime logs from the emulator: `mise emu` to install, then `pebble logs --emulator basalt` in a separate terminal.
 

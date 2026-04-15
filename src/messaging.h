@@ -26,6 +26,13 @@ void message_set_queue_callback(QueueCallback callback);
 bool message_has_cached_player_state(void);
 void message_get_cached_player_state(PlayerState *state, char *track, char *artist, char *album, int *volume);
 
+// Direct const-pointer accessors into the player state cache.
+// The pointers remain valid until the next inbox message is processed.
+// Use these to avoid copying the cached strings into a second static buffer.
+const char *message_get_cached_track(void);
+const char *message_get_cached_artist(void);
+const char *message_get_cached_album(void);
+
 // Send messages to phone
 void message_send_command(CommandType cmd);
 void message_send_search(ContentType type, const char *query);

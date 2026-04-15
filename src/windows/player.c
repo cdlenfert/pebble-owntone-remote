@@ -20,9 +20,43 @@ static GBitmap *s_icon_ellipsis;
 
 static PlayerState s_player_state = PLAYER_STATE_STOPPED;
 static int s_current_volume = 50;
-static char s_track_text[MAX_STRING_LENGTH];
-static char s_artist_text[MAX_STRING_LENGTH];
-static char s_album_text[MAX_STRING_LENGTH];
+
+#if !defined(PBL_PLATFORM_APLITE)
+static Layer    *s_logo_overlay = NULL;
+static GBitmap  *s_logo_bmp = NULL;
+static AppTimer *s_logo_timer = NULL;
+static bool      s_logo_shown = false;
+
+static void logo_overlay_update(Layer *layer, GContext *ctx) {
+  if (!s_logo_bmp) return;
+  GRect bounds = layer_get_bounds(layer);
+  GRect bmp_bounds = gbitmap_get_bounds(s_logo_bmp);
+  int logo_y = (bounds.size.h - bmp_bounds.size.h - 22) / 2;
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+  graphics_context_set_compositing_mode(ctx, GCompOpSet);
+  graphics_draw_bitmap_in_rect(ctx, s_logo_bmp,
+    GRect(bounds.size.w / 2 - bmp_bounds.size.w / 2, logo_y, bmp_bounds.size.w, bmp_bounds.size.h));
+  graphics_context_set_text_color(ctx, GColorBlack);
+  graphics_draw_text(ctx, "OwnTone Remote",
+    fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+    GRect(0, logo_y + bmp_bounds.size.h + 2, bounds.size.w, 20),
+    GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+}
+
+static void logo_overlay_dismiss(void *data) {
+  s_logo_timer = NULL;
+  if (s_logo_overlay) {
+    layer_remove_from_parent(s_logo_overlay);
+    layer_destroy(s_logo_overlay);
+    s_logo_overlay = NULL;
+  }
+  if (s_logo_bmp) {
+    gbitmap_destroy(s_logo_bmp);
+    s_logo_bmp = NULL;
+  }
+}
+#endif
 
 // Optimistic UI flag for launching from queue
 static bool s_force_initial_playing = false;
@@ -40,8 +74,10 @@ typedef enum {
 } ControlMode;
 
 static ControlMode s_control_mode = CONTROL_MODE_TRANSPORT;
+static Layer *s_vol_digit_layer = NULL;
+static char   s_vol_digit_text[5];   // fits "100\0"
+static bool   s_vol_digit_visible = false;
 static AppTimer *s_mode_timer = NULL;
-static AppTimer *s_status_check_timer = NULL;
 static AppTimer *s_poll_timer = NULL;
 static AppTimer *s_state_retry_timer = NULL;
 static int s_state_retry_attempts = 0;
@@ -92,14 +128,68 @@ static void volume_repeat_callback(void *data) {
   if (s_volume_up_held) {
     s_current_volume = (s_current_volume >= 95) ? 100 : s_current_volume + 5;
     message_send_set_volume(s_current_volume);
+    if (s_vol_digit_visible) {
+      snprintf(s_vol_digit_text, sizeof(s_vol_digit_text), "%d", s_current_volume);
+      if (s_vol_digit_layer) layer_mark_dirty(s_vol_digit_layer);
+    }
     light_vibe();
     s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
   } else if (s_volume_down_held) {
     s_current_volume = (s_current_volume <= 5) ? 0 : s_current_volume - 5;
     message_send_set_volume(s_current_volume);
+    if (s_vol_digit_visible) {
+      snprintf(s_vol_digit_text, sizeof(s_vol_digit_text), "%d", s_current_volume);
+      if (s_vol_digit_layer) layer_mark_dirty(s_vol_digit_layer);
+    }
     light_vibe();
     s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
   }
+}
+
+// Volume digit overlay helpers
+static void vol_digit_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  // Fill black to cover the underlying action bar icon
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+  // Draw volume number centered in the slot
+  int text_h = 22;
+  int text_y = (bounds.size.h - text_h) / 2;
+  graphics_context_set_text_color(ctx, GColorWhite);
+  graphics_draw_text(ctx, s_vol_digit_text,
+    fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+    GRect(0, text_y, bounds.size.w, text_h),
+    GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+}
+
+static void show_vol_digit_layer(void) {
+  if (s_vol_digit_visible) return;
+  Layer *root = window_get_root_layer(s_window);
+  GRect bounds = layer_get_bounds(root);
+  // Frame matches the center button slot of the action bar
+  GRect frame = GRect(bounds.size.w - ACTION_BAR_WIDTH,
+                      bounds.size.h / 3,
+                      ACTION_BAR_WIDTH,
+                      bounds.size.h / 3);
+  s_vol_digit_layer = layer_create(frame);
+  layer_set_update_proc(s_vol_digit_layer, vol_digit_update_proc);
+  layer_add_child(root, s_vol_digit_layer);
+  s_vol_digit_visible = true;
+}
+
+static void hide_vol_digit_layer(void) {
+  if (!s_vol_digit_visible) return;
+  if (s_vol_digit_layer) {
+    layer_remove_from_parent(s_vol_digit_layer);
+    layer_destroy(s_vol_digit_layer);
+    s_vol_digit_layer = NULL;
+  }
+  s_vol_digit_visible = false;
+}
+
+static void update_vol_digit_text(void) {
+  snprintf(s_vol_digit_text, sizeof(s_vol_digit_text), "%d", s_current_volume);
+  if (s_vol_digit_layer) layer_mark_dirty(s_vol_digit_layer);
 }
 
 // Forward declaration: defined after click handlers below.
@@ -107,6 +197,7 @@ static void update_action_bar(void);
 
 static void revert_to_transport_mode(void *data) {
   s_mode_timer = NULL;
+  hide_vol_digit_layer();
   s_control_mode = CONTROL_MODE_TRANSPORT;
 
   // Free volume icons now that we're back in transport mode
@@ -128,13 +219,6 @@ static void cancel_mode_timer(void) {
   if (s_mode_timer) {
     app_timer_cancel(s_mode_timer);
     s_mode_timer = NULL;
-  }
-}
-
-static void cancel_status_check_timer(void) {
-  if (s_status_check_timer) {
-    app_timer_cancel(s_status_check_timer);
-    s_status_check_timer = NULL;
   }
 }
 
@@ -250,7 +334,6 @@ static void auto_close_timer_callback(void *data) {
   
   // Stop all polling before closing window
   cancel_poll_timer();
-  cancel_status_check_timer();
   cancel_mode_timer();
   cancel_state_retry();
   
@@ -295,10 +378,12 @@ static void update_action_bar(void) {
     }
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_volume_up);
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_volume_down);
-    if (s_player_state == PLAYER_STATE_PLAYING) {
-      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_pause);
-    } else {
-      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
+    if (!s_vol_digit_visible) {
+      if (s_player_state == PLAYER_STATE_PLAYING) {
+        action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_pause);
+      } else {
+        action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
+      }
     }
   }
 }
@@ -317,13 +402,9 @@ static void player_state_handler(PlayerState state, const char *track, const cha
   
   s_current_volume = volume;
   
-  snprintf(s_track_text, sizeof(s_track_text), "%s", track ? track : "No track");
-  snprintf(s_artist_text, sizeof(s_artist_text), "%s", artist ? artist : "");
-  snprintf(s_album_text, sizeof(s_album_text), "%s", album ? album : "");
-  
-  text_layer_set_text(s_track_layer, s_track_text);
-  text_layer_set_text(s_artist_layer, s_artist_text);
-  text_layer_set_text(s_album_layer, s_album_text);
+  text_layer_set_text(s_track_layer, track && track[0] ? track : "No track");
+  text_layer_set_text(s_artist_layer, artist ? artist : "");
+  text_layer_set_text(s_album_layer, album ? album : "");
   reflow_layout();
 
   // Update UI immediately on state change
@@ -361,6 +442,8 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     message_send_set_volume(s_current_volume);
     light_vibe();
     start_mode_timer();
+    show_vol_digit_layer();
+    update_vol_digit_text();
   } else {
     // Previous track - optimistic UI update, will sync on response
     s_player_state = PLAYER_STATE_PLAYING;
@@ -415,6 +498,8 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     message_send_set_volume(s_current_volume);
     light_vibe();
     start_mode_timer();
+    show_vol_digit_layer();
+    update_vol_digit_text();
   } else {
     // Next track - optimistic UI update, will sync on response
     s_player_state = PLAYER_STATE_PLAYING;
@@ -507,17 +592,24 @@ static void reflow_layout(void) {
   int text_x = 4;
   int text_w = content_w - 8;
 
+  const char *track_str  = text_layer_get_text(s_track_layer);
+  const char *artist_str = text_layer_get_text(s_artist_layer);
+  const char *album_str  = text_layer_get_text(s_album_layer);
+  if (!track_str)  track_str  = "";
+  if (!artist_str) artist_str = "";
+  if (!album_str)  album_str  = "";
+
   // Measure text directly — bypasses any layer render cache so updates are always accurate
   GSize ts = graphics_text_layout_get_content_size(
-      s_track_text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD),
+      track_str, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD),
       GRect(0, 0, text_w, TRACK_MAX_LINES * TRACK_LINE_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
   GSize as = graphics_text_layout_get_content_size(
-      s_artist_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
+      artist_str, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
       GRect(0, 0, text_w, ARTIST_MAX_LINES * ARTIST_LINE_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
   GSize ls = graphics_text_layout_get_content_size(
-      s_album_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+      album_str, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
       GRect(0, 0, text_w, ALBUM_MAX_LINES * ALBUM_LINE_H),
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
 
@@ -639,13 +731,10 @@ static void window_load(Window *window) {
 
   if (message_has_cached_player_state()) {
     PlayerState cs = PLAYER_STATE_STOPPED;
-    char track[MAX_STRING_LENGTH] = {0};
-    char artist[MAX_STRING_LENGTH] = {0};
-    char album[MAX_STRING_LENGTH] = {0};
     int vol = 50;
-    message_get_cached_player_state(&cs, track, artist, album, &vol);
+    message_get_cached_player_state(&cs, NULL, NULL, NULL, &vol);
     APP_LOG(APP_LOG_LEVEL_INFO, "player: using cached player state on load");
-    player_state_handler(cs, track, artist, album, vol);
+    player_state_handler(cs, message_get_cached_track(), message_get_cached_artist(), message_get_cached_album(), vol);
     // Request fresh state since cache might be stale
     message_send_command(CMD_GET_PLAYER_STATE);
   } else {
@@ -660,9 +749,15 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
   message_set_player_callback(NULL);
   message_set_status_callback(NULL);
-  
+
+#if !defined(PBL_PLATFORM_APLITE)
+  if (s_logo_timer) { app_timer_cancel(s_logo_timer); s_logo_timer = NULL; }
+  if (s_logo_overlay) { layer_destroy(s_logo_overlay); s_logo_overlay = NULL; }
+  if (s_logo_bmp)    { gbitmap_destroy(s_logo_bmp);   s_logo_bmp = NULL; }
+#endif
+
+  hide_vol_digit_layer();
   cancel_mode_timer();
-  cancel_status_check_timer();
   cancel_state_retry();
   cancel_poll_timer();
   cancel_volume_repeat_timer();
@@ -695,6 +790,23 @@ static void window_appear(Window *window) {
   if (!s_icon_next) s_icon_next = gbitmap_create_with_resource(RESOURCE_ID_ICON_NEXT);
   if (!s_icon_prev) s_icon_prev = gbitmap_create_with_resource(RESOURCE_ID_ICON_PREV);
   if (!s_icon_ellipsis) s_icon_ellipsis = gbitmap_create_with_resource(RESOURCE_ID_ICON_ELLIPSIS);
+
+#if !defined(PBL_PLATFORM_APLITE)
+  // Show logo overlay on first app launch only.
+  if (!s_logo_shown) {
+    s_logo_shown = true;
+    s_logo_bmp = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE);
+    if (!s_logo_bmp)
+      s_logo_bmp = gbitmap_create_with_resource(RESOURCE_ID_LOGO_OWNTONE_BW);
+    if (s_logo_bmp) {
+      Layer *root = window_get_root_layer(window);
+      s_logo_overlay = layer_create(layer_get_bounds(root));
+      layer_set_update_proc(s_logo_overlay, logo_overlay_update);
+      layer_add_child(root, s_logo_overlay);
+      s_logo_timer = app_timer_register(1000, logo_overlay_dismiss, NULL);
+    }
+  }
+#endif
 
   // Callbacks already set in window_load, just ensure they're still set
   message_set_player_callback(player_state_handler);
@@ -734,8 +846,8 @@ static void window_disappear(Window *window) {
   // Stop polling when window is not visible
   app_auto_close_start();
   cancel_poll_timer();
-  cancel_status_check_timer();
   cancel_mode_timer();
+  hide_vol_digit_layer();
   cancel_volume_repeat_timer();
   cancel_state_retry();
   cancel_auto_close_timer();
