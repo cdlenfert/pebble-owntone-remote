@@ -2,6 +2,7 @@ Version 1.13 (2026-04-15)
 
 - Player: volume level displayed as a number in the center action bar slot when volume mode is active and UP or DOWN is pressed; updates on each press and disappears when volume mode times out (both Aplite and Basalt)
 - Queue: fix current track appearing as the last item with no upcoming tracks on Aplite; now correctly shows up to 4 previous and 5 upcoming items on all platforms
+- Memory: major internal refactor to reduce peak heap usage on all platforms — list-based windows (queue, results, outputs, random) now share a single reusable window layer instead of each owning a persistent MenuLayer, freeing significant RAM when navigating between screens; standalone splash window removed from Basalt (replaced by a brief logo overlay in the player screen)
 
 Version 1.12 (2026-04-11)
 
