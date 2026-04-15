@@ -74,6 +74,9 @@ typedef enum {
 } ControlMode;
 
 static ControlMode s_control_mode = CONTROL_MODE_TRANSPORT;
+static Layer *s_vol_digit_layer = NULL;
+static char   s_vol_digit_text[5];   // fits "100\0"
+static bool   s_vol_digit_visible = false;
 static AppTimer *s_mode_timer = NULL;
 static AppTimer *s_poll_timer = NULL;
 static AppTimer *s_state_retry_timer = NULL;
@@ -125,14 +128,68 @@ static void volume_repeat_callback(void *data) {
   if (s_volume_up_held) {
     s_current_volume = (s_current_volume >= 95) ? 100 : s_current_volume + 5;
     message_send_set_volume(s_current_volume);
+    if (s_vol_digit_visible) {
+      snprintf(s_vol_digit_text, sizeof(s_vol_digit_text), "%d", s_current_volume);
+      if (s_vol_digit_layer) layer_mark_dirty(s_vol_digit_layer);
+    }
     light_vibe();
     s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
   } else if (s_volume_down_held) {
     s_current_volume = (s_current_volume <= 5) ? 0 : s_current_volume - 5;
     message_send_set_volume(s_current_volume);
+    if (s_vol_digit_visible) {
+      snprintf(s_vol_digit_text, sizeof(s_vol_digit_text), "%d", s_current_volume);
+      if (s_vol_digit_layer) layer_mark_dirty(s_vol_digit_layer);
+    }
     light_vibe();
     s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
   }
+}
+
+// Volume digit overlay helpers
+static void vol_digit_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  // Fill black to cover the underlying action bar icon
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+  // Draw volume number centered in the slot
+  int text_h = 22;
+  int text_y = (bounds.size.h - text_h) / 2;
+  graphics_context_set_text_color(ctx, GColorWhite);
+  graphics_draw_text(ctx, s_vol_digit_text,
+    fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+    GRect(0, text_y, bounds.size.w, text_h),
+    GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+}
+
+static void show_vol_digit_layer(void) {
+  if (s_vol_digit_visible) return;
+  Layer *root = window_get_root_layer(s_window);
+  GRect bounds = layer_get_bounds(root);
+  // Frame matches the center button slot of the action bar
+  GRect frame = GRect(bounds.size.w - ACTION_BAR_WIDTH,
+                      bounds.size.h / 3,
+                      ACTION_BAR_WIDTH,
+                      bounds.size.h / 3);
+  s_vol_digit_layer = layer_create(frame);
+  layer_set_update_proc(s_vol_digit_layer, vol_digit_update_proc);
+  layer_add_child(root, s_vol_digit_layer);
+  s_vol_digit_visible = true;
+}
+
+static void hide_vol_digit_layer(void) {
+  if (!s_vol_digit_visible) return;
+  if (s_vol_digit_layer) {
+    layer_remove_from_parent(s_vol_digit_layer);
+    layer_destroy(s_vol_digit_layer);
+    s_vol_digit_layer = NULL;
+  }
+  s_vol_digit_visible = false;
+}
+
+static void update_vol_digit_text(void) {
+  snprintf(s_vol_digit_text, sizeof(s_vol_digit_text), "%d", s_current_volume);
+  if (s_vol_digit_layer) layer_mark_dirty(s_vol_digit_layer);
 }
 
 // Forward declaration: defined after click handlers below.
@@ -140,6 +197,7 @@ static void update_action_bar(void);
 
 static void revert_to_transport_mode(void *data) {
   s_mode_timer = NULL;
+  hide_vol_digit_layer();
   s_control_mode = CONTROL_MODE_TRANSPORT;
 
   // Free volume icons now that we're back in transport mode
@@ -320,10 +378,12 @@ static void update_action_bar(void) {
     }
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_UP, s_icon_volume_up);
     action_bar_layer_set_icon(s_action_bar, BUTTON_ID_DOWN, s_icon_volume_down);
-    if (s_player_state == PLAYER_STATE_PLAYING) {
-      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_pause);
-    } else {
-      action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
+    if (!s_vol_digit_visible) {
+      if (s_player_state == PLAYER_STATE_PLAYING) {
+        action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_pause);
+      } else {
+        action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_play);
+      }
     }
   }
 }
@@ -382,6 +442,8 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     message_send_set_volume(s_current_volume);
     light_vibe();
     start_mode_timer();
+    show_vol_digit_layer();
+    update_vol_digit_text();
   } else {
     // Previous track - optimistic UI update, will sync on response
     s_player_state = PLAYER_STATE_PLAYING;
@@ -436,6 +498,8 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     message_send_set_volume(s_current_volume);
     light_vibe();
     start_mode_timer();
+    show_vol_digit_layer();
+    update_vol_digit_text();
   } else {
     // Next track - optimistic UI update, will sync on response
     s_player_state = PLAYER_STATE_PLAYING;
@@ -692,6 +756,7 @@ static void window_unload(Window *window) {
   if (s_logo_bmp)    { gbitmap_destroy(s_logo_bmp);   s_logo_bmp = NULL; }
 #endif
 
+  hide_vol_digit_layer();
   cancel_mode_timer();
   cancel_state_retry();
   cancel_poll_timer();
@@ -782,6 +847,7 @@ static void window_disappear(Window *window) {
   app_auto_close_start();
   cancel_poll_timer();
   cancel_mode_timer();
+  hide_vol_digit_layer();
   cancel_volume_repeat_timer();
   cancel_state_retry();
   cancel_auto_close_timer();
