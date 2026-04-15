@@ -9,12 +9,12 @@
   // Smaller caps reduce peak heap pressure.
   #define PLATFORM_INBOX_SIZE    1536
   #define PLATFORM_OUTBOX_SIZE   256
-  #define MAX_QUEUE_ITEMS        5
 #else
   #define PLATFORM_INBOX_SIZE    2048
   #define PLATFORM_OUTBOX_SIZE   512
-  #define MAX_QUEUE_ITEMS        10
 #endif
+
+#define MAX_QUEUE_ITEMS        10
 
 // Shared limits (same on all platforms)
 #define MAX_OUTPUTS       8
