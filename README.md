@@ -122,6 +122,18 @@ This provides fast access to the player from anywhere in the app.
 
 ## Changelog
 
+### v1.14 (2026-04-30)
+- **Player:** Fix missing music info text in the player window; track/artist/album now display reliably and a placeholder is shown when metadata is unavailable.
+
+### v1.13 (2026-04-15)
+- Player: volume level displayed as a number in the center action bar slot when volume mode is active and UP or DOWN is pressed; updates on each press and disappears when volume mode times out (both Aplite and Basalt)
+- Queue: fix current track appearing as the last item with no upcoming tracks on Aplite; now correctly shows up to 4 previous and 5 upcoming items on all platforms
+- Memory: major internal refactor to reduce peak heap usage on all platforms — list-based windows (queue, results, outputs, random) now share a single reusable window layer instead of each owning a persistent MenuLayer, freeing significant RAM when navigating between screens; standalone splash window removed from Basalt (replaced by a brief logo overlay in the player screen)
+
+### v1.12 (2026-04-11)
+- Search: strip punctuation and normalize whitespace before querying the server, improving match quality
+- Search: skip the API call and return empty results immediately if the cleaned query is empty
+
 ### v1.11 (2026-04-09)
 - **Fix all player action bar icons missing on Aplite**: Aplite's PNG decoder only handles 1-bit images; the 7 action bar icons were stored as 8-bit RGBA PNGs, causing `gbitmap_create_with_resource` to return NULL for every icon at runtime. Fixed by changing all action bar icon resources from `"type": "png"` to `"type": "bitmap"` in `appinfo.json` — the SDK now pre-converts them to Pebble binary format at build time, bypassing the runtime decoder entirely.
 - **Fix action bar icon colors on Aplite**: All 7 icons had incorrect black/white polarity for `ActionBarLayer` rendering (which uses `GCompOpAssignInverted`). Corrected all icons to the expected format.
@@ -155,15 +167,27 @@ This provides fast access to the player from anywhere in the app.
 - Overflow handling: album truncates first, then artist, then track
 - Splash screen minimum display time halved (2000ms → 1000ms)
 
-### v1.4 and earlier
-- Initial release with player controls, search, random, outputs management
+### v1.4 (2026-03-10)
+- Raise max search/random results on Aplite from 4 to 8 (matching other platforms)
+- Remove long-press shortcut to player window on Aplite (icons displayed incorrectly when accessed this way)
+
+### v1.3 (2026-02-24)
+- Outputs: single-pressing an active speaker now opens volume controls directly, without changing its state
+- Outputs: single-pressing an inactive speaker still enables it exclusively and opens volume controls
+
+### v1.2 (2026-02-23)
+- Fix crash on Aplite when scrolling the Random results list
+
+### v1.1 (2026-02-23)
+- RAM optimizations for Aplite (Classic/Pebble Steel) to reduce memory usage
+- Skip splash screen on Aplite to free additional heap
+- Reduce max result and queue list sizes on Aplite to stay within memory limits
 
 ## Phase 2 Roadmap
 
 - **Favorites Management**: Configure favorite playlists/artists/albums via web interface
 - **Output Defaults**: Set default volumes for each output
 - **Track Search**: Add individual tracks without clearing queue
-- **Queue Viewer**: See upcoming tracks (next 10)
 - **Smart Playlists**: Quick access to OwnTone smart playlists
 
 ## Technical Details
@@ -184,11 +208,3 @@ This provides fast access to the player from anywhere in the app.
 ## License
 
 Personal project - see LICENSE file
-
-## Credits
-
-Built from scratch to replace buggy WIP implementation with:
-- Cleaner architecture
-- Predictable UI flow
-- Extensible design
-- Better UX (no blank screens!)

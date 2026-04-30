@@ -1,3 +1,7 @@
+Version 1.14 (2026-04-30)
+
+- Player: fix missing music info text in the player window — track/artist/album now reliably display after recent fixes; show a placeholder when metadata is unavailable
+
 Version 1.13 (2026-04-15)
 
 - Player: volume level displayed as a number in the center action bar slot when volume mode is active and UP or DOWN is pressed; updates on each press and disappears when volume mode times out (both Aplite and Basalt)
