@@ -198,9 +198,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
     
 
-    // Deliver to registered callback if any
+    // Deliver to registered callback if any. Use our cached copies so the
+    // TextLayer doesn't end up referencing the transient AppMessage buffer
+    // (which becomes invalid after this callback returns).
     if (s_player_callback) {
-      s_player_callback(state, track, artist, album, volume);
+      s_player_callback(state, s_cached_track, s_cached_artist, s_cached_album, volume);
     }
   }
   
