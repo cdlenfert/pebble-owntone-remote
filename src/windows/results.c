@@ -9,11 +9,9 @@ static char *s_titles[MAX_RESULTS];
 static char *s_uris[MAX_RESULTS];
 static int s_result_count = 0;
 
-// Custom light vibration pattern (20ms pulse)
+// Simple short vibration helper — prefer the short pulse API for compatibility.
 static void light_vibe(void) {
-  uint32_t segments[] = { 20 };
-  VibePattern pat = { .durations = segments, .num_segments = 1 };
-  vibes_enqueue_custom_pattern(pat);
+  vibes_short_pulse();
 }
 
 static void cleanup_results(void) {

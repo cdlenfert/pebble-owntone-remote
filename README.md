@@ -125,6 +125,12 @@ This provides fast access to the player from anywhere in the app.
 ### v1.14 (2026-04-30)
 - **Player:** Fix missing music info text in the player window; track/artist/album now display reliably and a placeholder is shown when metadata is unavailable.
 
+### v1.15 (2026-07-05)
+- **Platform:** Add support for Pebble 2 Duo (`flint`) and Pebble Time 2 (`emery`). Voice search (dictation) now functions on these devices.
+- **Haptics:** Fix missing vibration on Flint when long-pressing volume controls by using `vibes_short_pulse()` for consistent feedback.
+- **Misc:** Continued improvements to search query sanitization and cross-platform UI memory handling.
+
+
 ### v1.13 (2026-04-15)
 - Player: volume level displayed as a number in the center action bar slot when volume mode is active and UP or DOWN is pressed; updates on each press and disappears when volume mode times out (both Aplite and Basalt)
 - Queue: fix current track appearing as the last item with no upcoming tracks on Aplite; now correctly shows up to 4 previous and 5 upcoming items on all platforms

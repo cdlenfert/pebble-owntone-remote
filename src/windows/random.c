@@ -11,11 +11,9 @@ static const char *s_content_types[] = { "Playlist", "Artist", "Album" };
 // when the async response arrives from the phone.
 static ContentType s_pending_type = CONTENT_TYPE_PLAYLIST;
 
-// Custom light vibration pattern (20ms pulse)
+// Simple short vibration helper — prefer the short pulse API for compatibility.
 static void light_vibe(void) {
-  uint32_t segments[] = { 20 };
-  VibePattern pat = { .durations = segments, .num_segments = 1 };
-  vibes_enqueue_custom_pattern(pat);
+  vibes_short_pulse();
 }
 
 static void random_results_handler(int count, char *titles[], char *uris[]) {

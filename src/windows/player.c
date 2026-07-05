@@ -105,14 +105,10 @@ static Layer *s_divider_layer;
 static int s_divider1_y = -1;
 static int s_divider2_y = -1;
 
-// Custom light vibration pattern (20ms pulse)
+// Simple short vibration helper. Use the higher-level API which tends to work
+// consistently across Pebble cores (Flint, Emery, Basalt, etc.).
 static void light_vibe(void) {
-  uint32_t segments[] = { 20 };
-  VibePattern pat = {
-    .durations = segments,
-    .num_segments = 1,
-  };
-  vibes_enqueue_custom_pattern(pat);
+  vibes_short_pulse();
 }
 
 static void cancel_volume_repeat_timer(void) {

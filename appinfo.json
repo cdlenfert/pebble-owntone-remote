@@ -3,14 +3,14 @@
   "shortName": "OwnTone",
   "longName": "OwnTone Remote",
   "companyName": "Personal",
-  "versionCode": 15,
-  "versionLabel": "1.14",
+  "versionCode": 16,
+  "versionLabel": "1.15",
   "sdkVersion": "3",
   "watchapp": {
     "watchface": false
   },
   "enableMultiJS": false,
-  "targetPlatforms": ["basalt", "aplite"],
+  "targetPlatforms": ["basalt", "aplite", "flint", "emery"],
   "capabilities": ["configurable"],
   "appKeys": {
     "CMD": 0,

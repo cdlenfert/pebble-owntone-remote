@@ -248,6 +248,15 @@ function setVolume(volume) {
 }
 
 function search(type, query) {
+  // Sanitize query: remove common punctuation and collapse whitespace so
+  // server receives clean terms (helps dictation results).
+  if (typeof query === 'string') {
+    // Remove characters that are not word chars or whitespace
+    query = query.replace(/[^\w\s]/g, ' ');
+    // Collapse multiple spaces and trim
+    query = query.replace(/\s+/g, ' ').trim();
+  }
+
   var typeName = ContentTypeNames[type] || 'playlist';
   var url = Config.OWNTONE_BASE + '/api/search?type=' + encodeURIComponent(typeName) + 
             '&query=' + encodeURIComponent(query) + '&limit=' + Config.MAX_RESULTS;
