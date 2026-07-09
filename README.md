@@ -121,6 +121,8 @@ This provides fast access to the player from anywhere in the app.
 5. Volume screen: UP/DOWN to adjust, SELECT to pause, BACK to return
 
 ## Changelog
+### v1.16 (2026-07-09)
+- **Config:** Persist player auto-close timeout set in the config page — the webview now receives and applies saved settings so the player timeout no longer reverts to 30 seconds.
 
 ### v1.14 (2026-04-30)
 - **Player:** Fix missing music info text in the player window; track/artist/album now display reliably and a placeholder is shown when metadata is unavailable.

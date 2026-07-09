@@ -524,23 +524,52 @@
       touchDrag.active = false;
     }
 
-    // Load existing settings
-    var currentSettings = JSON.parse(getQueryParam('settings', '{}'));
+    // Load existing settings passed in the query string (from PebbleKit JS)
+    var currentSettings = {};
+    var settingsParam = getQueryParam('settings', '{}');
+    try {
+      currentSettings = JSON.parse(settingsParam || '{}');
+    } catch (e) {
+      console.log('Error parsing settings param:', e);
+      currentSettings = {};
+    }
     console.log('Current settings:', currentSettings);
-    
-    // Load favorites from localStorage
-    loadFavorites();
-    
-    // Load player auto-close timeout (default 180 seconds = 3 minutes)
-    var storedTimeout = localStorage.getItem('owntone_player_auto_close_timeout');
-    if (storedTimeout) {
-      document.getElementById('player-auto-close').value = storedTimeout;
+
+    // If settings.favorites were passed, use them and persist to localStorage;
+    // otherwise load from localStorage in the browser.
+    if (currentSettings && currentSettings.favorites) {
+      try {
+        favorites = currentSettings.favorites;
+        saveFavoritesToStorage();
+      } catch (e) {
+        console.log('Error applying passed favorites:', e);
+        loadFavorites();
+      }
+      renderFavorites();
+    } else {
+      loadFavorites();
     }
 
-    // Load app auto-close timeout (default Never = 0)
-    var storedAppTimeout = localStorage.getItem('owntone_app_auto_close_timeout');
-    if (storedAppTimeout) {
-      document.getElementById('app-auto-close').value = storedAppTimeout;
+    // Pre-populate player/app auto-close values from passed settings first,
+    // then fall back to localStorage, then fall back to the select default.
+    if (currentSettings && typeof currentSettings.playerAutoCloseTimeout !== 'undefined') {
+      document.getElementById('player-auto-close').value = currentSettings.playerAutoCloseTimeout;
+      try { localStorage.setItem('owntone_player_auto_close_timeout', String(currentSettings.playerAutoCloseTimeout)); } catch (e) {}
+    } else {
+      var storedTimeout = localStorage.getItem('owntone_player_auto_close_timeout');
+      if (storedTimeout !== null) {
+        document.getElementById('player-auto-close').value = storedTimeout;
+      }
+    }
+
+    if (currentSettings && typeof currentSettings.appAutoCloseTimeout !== 'undefined') {
+      document.getElementById('app-auto-close').value = currentSettings.appAutoCloseTimeout;
+      try { localStorage.setItem('owntone_app_auto_close_timeout', String(currentSettings.appAutoCloseTimeout)); } catch (e) {}
+    } else {
+      var storedAppTimeout = localStorage.getItem('owntone_app_auto_close_timeout');
+      if (storedAppTimeout !== null) {
+        document.getElementById('app-auto-close').value = storedAppTimeout;
+      }
     }
   </script>
 </body>

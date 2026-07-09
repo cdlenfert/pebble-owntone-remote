@@ -1,12 +1,17 @@
-Version 1.14 (2026-04-30)
+Version 1.16 (2026-07-09)
 
-- Player: fix missing music info text in the player window — track/artist/album now reliably display after recent fixes; show a placeholder when metadata is unavailable
+- Config: persist player auto-close timeout set in the configuration page; settings passed from the Pebble JS webview now pre-populate fields so the player timeout no longer reverts to 30 seconds.
+
 
 Version 1.15 (2026-07-05)
 
 - Platform: Add support for Pebble 2 Duo (`flint`) and Pebble Time 2 (`emery`) — voice search (dictation) now works on these devices.
 - Haptics: Fix missing vibration on Flint for long-press volume controls; use a short pulse for consistent feedback across cores.
 - Misc: Keep query sanitization (strip punctuation / normalize whitespace) to improve voice search results.
+
+Version 1.14 (2026-04-30)
+
+- Player: fix missing music info text in the player window — track/artist/album now reliably display after recent fixes; show a placeholder when metadata is unavailable
 
 Version 1.13 (2026-04-15)
 

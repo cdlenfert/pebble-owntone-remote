@@ -723,7 +723,29 @@ Pebble.addEventListener('appmessage', function(e) {
 });
 
 Pebble.addEventListener('showConfiguration', function(e) {
-  Pebble.openURL('https://cdlenfert.github.io/pebble-owntone-remote/config.html');
+  // Build current settings from PebbleKit JS localStorage and pass to the
+  // configuration page so it can pre-populate fields.
+  try {
+    var cfg = {};
+
+    var favs = localStorage.getItem('owntone_favorites');
+    if (favs) {
+      try { cfg.favorites = JSON.parse(favs); } catch (e) { cfg.favorites = null; }
+    }
+
+    var ptimeout = localStorage.getItem('owntone_player_auto_close_timeout');
+    if (ptimeout !== null) cfg.playerAutoCloseTimeout = parseInt(ptimeout);
+
+    var atimeout = localStorage.getItem('owntone_app_auto_close_timeout');
+    if (atimeout !== null) cfg.appAutoCloseTimeout = parseInt(atimeout);
+
+    var url = 'https://cdlenfert.github.io/pebble-owntone-remote/config.html';
+    url += '?settings=' + encodeURIComponent(JSON.stringify(cfg || {}));
+    Pebble.openURL(url);
+  } catch (err) {
+    // Fallback to opening without settings if anything goes wrong
+    Pebble.openURL('https://cdlenfert.github.io/pebble-owntone-remote/config.html');
+  }
 });
 
 Pebble.addEventListener('webviewclosed', function(e) {

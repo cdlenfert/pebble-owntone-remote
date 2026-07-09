@@ -404,6 +404,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     int timeout_seconds = t->value->int32;
     APP_LOG(APP_LOG_LEVEL_INFO, "Received app auto-close timeout: %d seconds", timeout_seconds);
     app_auto_close_set_timeout(timeout_seconds);
+    // Start the app auto-close timer immediately so the setting takes effect
+    // even if the main menu already appeared before the JS message arrived.
+    app_auto_close_start();
   }
 }
 
