@@ -44,3 +44,6 @@ void message_send_toggle_output(const char *output_id);
 void message_send_set_output_volume(const char *output_id, int volume);
 void message_send_get_favorites(void);
 void message_send_play_queue_item(int item_id);
+
+// Vibrations: centralized helper that respects the user-selected vibration level
+void message_vibrate_light(void);

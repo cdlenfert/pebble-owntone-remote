@@ -216,6 +216,17 @@
       </select>
       <small style="color: #999; display: block; margin-top: 5px;">After the player closes, the app will exit to the watchface if no buttons are pressed within the selected time. Default is 5 minutes.</small>
     </div>
+
+    <div class="section">
+      <h2>Vibration</h2>
+      <label for="vibration">Haptic feedback strength</label>
+      <select id="vibration" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <option value="1" selected>Default (lighter)</option>
+        <option value="2">Strong</option>
+        <option value="3">Off</option>
+      </select>
+      <small style="color: #999; display: block; margin-top: 5px;">Choose the vibration intensity for button and selection feedback.</small>
+    </div>
     
     <div class="section" style="opacity: 0.5; pointer-events: none;">
       <h2>Output Defaults</h2>
@@ -346,6 +357,7 @@
         favorites: favorites,
         playerAutoCloseTimeout: parseInt(document.getElementById('player-auto-close').value),
         appAutoCloseTimeout: parseInt(document.getElementById('app-auto-close').value),
+        vibration: parseInt(document.getElementById('vibration').value),
         outputDefaults: {}
       };
       
@@ -569,6 +581,17 @@
       var storedAppTimeout = localStorage.getItem('owntone_app_auto_close_timeout');
       if (storedAppTimeout !== null) {
         document.getElementById('app-auto-close').value = storedAppTimeout;
+      }
+    }
+
+    // Vibration: pre-populate from passed settings first, then localStorage
+    if (currentSettings && typeof currentSettings.vibration !== 'undefined') {
+      document.getElementById('vibration').value = currentSettings.vibration;
+      try { localStorage.setItem('owntone_vibration', String(currentSettings.vibration)); } catch (e) {}
+    } else {
+      var storedVib = localStorage.getItem('owntone_vibration');
+      if (storedVib !== null) {
+        document.getElementById('vibration').value = storedVib;
       }
     }
   </script>

@@ -12,12 +12,7 @@ static int s_volumes[MAX_OUTPUTS];
 static bool s_enabled[MAX_OUTPUTS];
 static int s_output_count = 0;
 
-// Custom light vibration pattern (20ms pulse)
-static void light_vibe(void) {
-  uint32_t segments[] = { 20 };
-  VibePattern pat = { .durations = segments, .num_segments = 1 };
-  vibes_enqueue_custom_pattern(pat);
-}
+// Use centralized vibration helper from messaging.c
 
 // Forward declare volume window
 static void output_volume_window_push(const char *name, const char *id,
@@ -82,7 +77,7 @@ static void outputs_on_select(MenuIndex *cell_index, void *_ctx) {
     if (!s_enabled[cell_index->row]) {
       message_send_set_output_exclusive(s_ids[cell_index->row]);
     }
-    light_vibe();
+    message_vibrate_light();
     output_volume_window_push(s_names[cell_index->row],
                                s_ids[cell_index->row],
                                s_volumes[cell_index->row]);
@@ -96,7 +91,7 @@ static void outputs_on_select_long(MenuIndex *cell_index, void *_ctx) {
       s_ids[cell_index->row]) {
     bool was_enabled = s_enabled[cell_index->row];
     message_send_toggle_output(s_ids[cell_index->row]);
-    light_vibe();
+    message_vibrate_light();
     if (!was_enabled) {
       output_volume_window_push(s_names[cell_index->row],
                                  s_ids[cell_index->row],
@@ -195,7 +190,7 @@ static void volume_up_click(ClickRecognizerRef recognizer, void *context) {
   s_current_output_volume = (s_current_output_volume >= 95) ? 100 : s_current_output_volume + 5;
   message_send_set_output_volume(s_current_output_id, s_current_output_volume);
   update_volume_display();
-  light_vibe();
+  message_vibrate_light();
 }
 
 static void volume_down_click(ClickRecognizerRef recognizer, void *context) {
@@ -203,7 +198,7 @@ static void volume_down_click(ClickRecognizerRef recognizer, void *context) {
   s_current_output_volume = (s_current_output_volume <= 5) ? 0 : s_current_output_volume - 5;
   message_send_set_output_volume(s_current_output_id, s_current_output_volume);
   update_volume_display();
-  light_vibe();
+  message_vibrate_light();
 }
 
 static void volume_select_click(ClickRecognizerRef recognizer, void *context) {
@@ -218,7 +213,7 @@ static void volume_select_click(ClickRecognizerRef recognizer, void *context) {
   update_output_play_pause_icon();
   
   message_send_command(CMD_PLAY_PAUSE);
-  light_vibe();
+  message_vibrate_light();
 }
 
 #ifndef PBL_PLATFORM_APLITE

@@ -69,7 +69,17 @@ typedef enum {
   KEY_QUEUE_ITEM_ID = 180,
   KEY_PLAYER_AUTO_CLOSE_TIMEOUT = 190,
   KEY_APP_AUTO_CLOSE_TIMEOUT = 191
+  ,
+  KEY_VIBRATION = 192
 } MessageKey;
+
+// Vibration settings sent from the config page (wire values)
+// 1 = Default (lighter), 2 = Strong, 3 = Off
+typedef enum {
+  VIBRATION_DEFAULT = 1,
+  VIBRATION_STRONG  = 2,
+  VIBRATION_OFF     = 3
+} VibrationSetting;
 
 // Player states
 typedef enum {

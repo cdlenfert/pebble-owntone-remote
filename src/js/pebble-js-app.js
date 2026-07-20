@@ -43,6 +43,8 @@ var MessageKeys = {
   QUEUE_ITEM_ID: 180,
   PLAYER_AUTO_CLOSE_TIMEOUT: 190,
   APP_AUTO_CLOSE_TIMEOUT: 191
+  ,
+  VIBRATION: 192
 };
 
 // Command types
@@ -610,6 +612,13 @@ function sendAppAutoCloseTimeout(timeoutSeconds) {
   console.log('Sent app auto-close timeout: ' + timeoutSeconds + 's');
 }
 
+function sendVibrationSetting(vib) {
+  var dict = {};
+  dict[MessageKeys.VIBRATION] = vib;
+  sendToPebble(dict);
+  console.log('Sent vibration setting: ' + vib);
+}
+
 // Pebble event handlers
 Pebble.addEventListener('ready', function(e) {
   console.log('OwnTone Remote JS ready');
@@ -636,6 +645,13 @@ Pebble.addEventListener('ready', function(e) {
     }
   }, 2000);
 });
+
+  // Also send vibration setting on ready (default to 1 = lighter)
+  setTimeout(function() {
+    var vib = localStorage.getItem('owntone_vibration');
+    if (vib !== null) sendVibrationSetting(parseInt(vib));
+    else sendVibrationSetting(1);
+  }, 2200);
 
 Pebble.addEventListener('appmessage', function(e) {
   var payload = e.payload;
@@ -767,6 +783,11 @@ Pebble.addEventListener('webviewclosed', function(e) {
       if (settings.appAutoCloseTimeout !== undefined) {
         localStorage.setItem('owntone_app_auto_close_timeout', settings.appAutoCloseTimeout.toString());
         sendAppAutoCloseTimeout(settings.appAutoCloseTimeout);
+      }
+
+      if (settings.vibration !== undefined) {
+        localStorage.setItem('owntone_vibration', String(settings.vibration));
+        sendVibrationSetting(settings.vibration);
       }
     } catch (err) {
       console.log('Error parsing config response: ' + err);

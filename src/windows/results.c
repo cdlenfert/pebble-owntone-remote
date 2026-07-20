@@ -9,10 +9,7 @@ static char *s_titles[MAX_RESULTS];
 static char *s_uris[MAX_RESULTS];
 static int s_result_count = 0;
 
-// Simple short vibration helper — prefer the short pulse API for compatibility.
-static void light_vibe(void) {
-  vibes_short_pulse();
-}
+// Use centralized vibration helper from messaging.c
 
 static void cleanup_results(void) {
   for (int i = 0; i < MAX_RESULTS; i++) {
@@ -44,7 +41,7 @@ static void results_on_select(MenuIndex *cell_index, void *_ctx) {
   if (s_result_count > 0 && cell_index->row < s_result_count &&
       s_uris[cell_index->row]) {
     message_send_add_to_queue(s_uris[cell_index->row], s_current_type);
-    light_vibe();
+    message_vibrate_light();
     window_stack_pop(true);
   }
 }

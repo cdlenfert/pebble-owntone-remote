@@ -12,9 +12,7 @@ static const char *s_content_types[] = { "Playlist", "Artist", "Album" };
 static ContentType s_pending_type = CONTENT_TYPE_PLAYLIST;
 
 // Simple short vibration helper — prefer the short pulse API for compatibility.
-static void light_vibe(void) {
-  vibes_short_pulse();
-}
+// Use centralized vibration helper from messaging.c
 
 static void random_results_handler(int count, char *titles[], char *uris[]) {
   message_set_results_callback(NULL);
@@ -40,7 +38,7 @@ static void random_on_select(MenuIndex *cell_index, void *_ctx) {
   s_pending_type = (ContentType)cell_index->row;
   message_set_results_callback(random_results_handler);
   message_send_random(s_pending_type);
-  light_vibe();
+  message_vibrate_light();
 }
 
 #ifndef PBL_PLATFORM_APLITE

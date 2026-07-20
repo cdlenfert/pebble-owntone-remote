@@ -12,15 +12,7 @@ static DictationSession *s_dictation;
 static const char *s_content_types[] = {"Playlist", "Artist", "Album"};
 static ContentType s_selected_type;
 
-// Custom light vibration pattern (20ms pulse)
-static void light_vibe(void) {
-  uint32_t segments[] = { 20 };
-  VibePattern pat = {
-    .durations = segments,
-    .num_segments = 1,
-  };
-  vibes_enqueue_custom_pattern(pat);
-}
+// Use centralized vibration helper from messaging.c
 
 static void search_results_handler(int count, char *titles[], char *uris[]) {
   results_window_push(count, titles, uris, s_selected_type);
@@ -31,7 +23,7 @@ static void dictation_callback(DictationSession *session, DictationSessionStatus
     message_set_results_callback(search_results_handler);
     message_send_search(s_selected_type, transcription);
   } else {
-    light_vibe();
+    message_vibrate_light();
   }
 }
 

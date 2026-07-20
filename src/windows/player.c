@@ -107,9 +107,7 @@ static int s_divider2_y = -1;
 
 // Simple short vibration helper. Use the higher-level API which tends to work
 // consistently across Pebble cores (Flint, Emery, Basalt, etc.).
-static void light_vibe(void) {
-  vibes_short_pulse();
-}
+// Use centralized vibration helper from messaging.c
 
 static void cancel_volume_repeat_timer(void) {
   if (s_volume_repeat_timer) {
@@ -128,7 +126,7 @@ static void volume_repeat_callback(void *data) {
       snprintf(s_vol_digit_text, sizeof(s_vol_digit_text), "%d", s_current_volume);
       if (s_vol_digit_layer) layer_mark_dirty(s_vol_digit_layer);
     }
-    light_vibe();
+    message_vibrate_light();
     s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
   } else if (s_volume_down_held) {
     s_current_volume = (s_current_volume <= 5) ? 0 : s_current_volume - 5;
@@ -137,7 +135,7 @@ static void volume_repeat_callback(void *data) {
       snprintf(s_vol_digit_text, sizeof(s_vol_digit_text), "%d", s_current_volume);
       if (s_vol_digit_layer) layer_mark_dirty(s_vol_digit_layer);
     }
-    light_vibe();
+    message_vibrate_light();
     s_volume_repeat_timer = app_timer_register(500, volume_repeat_callback, NULL);
   }
 }
@@ -436,7 +434,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     // Volume up
     s_current_volume = (s_current_volume >= 95) ? 100 : s_current_volume + 5;
     message_send_set_volume(s_current_volume);
-    light_vibe();
+    message_vibrate_light();
     start_mode_timer();
     show_vol_digit_layer();
     update_vol_digit_text();
@@ -445,7 +443,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     s_player_state = PLAYER_STATE_PLAYING;
     update_action_bar();
     message_send_command(CMD_PREVIOUS);
-    light_vibe();
+    message_vibrate_light();
     defer_polling(1000); // Delay polling to allow server state to update
     player_set_transient_playing_state();
   }
@@ -464,7 +462,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       s_player_state = PLAYER_STATE_PLAYING;
       update_action_bar();
       message_send_command(CMD_PLAY);
-      light_vibe();
+      message_vibrate_light();
       defer_polling(1000); // Delay polling
       player_set_transient_playing_state();
     }
@@ -480,7 +478,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       message_send_command(CMD_PLAY);
       player_set_transient_playing_state();
     }
-    light_vibe();
+    message_vibrate_light();
     start_mode_timer();
     defer_polling(1000); // Delay polling
   }
@@ -492,7 +490,7 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     // Volume down
     s_current_volume = (s_current_volume <= 5) ? 0 : s_current_volume - 5;
     message_send_set_volume(s_current_volume);
-    light_vibe();
+    message_vibrate_light();
     start_mode_timer();
     show_vol_digit_layer();
     update_vol_digit_text();
@@ -501,7 +499,7 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     s_player_state = PLAYER_STATE_PLAYING;
     update_action_bar();
     message_send_command(CMD_NEXT);
-    light_vibe();
+    message_vibrate_light();
     defer_polling(1000); // Delay polling to allow server state to update
     player_set_transient_playing_state();
   }
@@ -518,7 +516,7 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
   // Volume up (first press)
   s_current_volume = (s_current_volume >= 95) ? 100 : s_current_volume + 5;
   message_send_set_volume(s_current_volume);
-  light_vibe();
+  message_vibrate_light();
   
   // Start repeating
   s_volume_up_held = true;
@@ -542,7 +540,7 @@ static void down_long_click_handler(ClickRecognizerRef recognizer, void *context
   // Volume down (first press)
   s_current_volume = (s_current_volume <= 5) ? 0 : s_current_volume - 5;
   message_send_set_volume(s_current_volume);
-  light_vibe();
+  message_vibrate_light();
   
   // Start repeating
   s_volume_down_held = true;
