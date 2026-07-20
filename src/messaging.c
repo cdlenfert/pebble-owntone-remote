@@ -24,6 +24,8 @@ static char s_cached_track[MAX_STRING_LENGTH] = {0};
 static char s_cached_artist[MAX_STRING_LENGTH] = {0};
 static char s_cached_album[MAX_STRING_LENGTH] = {0};
 static int s_cached_volume = 50;
+// Vibration setting received from phone (1=default,2=strong,3=off)
+static int s_vibration_level = VIBRATION_DEFAULT;
 
 void message_init(void) {
   APP_LOG(APP_LOG_LEVEL_INFO, "messaging: message_init() called");
@@ -408,6 +410,13 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // even if the main menu already appeared before the JS message arrived.
     app_auto_close_start();
   }
+
+  // Check for vibration setting
+  t = dict_find(iterator, KEY_VIBRATION);
+  if (t) {
+    s_vibration_level = t->value->uint8;
+    APP_LOG(APP_LOG_LEVEL_INFO, "Received vibration setting: %d", s_vibration_level);
+  }
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -420,6 +429,24 @@ static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResul
 
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Outbox send success");
+}
+
+void message_vibrate_light(void) {
+  // 3 = off
+  if (s_vibration_level == VIBRATION_OFF) return;
+
+  if (s_vibration_level == VIBRATION_STRONG) {
+    // Strong: single 80ms pulse
+    static uint32_t strong_segments[] = { 80 };
+    VibePattern pat = { .durations = strong_segments, .num_segments = 1 };
+    vibes_enqueue_custom_pattern(pat);
+    return;
+  }
+
+  // Default (lighter): single short 40ms pulse
+  static uint32_t light_segments[] = { 40 };
+  VibePattern pat = { .durations = light_segments, .num_segments = 1 };
+  vibes_enqueue_custom_pattern(pat);
 }
 
 // Expose cached-player helpers to avoid race where JS replies before UI registers

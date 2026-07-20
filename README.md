@@ -121,6 +121,13 @@ This provides fast access to the player from anywhere in the app.
 5. Volume screen: UP/DOWN to adjust, SELECT to pause, BACK to return
 
 ## Changelog
+### v1.17 (2026-07-20)
+- **Config:** Add vibration setting to the configuration page. Users can choose:
+  - **Default:** single short 40ms pulse
+  - **Strong:** single 80ms pulse
+  - **Off:** disable haptic feedback
+  Settings are persisted in the PebbleKit JS webview and sent to the watch on app ready.
+
 ### v1.16 (2026-07-09)
 - **Config:** Persist player auto-close timeout set in the config page — the webview now receives and applies saved settings so the player timeout no longer reverts to 30 seconds.
 

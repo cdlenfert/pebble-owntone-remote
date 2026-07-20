@@ -3,8 +3,8 @@
   "shortName": "OwnTone",
   "longName": "OwnTone Remote",
   "companyName": "Personal",
-  "versionCode": 17,
-  "versionLabel": "1.16",
+  "versionCode": 18,
+  "versionLabel": "1.17",
   "sdkVersion": "3",
   "watchapp": {
     "watchface": false
@@ -138,7 +138,8 @@
     "FAVORITE_TYPE_29": 179,
     "QUEUE_ITEM_ID": 180,
     "PLAYER_AUTO_CLOSE_TIMEOUT": 190,
-    "APP_AUTO_CLOSE_TIMEOUT": 191
+    "APP_AUTO_CLOSE_TIMEOUT": 191,
+    "VIBRATION": 192
   },
   "resources": {
     "media": [
