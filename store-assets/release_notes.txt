@@ -1,3 +1,8 @@
+Version 1.18 (2026-07-20)
+
+- Release: Bump to 1.18 for publishing; minor fixes and release preparation. Includes vibration configuration and related fixes.
+
+
 Version 1.17 (2026-07-20)
 
 - Config: Add vibration setting to the configuration page. Options: Default (40ms), Strong (80ms), Off. Settings persist in the webview and are sent to the watch when the Pebble app connects.
