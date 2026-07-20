@@ -1,12 +1,11 @@
-Version 1.16 (2026-07-09)
-
-- Config: persist player auto-close timeout set in the configuration page; settings passed from the Pebble JS webview now pre-populate fields so the player timeout no longer reverts to 30 seconds.
-
 Version 1.17 (2026-07-20)
 
 - Config: Add vibration setting to the configuration page. Options: Default (40ms), Strong (80ms), Off. Settings persist in the webview and are sent to the watch when the Pebble app connects.
 
 
+Version 1.16 (2026-07-09)
+
+- Config: persist player auto-close timeout set in the configuration page; settings passed from the Pebble JS webview now pre-populate fields so the player timeout no longer reverts to 30 seconds.
 
 Version 1.15 (2026-07-05)
 
