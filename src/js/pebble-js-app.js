@@ -755,6 +755,10 @@ Pebble.addEventListener('showConfiguration', function(e) {
     var atimeout = localStorage.getItem('owntone_app_auto_close_timeout');
     if (atimeout !== null) cfg.appAutoCloseTimeout = parseInt(atimeout);
 
+    // Include vibration setting so the config page pre-populates correctly
+    var vib = localStorage.getItem('owntone_vibration');
+    if (vib !== null) cfg.vibration = parseInt(vib);
+
     var url = 'https://cdlenfert.github.io/pebble-owntone-remote/config.html';
     url += '?settings=' + encodeURIComponent(JSON.stringify(cfg || {}));
     Pebble.openURL(url);
